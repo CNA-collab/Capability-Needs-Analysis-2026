@@ -7,9 +7,9 @@ import { exportOfficialReport } from '../utils/pdfExport';
 import { OfficerRecord } from '../types';
 
 interface ReportProps {
-  data: OfficerRecord[];
-  agencyName: string;
-  onClose: () => void;
+    data: OfficerRecord[];
+    agencyName: string;
+    onClose: () => void;
 }
 
 const getOrdinalSuffix = (day: number): string => {
@@ -111,7 +111,7 @@ export const CertificateOfCompliance: React.FC<ReportProps> = ({ data, agencyNam
                     {/* 1. OFFICIAL WATERMARK (80% Size, 55% Opacity) */}
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
                         <img 
-                            src="/PNG Crest.png" 
+                            src="/Logo/PNG Crest.png" 
                             alt="" 
                             className="w-[80%] max-w-[700px] object-contain opacity-[0.55] grayscale" 
                         />
@@ -122,7 +122,7 @@ export const CertificateOfCompliance: React.FC<ReportProps> = ({ data, agencyNam
                         <div className="w-full flex flex-col items-center">
                             <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center p-2 shadow-sm border border-slate-100 mb-3">
                                 <img 
-                                    src="/PNG Crest.png" 
+                                    src="/Logo/PNG Crest.png" 
                                     alt="PNG National Crest" 
                                     className="w-full h-full object-contain"
                                 />
