@@ -15,10 +15,6 @@ interface SidebarProps {
   onClose: () => void;
 }
 
-/**
- * PNG National Emblem Component
- * Optimized: Increased size to 85% for better visibility and enforced centering.
- */
 const PNGNationalEmblem = () => (
     <div className="flex items-center justify-center w-full h-full">
         <img 
@@ -49,7 +45,7 @@ const NavItem: React.FC<{
         className={`w-full flex items-center px-3 py-2.5 text-[10px] font-bold uppercase tracking-widest transition-all duration-200 rounded-lg min-h-[38px] group ${
         isActive
             ? 'bg-[#2AAA52] text-white shadow-lg'
-            : 'text-white/60 hover:bg-white/10 hover:text-white'
+            : 'text-white/60 hover:bg-white/5 hover:text-white'
         }`}
     >
         <Icon className={`w-4 h-4 mr-3 flex-shrink-0 transition-transform ${isActive ? 'scale-110' : 'group-hover:scale-105'}`} />
@@ -78,16 +74,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
             />
         )}
         
-        {/* Sidebar Container */}
-        <aside className={`fixed top-0 left-0 h-screen w-60 z-50 transition-transform duration-300 transform md:relative md:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'} flex flex-col shadow-[10px_0_30px_rgba(0,0,0,0.3)] border-r border-white/10 bg-[#1A1A40]/80 backdrop-blur-xl`}>
+        {/* Sidebar Container: Updated to Institutional Deep Blue (#0F172A) */}
+        <aside className={`fixed top-0 left-0 h-screen w-60 z-50 transition-transform duration-300 transform md:relative md:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'} flex flex-col shadow-[10px_0_30px_rgba(0,0,0,0.5)] border-r border-white/5 bg-[#0F172A] backdrop-blur-xl`}>
             
             {/* Header / Logo Section */}
-            <div className="flex flex-col items-center px-5 py-8 shrink-0 border-b border-white/10">
+            <div className="flex flex-col items-center px-5 py-8 shrink-0 border-b border-white/5">
                 <div className="flex items-center justify-center w-full mb-4 relative">
                     <div className="w-16 h-16 bg-white/5 rounded-xl border border-white/10 shadow-inner flex items-center justify-center overflow-hidden">
                         <PNGNationalEmblem />
                     </div>
-                    {/* Absolute positioned Close Button for Mobile */}
                     <button onClick={onClose} className="md:hidden absolute right-0 p-1.5 text-white/40 hover:text-white transition-colors" aria-label="Close menu">
                         <XIcon className="w-6 h-6" />
                     </button>
@@ -188,8 +183,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </NavItemGroup>
             </nav>
 
-            {/* Footer Institutional Tag */}
-            <div className="shrink-0 p-6 border-t border-white/10 bg-black/20">
+            {/* Footer Institutional Tag: Subtle contrast change */}
+            <div className="shrink-0 p-6 border-t border-white/5 bg-black/10">
                 <p className="text-[8px] font-black text-white/30 uppercase tracking-[0.4em] text-center leading-relaxed">
                     DPM PNG &copy; 2026 <br/>
                     <span className="text-[#2AAA52]">Authenticated Access</span>
