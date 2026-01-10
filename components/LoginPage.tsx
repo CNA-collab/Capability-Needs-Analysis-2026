@@ -1,23 +1,35 @@
 import React, { useState } from 'react';
 
-export const LoginPage: React.FC = () => {
+// 1. Interface tells TypeScript that 'onLoginSuccess' is a valid prop
+interface LoginPageProps {
+    onLoginSuccess: () => void;
+}
+
+export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
 
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
-        if (username === "DPM_OP_0001" && password === "CNA-Dev-2026") {
-            window.location.href = "/dashboard"; 
+        
+        // Use .trim() to prevent issues with accidental spaces
+        if (username.trim() === "DPM_OP_0001" && password.trim() === "CNA-Dev-2026") {
+            
+            // 2. Tell App.tsx that login was successful
+            onLoginSuccess(); 
+            
+            // 3. Since App.tsx handles the view switching, the login screen 
+            // will automatically unmount and show the Dashboard.
         } else {
-            alert("Login Failed: Please check your Username and Password.");
+            alert("Authorization Failed: Please check your credentials.");
         }
     };
 
     return (
-        /* BACKGROUND CHANGED TO EXECUTIVE NAVY BLUE */
+        /* EXECUTIVE NAVY BLUE BACKGROUND */
         <div className="relative min-h-screen w-full flex items-center justify-center bg-[#0f172a] overflow-hidden font-['Inter']">
             
-            {/* 1. DIAGONAL WATERMARK GRID (White/Silver at 70% Opacity) */}
+            {/* DIAGONAL WATERMARK GRID */}
             <div className="absolute inset-[-20%] grid grid-cols-6 md:grid-cols-10 gap-12 p-4 pointer-events-none transform -rotate-12">
                 {Array.from({ length: 120 }).map((_, i) => (
                     <div 
@@ -37,7 +49,7 @@ export const LoginPage: React.FC = () => {
                 ))}
             </div>
 
-            {/* 2. LOGIN CARD - Glassmorphism style to contrast with Deep Blue */}
+            {/* LOGIN CARD */}
             <div className="relative z-10 w-full max-w-md p-10 bg-white shadow-[0_25px_70px_rgba(0,0,0,0.5)] rounded-3xl border border-white/10">
                 <div className="text-center mb-10">
                     {/* WIDENED MAIN CREST */}

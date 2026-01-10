@@ -1,9 +1,9 @@
 /**
- * PNG National CNA Application
- * Integrated with 80% Background Crest Watermark
+ * PNG National CNA Application - 2026
+ * Integrated with Persistent Auth & 80% Background Crest Watermark
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 
 // FIX: Explicitly importing JSX types
 import type { JSX } from 'react'; 
@@ -45,7 +45,6 @@ import { GesiPolicyToolkit } from './components/GesiPolicyToolkit';
 import { LoginPage } from './components/LoginPage';
 import { PowerBiModal } from './components/PowerBiModal';
 import { WelcomeModal } from './components/WelcomeModal';
-// REMOVED: GlobalNavigation Import
 import { TrainingPathwaysDashboard } from './components/TrainingPathwaysDashboard';
 import { TrainingCategoryModal } from './components/TrainingCategoryModal';
 import { CompetencyProjectionReport } from './components/CompetencyProjectionReport';
@@ -53,24 +52,11 @@ import { ItemLevelAnalysisReport } from './components/ItemLevelAnalysisReport';
 import { CertificateOfCompliance } from './components/CertificateOfCompliance';
 import { SystemSettings } from './components/SystemSettings';
 import { SurveyInsights } from './components/SurveyInsights';
-import { ArrowDownTrayIcon, ClipboardDocumentListIcon } from './components/icons';
-import { exportToXlsx, ReportData } from './utils/export';
+import { exportToXlsx } from './utils/export';
 
 // Configuration
 type View = 'organisational' | 'individual' | 'pathways' | 'gesi' | 'cna' | 'settings' | 'survey-insights';
 type OrgTab = 'diagnostic' | 'overview' | 'divisional';
-
-const VIEW_SEQUENCE: { view: View; tab?: OrgTab }[] = [
-    { view: 'organisational', tab: 'diagnostic' },
-    { view: 'organisational', tab: 'overview' },
-    { view: 'organisational', tab: 'divisional' },
-    { view: 'individual' },
-    { view: 'pathways' },
-    { view: 'survey-insights' },
-    { view: 'gesi' },
-    { view: 'cna' },
-    { view: 'settings' },
-];
 
 const deDuplicateOfficers = (officers: OfficerRecord[]): OfficerRecord[] => {
     const uniqueOfficersMap = new Map<string, OfficerRecord>();
@@ -87,17 +73,30 @@ const deDuplicateOfficers = (officers: OfficerRecord[]): OfficerRecord[] => {
 };
 
 const App: React.FC = () => {
-    // Auth State
-    const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => sessionStorage.getItem('isCnaAppLoggedIn') === 'true');
+    // --- AUTHENTICATION LOGIC ---
+    const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => 
+        sessionStorage.getItem('isCnaAppLoggedIn') === 'true'
+    );
 
-    // Navigation & UI State
+    const handleLoginSuccess = () => {
+        sessionStorage.setItem('isCnaAppLoggedIn', 'true');
+        setIsLoggedIn(true);
+    };
+
+    const handleLogout = () => {
+        sessionStorage.removeItem('isCnaAppLoggedIn');
+        setIsLoggedIn(false);
+    };
+
+    // --- NAVIGATION & UI STATE ---
     const [showWelcome, setShowWelcome] = useState<boolean>(false);
     const [currentView, setCurrentView] = useState<View>('organisational');
     const [activeOrgTab, setActiveOrgTab] = useState<OrgTab>('diagnostic');
-    const [history, setHistory] = useState<{ view: View; tab?: OrgTab }[]>([]);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-    useEffect(() => { if (isLoggedIn) setShowWelcome(true); }, [isLoggedIn]);
+    useEffect(() => { 
+        if (isLoggedIn) setShowWelcome(true); 
+    }, [isLoggedIn]);
     
     const getFromStorage = <T,>(key: string, defaultValue: T): T => {
         try {
@@ -107,17 +106,17 @@ const App: React.FC = () => {
         return defaultValue;
     };
 
-    // Data State
+    // --- DATA STATE ---
     const [officerData, setOfficerData] = useState<OfficerRecord[]>(() => deDuplicateOfficers(getFromStorage(OFFICER_DATA_KEY, INITIAL_CNA_DATASET)));
     const [rawResponseCount, setRawResponseCount] = useState<number>(() => getFromStorage(RAW_RESPONSE_COUNT_KEY, officerData.length));
     const [establishmentData, setEstablishmentData] = useState<EstablishmentRecord[]>(() => getFromStorage(ESTABLISHMENT_DATA_KEY, ESTABLISHMENT_DATA));
     const [agencyType, setAgencyType] = useState<AgencyType>(() => getFromStorage(AGENCY_TYPE_KEY, 'National Agency'));
     const [agencyName, setAgencyName] = useState<string>(() => getFromStorage(AGENCY_NAME_KEY, 'Department of Personnel Management'));
     const [corporatePlanContext, setCorporatePlanContext] = useState<string>(() => getFromStorage(CORP_PLAN_CONTEXT_KEY, ''));
-    const [gradingGroupFilter, setGradingGroupFilter] = useState<GradingGroup | 'All'>('All');
-    const [urgencyFilter, setUrgencyFilter] = useState<UrgencyLevel | 'All'>('All');
+    const [gradingGroupFilter] = useState<GradingGroup | 'All'>('All');
+    const [urgencyFilter] = useState<UrgencyLevel | 'All'>('All');
     
-    // Modal Visibility State
+    // --- MODAL VISIBILITY STATE ---
     const [showImportModal, setShowImportModal] = useState(false);
     const [showHelpModal, setShowHelpModal] = useState(false);
     const [showLndAiAssistant, setShowLndAiAssistant] = useState(false);
@@ -140,22 +139,16 @@ const App: React.FC = () => {
     const [showDevelopmentPathways, setShowDevelopmentPathways] = useState(false);
     const [showEvidenceMasterTable, setShowEvidenceMasterTable] = useState(false);
     const [showConsolidatedLifecycle, setShowConsolidatedLifecycle] = useState(false);
-
     const [showTrainingCategory, setShowTrainingCategory] = useState<string | null>(null);
     const [showProjectionReport, setShowProjectionReport] = useState(false);
     const [selectedOfficerForLndPlan, setSelectedOfficerForLndPlan] = useState<OfficerRecord | null>(null);
     const [selectedOfficerForPathway, setSelectedOfficerForPathway] = useState<OfficerRecord | null>(null);
 
-    // Handlers
+    // --- HANDLERS ---
     const handleNavigate = (view: View, tab?: OrgTab) => {
-        setHistory(prev => [...prev, { view: currentView, tab: activeOrgTab }]);
         setCurrentView(view);
         if (tab) setActiveOrgTab(tab);
     };
-
-    const handleHome = () => handleNavigate('organisational', 'diagnostic');
-
-    // Breadcrumb logic removed as it was only used for the deleted Header
 
     const updateAndStore = <T,>(setter: any, key: string) => (newValue: T | ((prevState: T) => T)) => {
         setter((prev: T) => {
@@ -251,8 +244,8 @@ const App: React.FC = () => {
         }
     };
     
-    // Auth Check
-    if (!isLoggedIn) return <LoginPage onLoginSuccess={() => setIsLoggedIn(true)} />;
+    // --- AUTH GUARD RENDER ---
+    if (!isLoggedIn) return <LoginPage onLoginSuccess={handleLoginSuccess} />;
 
     return (
         <div className="flex h-screen bg-[#F4F7F9] overflow-hidden relative">
@@ -274,14 +267,14 @@ const App: React.FC = () => {
                     onImportClick={() => setShowImportModal(true)} 
                     onHelpClick={() => setShowHelpModal(true)} 
                     onShowLndAiAssistant={() => setShowLndAiAssistant(true)} 
-                    onLogout={() => setIsLoggedIn(false)} 
+                    onLogout={handleLogout} 
                     onShowPowerBi={() => setShowPowerBiModal(true)} 
                     isOpen={isSidebarOpen}
                     onClose={() => setIsSidebarOpen(false)}
                 />
             </div>
             
-            {/* 3. CONTENT AREA - Navigation Header completely removed */}
+            {/* 3. CONTENT AREA */}
             <div className="flex-1 flex flex-col h-full overflow-hidden relative z-10 bg-transparent">
                 <main className="flex-1 overflow-y-auto relative bg-transparent custom-scrollbar">
                     <div className="relative z-20 min-h-full">
