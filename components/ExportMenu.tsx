@@ -1,5 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ArrowDownTrayIcon, DocumentIcon, TableCellsIcon, ClipboardIcon, PrinterIcon, ChevronDownIcon } from './icons';
+import { 
+    DocumentIcon, 
+    TableCellsIcon, 
+    ClipboardIcon, 
+    PrinterIcon, 
+    ChevronDownIcon,
+    ArrowDownTrayIcon 
+} from './icons';
 
 interface ExportMenuProps {
     onExport: (format: 'pdf' | 'docx' | 'xlsx' | 'csv' | 'sheets' | 'json' | 'print') => void;
@@ -16,14 +23,17 @@ export const ExportMenu: React.FC<ExportMenuProps> = ({ onExport }) => {
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
+        return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
     const handleExport = (format: 'pdf' | 'docx' | 'xlsx' | 'csv' | 'sheets' | 'json' | 'print') => {
-        onExport(format);
         setIsOpen(false);
+        
+        // Add a tiny delay to ensure the menu is fully closed before capture
+        // This prevents the menu itself from appearing in the PDF/Screenshot
+        setTimeout(() => {
+            onExport(format);
+        }, 100);
     };
 
     return (
@@ -32,41 +42,69 @@ export const ExportMenu: React.FC<ExportMenuProps> = ({ onExport }) => {
                 <button
                     type="button"
                     onClick={() => setIsOpen(!isOpen)}
-                    className="inline-flex justify-center w-full rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500"
-                    aria-haspopup="true"
-                    aria-expanded={isOpen}
+                    className="inline-flex items-center justify-center w-full rounded-xl border-2 border-slate-200 shadow-sm px-6 py-2.5 bg-white text-sm font-black text-slate-700 hover:bg-slate-50 hover:border-slate-900 transition-all focus:outline-none uppercase tracking-widest"
                 >
-                    Export
-                    <ChevronDownIcon className="-mr-1 ml-2 h-5 w-5" />
+                    <ArrowDownTrayIcon className="mr-2 h-4 w-4 text-slate-900" />
+                    Export Options
+                    <ChevronDownIcon className="-mr-1 ml-2 h-5 w-5 opacity-40" />
                 </button>
             </div>
 
             {isOpen && (
-                <div className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 z-50">
-                    <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-                        <a href="#" onClick={(e) => { e.preventDefault(); handleExport('pdf'); }} className="group flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700" role="menuitem">
-                            <DocumentIcon className="mr-3 h-5 w-5 text-red-500" aria-hidden="true" /> PDF
-                        </a>
-                        <a href="#" onClick={(e) => { e.preventDefault(); handleExport('docx'); }} className="group flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700" role="menuitem">
-                            <DocumentIcon className="mr-3 h-5 w-5 text-blue-500" aria-hidden="true" /> DOCX
-                        </a>
-                        <a href="#" onClick={(e) => { e.preventDefault(); handleExport('xlsx'); }} className="group flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700" role="menuitem">
-                            <TableCellsIcon className="mr-3 h-5 w-5 text-green-500" aria-hidden="true" /> XLSX
-                        </a>
-                        <div className="border-t border-gray-200 dark:border-gray-700 my-1"></div>
-                        <a href="#" onClick={(e) => { e.preventDefault(); handleExport('print'); }} className="group flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700" role="menuitem">
-                            <PrinterIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" /> Print
-                        </a>
-                         <div className="border-t border-gray-200 dark:border-gray-700 my-1"></div>
-                        <a href="#" onClick={(e) => { e.preventDefault(); handleExport('csv'); }} className="group flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700" role="menuitem">
-                           <DocumentIcon className="mr-3 h-5 w-5 text-gray-400" aria-hidden="true" /> CSV
-                        </a>
-                         <a href="#" onClick={(e) => { e.preventDefault(); handleExport('sheets'); }} className="group flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700" role="menuitem">
-                           <ClipboardIcon className="mr-3 h-5 w-5 text-green-400" aria-hidden="true" /> Copy for Sheets
-                        </a>
-                        <a href="#" onClick={(e) => { e.preventDefault(); handleExport('json'); }} className="group flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700" role="menuitem">
-                           <DocumentIcon className="mr-3 h-5 w-5 text-yellow-500" aria-hidden="true" /> JSON
-                        </a>
+                <div className="origin-top-right absolute right-0 mt-3 w-64 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] bg-white ring-1 ring-black ring-opacity-5 z-[300] overflow-hidden border border-slate-100">
+                    <div className="py-2" role="menu">
+                        {/* 1. HIGH FIDELITY SECTION */}
+                        <div className="px-4 py-2 text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/50">
+                            Visual Reports (Exact Look)
+                        </div>
+                        <button 
+                            onClick={() => handleExport('pdf')} 
+                            className="w-full group flex items-center px-4 py-3 text-sm text-slate-700 hover:bg-slate-900 hover:text-white transition-colors"
+                        >
+                            <DocumentIcon className="mr-3 h-5 w-5 text-red-500 group-hover:text-white" /> 
+                            <span className="font-bold">Official PDF (.pdf)</span>
+                        </button>
+                        
+                        <button 
+                            onClick={() => handleExport('print')} 
+                            className="w-full group flex items-center px-4 py-3 text-sm text-slate-700 hover:bg-slate-900 hover:text-white transition-colors"
+                        >
+                            <PrinterIcon className="mr-3 h-5 w-5 text-slate-500 group-hover:text-white" /> 
+                            <span className="font-bold">Direct Print / Save</span>
+                        </button>
+
+                        <div className="border-t border-slate-100 my-1"></div>
+
+                        {/* 2. DATA SECTION */}
+                        <div className="px-4 py-2 text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/50">
+                            Data Analysis
+                        </div>
+                        <button 
+                            onClick={() => handleExport('xlsx')} 
+                            className="w-full group flex items-center px-4 py-3 text-sm text-slate-700 hover:bg-slate-900 hover:text-white transition-colors"
+                        >
+                            <TableCellsIcon className="mr-3 h-5 w-5 text-green-600 group-hover:text-white" /> 
+                            <span className="font-bold">Excel Workbook (.xlsx)</span>
+                        </button>
+                        
+                        <button 
+                            onClick={() => handleExport('csv')} 
+                            className="w-full group flex items-center px-4 py-3 text-sm text-slate-700 hover:bg-slate-900 hover:text-white transition-colors"
+                        >
+                            <DocumentIcon className="mr-3 h-5 w-5 text-slate-400 group-hover:text-white" /> 
+                            <span className="font-bold">Comma Separated (.csv)</span>
+                        </button>
+
+                        <div className="border-t border-slate-100 my-1"></div>
+
+                        {/* 3. SYSTEM SECTION */}
+                        <button 
+                            onClick={() => handleExport('json')} 
+                            className="w-full group flex items-center px-4 py-3 text-xs text-slate-400 hover:bg-slate-50 transition-colors"
+                        >
+                            <ClipboardIcon className="mr-3 h-4 w-4" /> 
+                            Raw System Data (JSON)
+                        </button>
                     </div>
                 </div>
             )}
