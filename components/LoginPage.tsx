@@ -21,34 +21,20 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
     };
 
     return (
-        /* SOFT SKY BLUE BACKGROUND - Calmer tone for 2026 UI */
+        /* SOFT SKY BLUE BACKGROUND */
         <div className="relative min-h-screen w-full flex items-center justify-center bg-[#7DD3FC] overflow-hidden font-['Inter']">
             
-            {/* 45 DEGREE DIAGONAL WATERMARK GRID */}
-            <div 
-                className="absolute inset-[-50%] grid grid-cols-6 md:grid-cols-12 gap-16 p-4 pointer-events-none transform rotate-[45deg]"
-            >
-                {Array.from({ length: 144 }).map((_, i) => (
-                    <div 
-                        key={i} 
-                        className="flex items-center justify-center animate-live-watermark"
-                        style={{ 
-                            animationDelay: `${(i % 10) * 0.5}s`,
-                            opacity: 0.6 
-                        }}
-                    >
-                        {/* WHITE CREST WITH OVERLAY BLENDING */}
-                        <img 
-                            src="/Logo/PNG Crest.png" 
-                            className="w-14 h-14 brightness-0 invert opacity-20 mix-blend-overlay transform -rotate-[45deg]" 
-                            alt="" 
-                        />
-                    </div>
-                ))}
+            {/* SINGLE LARGE WATERMARK - 80% VISIBILITY */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <img 
+                    src="/Logo/PNG Crest.png" 
+                    className="w-[80%] max-w-[800px] h-auto opacity-80 brightness-110 grayscale-0 mix-blend-soft-light transform scale-110" 
+                    alt="Background Watermark" 
+                />
             </div>
 
             {/* LOGIN CARD */}
-            <div className="relative z-10 w-full max-w-md p-10 bg-white shadow-[0_35px_80px_rgba(0,0,0,0.2)] rounded-[2.5rem] border border-white/40">
+            <div className="relative z-10 w-full max-w-md p-10 bg-white shadow-[0_35px_80px_rgba(0,0,0,0.25)] rounded-[2.5rem] border border-white/40">
                 <div className="text-center mb-10">
                     <img 
                         src="/Logo/PNG Crest.png" 
@@ -99,22 +85,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                     <span>v2.0.38-Alpha</span>
                 </div>
             </div>
-
-            <style dangerouslySetInnerHTML={{ __html: `
-                @keyframes floatPulse {
-                    0%, 100% { 
-                        opacity: 0.3; 
-                        transform: translate(0, 0) scale(1); 
-                    }
-                    50% { 
-                        opacity: 0.7; 
-                        transform: translate(5px, -5px) scale(1.05); 
-                    }
-                }
-                .animate-live-watermark {
-                    animation: floatPulse 8s ease-in-out infinite;
-                }
-            `}} />
         </div>
     );
 };
