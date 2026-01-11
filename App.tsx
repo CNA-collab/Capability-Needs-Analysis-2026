@@ -1,14 +1,12 @@
 /**
  * PNG National CNA Application - 2026
- * Integrated with Persistent Auth & 80% Background Crest Watermark
+ * Fixed Type Scoping & Device Detection
  */
 
 import React, { useState, useEffect } from 'react';
-
-// FIX: Explicitly importing JSX types
 import type { JSX } from 'react'; 
 
-// Static Report & Component Imports
+// --- REPORT & COMPONENT IMPORTS ---
 import { AutomatedOrganisationalAnalysisReport } from './components/AiAnalysisReport';
 import { FiveYearPlanReport } from './components/FiveYearPlanReport';
 import { CompetencyDomainReport } from './components/CompetencyDomainReport';
@@ -22,17 +20,11 @@ import { AnnualTrainingPlanReport } from './components/AnnualTrainingPlanReport'
 import { ConsolidatedStrategicPlanReport } from './components/ConsolidatedStrategicPlanReport';
 import { SuccessionPlanReport } from './components/SuccessionPlanReport';
 import { GesiAnalysisReport } from './components/GesiAnalysisReport';
-import { DevelopmentPathwaysReport } from './components/DevelopmentPathwaysReport';
+import { TrainingPathwaysReport } from './components/TrainingPathwaysReport';
 import { CnaEvidenceMasterTable } from './components/CnaEvidenceMasterTable';
 import { ConsolidatedLifecyclePlanReport } from './components/ConsolidatedLifecyclePlanReport';
-import { TrainingPathwaysReport } from './components/TrainingPathwaysReport';
 
-// Types & Data
-import { OfficerRecord, AgencyType, EstablishmentRecord, GradingGroup, UrgencyLevel, QUESTION_TEXT_MAPPING } from './types';
-import { INITIAL_CNA_DATASET } from './constants';
-import { ESTABLISHMENT_DATA } from './data/establishment';
-
-// UI Components
+// --- UI COMPONENTS ---
 import { Sidebar } from './components/Sidebar';
 import { OrganisationalDashboard } from './components/OrganisationalDashboard';
 import { DivisionGroup } from './components/DivisionGroup';
@@ -52,9 +44,15 @@ import { ItemLevelAnalysisReport } from './components/ItemLevelAnalysisReport';
 import { CertificateOfCompliance } from './components/CertificateOfCompliance';
 import { SystemSettings } from './components/SystemSettings';
 import { SurveyInsights } from './components/SurveyInsights';
-import { exportToXlsx } from './utils/export';
 
-// Configuration
+// --- TYPES & DATA ---
+import { OfficerRecord, AgencyType, EstablishmentRecord, GradingGroup, UrgencyLevel, QUESTION_TEXT_MAPPING } from './types';
+import { INITIAL_CNA_DATASET } from './constants';
+import { ESTABLISHMENT_DATA } from './data/establishment';
+import { exportToXlsx } from './utils/export';
+import { DevelopmentPathwaysReport } from './components/DevelopmentPathwaysReport';
+
+// --- 1. DEFINE TYPES OUTSIDE COMPONENT (Fixes 'View' and 'OrgTab' errors) ---
 type View = 'organisational' | 'individual' | 'pathways' | 'gesi' | 'cna' | 'settings' | 'survey-insights';
 type OrgTab = 'diagnostic' | 'overview' | 'divisional';
 
@@ -73,50 +71,21 @@ const deDuplicateOfficers = (officers: OfficerRecord[]): OfficerRecord[] => {
 };
 
 const App: React.FC = () => {
-    // --- AUTHENTICATION LOGIC ---
+    // --- 2. DEVICE DETECTION STATE ---
+    const [deviceType, setDeviceType] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
+
+    // --- 3. AUTHENTICATION STATE ---
     const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => 
         sessionStorage.getItem('isCnaAppLoggedIn') === 'true'
     );
 
-    const handleLoginSuccess = () => {
-        sessionStorage.setItem('isCnaAppLoggedIn', 'true');
-        setIsLoggedIn(true);
-    };
-
-    const handleLogout = () => {
-        sessionStorage.removeItem('isCnaAppLoggedIn');
-        setIsLoggedIn(false);
-    };
-
-    // --- NAVIGATION & UI STATE ---
+    // --- 4. NAVIGATION & MODAL STATE ---
     const [showWelcome, setShowWelcome] = useState<boolean>(false);
     const [currentView, setCurrentView] = useState<View>('organisational');
     const [activeOrgTab, setActiveOrgTab] = useState<OrgTab>('diagnostic');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-    useEffect(() => { 
-        if (isLoggedIn) setShowWelcome(true); 
-    }, [isLoggedIn]);
-    
-    const getFromStorage = <T,>(key: string, defaultValue: T): T => {
-        try {
-            const saved = localStorage.getItem(key);
-            if (saved) return JSON.parse(saved);
-        } catch (error) { console.error(`Storage Error:`, error); }
-        return defaultValue;
-    };
-
-    // --- DATA STATE ---
-    const [officerData, setOfficerData] = useState<OfficerRecord[]>(() => deDuplicateOfficers(getFromStorage(OFFICER_DATA_KEY, INITIAL_CNA_DATASET)));
-    const [rawResponseCount, setRawResponseCount] = useState<number>(() => getFromStorage(RAW_RESPONSE_COUNT_KEY, officerData.length));
-    const [establishmentData, setEstablishmentData] = useState<EstablishmentRecord[]>(() => getFromStorage(ESTABLISHMENT_DATA_KEY, ESTABLISHMENT_DATA));
-    const [agencyType, setAgencyType] = useState<AgencyType>(() => getFromStorage(AGENCY_TYPE_KEY, 'National Agency'));
-    const [agencyName, setAgencyName] = useState<string>(() => getFromStorage(AGENCY_NAME_KEY, 'Department of Personnel Management'));
-    const [corporatePlanContext, setCorporatePlanContext] = useState<string>(() => getFromStorage(CORP_PLAN_CONTEXT_KEY, ''));
-    const [gradingGroupFilter] = useState<GradingGroup | 'All'>('All');
-    const [urgencyFilter] = useState<UrgencyLevel | 'All'>('All');
-    
-    // --- MODAL VISIBILITY STATE ---
+    // Modal Visibility
     const [showImportModal, setShowImportModal] = useState(false);
     const [showHelpModal, setShowHelpModal] = useState(false);
     const [showLndAiAssistant, setShowLndAiAssistant] = useState(false);
@@ -144,10 +113,54 @@ const App: React.FC = () => {
     const [selectedOfficerForLndPlan, setSelectedOfficerForLndPlan] = useState<OfficerRecord | null>(null);
     const [selectedOfficerForPathway, setSelectedOfficerForPathway] = useState<OfficerRecord | null>(null);
 
-    // --- HANDLERS ---
+    // --- 5. DATA FETCHING & STORAGE ---
+    const getFromStorage = <T,>(key: string, defaultValue: T): T => {
+        try {
+            const saved = localStorage.getItem(key);
+            if (saved) return JSON.parse(saved);
+        } catch (error) { console.error(`Storage Error:`, error); }
+        return defaultValue;
+    };
+
+    const [officerData, setOfficerData] = useState<OfficerRecord[]>(() => deDuplicateOfficers(getFromStorage(OFFICER_DATA_KEY, INITIAL_CNA_DATASET)));
+    const [rawResponseCount, setRawResponseCount] = useState<number>(() => getFromStorage(RAW_RESPONSE_COUNT_KEY, officerData.length));
+    const [establishmentData, setEstablishmentData] = useState<EstablishmentRecord[]>(() => getFromStorage(ESTABLISHMENT_DATA_KEY, ESTABLISHMENT_DATA));
+    const [agencyType, setAgencyType] = useState<AgencyType>(() => getFromStorage(AGENCY_TYPE_KEY, 'National Agency'));
+    const [agencyName, setAgencyName] = useState<string>(() => getFromStorage(AGENCY_NAME_KEY, 'Department of Personnel Management'));
+    const [corporatePlanContext, setCorporatePlanContext] = useState<string>(() => getFromStorage(CORP_PLAN_CONTEXT_KEY, ''));
+
+    // --- 6. EFFECTS (Device Detection & Auth) ---
+    useEffect(() => {
+        const handleResize = () => {
+            const width = window.innerWidth;
+            if (width < 768) setDeviceType('mobile');
+            else if (width < 1024) setDeviceType('tablet');
+            else setDeviceType('desktop');
+        };
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    useEffect(() => { 
+        if (isLoggedIn) setShowWelcome(true); 
+    }, [isLoggedIn]);
+
+    // --- 7. HANDLERS ---
+    const handleLoginSuccess = () => {
+        sessionStorage.setItem('isCnaAppLoggedIn', 'true');
+        setIsLoggedIn(true);
+    };
+
+    const handleLogout = () => {
+        sessionStorage.removeItem('isCnaAppLoggedIn');
+        setIsLoggedIn(false);
+    };
+
     const handleNavigate = (view: View, tab?: OrgTab) => {
         setCurrentView(view);
         if (tab) setActiveOrgTab(tab);
+        if (deviceType === 'mobile') setIsSidebarOpen(false); // Auto-close sidebar on mobile
     };
 
     const updateAndStore = <T,>(setter: any, key: string) => (newValue: T | ((prevState: T) => T)) => {
@@ -182,6 +195,7 @@ const App: React.FC = () => {
         exportToXlsx({ title: 'Consolidated Report', sections: [{ title: 'Dataset', content: [{ type: 'table', headers, rows }], orientation: 'landscape' }] });
     };
 
+    // --- 8. VIEW RENDERING ENGINE ---
     const renderCurrentView = () => {
         switch (currentView) {
             case 'organisational':
@@ -214,12 +228,16 @@ const App: React.FC = () => {
                     />
                 );
             case 'individual':
-                const filtered = officerData.filter(o => (gradingGroupFilter === 'All' || o.gradingGroup === gradingGroupFilter) && (urgencyFilter === 'All' || o.urgency === urgencyFilter));
-                const grouped = filtered.reduce((acc, o) => { const d = o.division || 'Unassigned'; if (!acc[d]) acc[d] = []; acc[d].push(o); return acc; }, {} as Record<string, OfficerRecord[]>);
+                const grouped = officerData.reduce((acc, o) => { 
+                    const d = o.division || 'Unassigned'; 
+                    if (!acc[d]) acc[d] = []; 
+                    acc[d].push(o); 
+                    return acc; 
+                }, {} as Record<string, OfficerRecord[]>);
                 return (
                     <div className="flex-1 flex flex-col bg-transparent">
                         <header className="p-4 md:p-6 bg-white/80 backdrop-blur-sm border-b border-[#E0E4E8] shadow-sm z-10 no-print">
-                            <div className="flex justify-between items-center">
+                            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                                 <div>
                                     <h1 className="text-xl font-black text-[#2C3E50] uppercase">Individual Operations</h1>
                                     <p className="text-[10px] font-bold text-[#1A365D]/60 uppercase tracking-widest">Monitoring & Development</p>
@@ -231,7 +249,16 @@ const App: React.FC = () => {
                             </div>
                         </header>
                         <div className="p-6 space-y-6">
-                            {Object.entries(grouped).map(([name, officers]) => <DivisionGroup key={name} divisionName={name} officers={officers} onViewSummary={setSelectedOfficerForLndPlan} onSuggestTraining={setSelectedOfficerForPathway} loadingSuggestionsFor={null} />)}
+                            {Object.entries(grouped).map(([name, officers]) => (
+                                <DivisionGroup 
+                                    key={name} 
+                                    divisionName={name} 
+                                    officers={officers} 
+                                    onViewSummary={setSelectedOfficerForLndPlan} 
+                                    onSuggestTraining={setSelectedOfficerForPathway} 
+                                    loadingSuggestionsFor={null} 
+                                />
+                            ))}
                         </div>
                     </div>
                 );
@@ -244,23 +271,25 @@ const App: React.FC = () => {
         }
     };
     
-    // --- AUTH GUARD RENDER ---
+    // --- 9. FINAL RENDER ---
     if (!isLoggedIn) return <LoginPage onLoginSuccess={handleLoginSuccess} />;
 
     return (
-        <div className="flex h-screen bg-[#F4F7F9] overflow-hidden relative">
+        <div className={`flex h-screen bg-[#F4F7F9] overflow-hidden relative ${deviceType}`}>
             
-            {/* 1. BACKGROUND CREST (80% SIZE VISIBILITY) */}
+            {/* BACKGROUND WATERMARK */}
             <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-0">
                 <img 
                     src="/PNG Crest.png" 
                     alt="National Crest Watermark" 
-                    className="w-[80%] max-w-[1200px] object-contain opacity-[0.06] grayscale"
+                    className={`object-contain opacity-[0.06] grayscale transition-all duration-500 ${
+                        deviceType === 'mobile' ? 'w-[95%]' : 'w-[80%] max-w-[1200px]'
+                    }`}
                 />
             </div>
 
-            {/* 2. SIDEBAR NAVIGATION */}
-            <div className="no-print shrink-0 z-50 relative">
+            {/* SIDEBAR NAVIGATION */}
+            <div className={`no-print shrink-0 z-50 relative ${deviceType === 'mobile' ? 'fixed inset-0 pointer-events-none' : ''}`}>
                 <Sidebar 
                     currentView={currentView} 
                     setCurrentView={handleNavigate} 
@@ -269,14 +298,23 @@ const App: React.FC = () => {
                     onShowLndAiAssistant={() => setShowLndAiAssistant(true)} 
                     onLogout={handleLogout} 
                     onShowPowerBi={() => setShowPowerBiModal(true)} 
-                    isOpen={isSidebarOpen}
+                    isOpen={deviceType === 'desktop' ? true : isSidebarOpen}
                     onClose={() => setIsSidebarOpen(false)}
                 />
             </div>
             
-            {/* 3. CONTENT AREA */}
+            {/* CONTENT AREA */}
             <div className="flex-1 flex flex-col h-full overflow-hidden relative z-10 bg-transparent">
-                <main className="flex-1 overflow-y-auto relative bg-transparent custom-scrollbar">
+                {deviceType === 'mobile' && (
+                    <button 
+                        onClick={() => setIsSidebarOpen(true)}
+                        className="fixed top-4 left-4 z-[60] p-2 bg-white rounded-lg shadow-lg border border-slate-200"
+                    >
+                        <svg className="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" /></svg>
+                    </button>
+                )}
+
+                <main className={`flex-1 overflow-y-auto relative bg-transparent custom-scrollbar ${deviceType === 'mobile' ? 'pt-16' : ''}`}>
                     <div className="relative z-20 min-h-full">
                         {renderCurrentView()}
                     </div>
@@ -315,7 +353,6 @@ const App: React.FC = () => {
     );
 };
 
-// Storage Keys
 const OFFICER_DATA_KEY = 'cna_officerData';
 const RAW_RESPONSE_COUNT_KEY = 'cna_rawResponseCount';
 const ESTABLISHMENT_DATA_KEY = 'cna_establishmentData';
