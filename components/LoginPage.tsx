@@ -24,11 +24,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
         /* SOFT SKY BLUE BACKGROUND */
         <div className="relative min-h-screen w-full flex items-center justify-center bg-[#7DD3FC] overflow-hidden font-['Inter']">
             
-            {/* SINGLE LARGE WATERMARK - 80% VISIBILITY */}
+            {/* SINGLE LARGE WATERMARK - 90% VISIBILITY */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <img 
                     src="/Logo/PNG Crest.png" 
-                    className="w-[80%] max-w-[800px] h-auto opacity-80 brightness-110 grayscale-0 mix-blend-soft-light transform scale-110" 
+                    className="w-[85%] max-w-[900px] h-auto opacity-90 brightness-110 mix-blend-overlay transform scale-100" 
                     alt="Background Watermark" 
                 />
             </div>
