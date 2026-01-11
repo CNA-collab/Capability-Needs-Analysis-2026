@@ -34,7 +34,7 @@ import { CnaPolicyToolkit } from './components/CnaPolicyToolkit';
 import { LndAiAssistantModal } from './components/LndAiAssistantModal';
 import { IndividualDevelopmentProfile } from './components/IndividualDevelopmentProfile';
 import { GesiPolicyToolkit } from './components/GesiPolicyToolkit';
-import { LoginPage } from './components/LoginPage';
+import { LoginPage } from './components/LoginPage'; // Corrected Named Import
 import { PowerBiModal } from './components/PowerBiModal';
 import { WelcomeModal } from './components/WelcomeModal';
 import { TrainingPathwaysDashboard } from './components/TrainingPathwaysDashboard';
@@ -52,7 +52,14 @@ import { ESTABLISHMENT_DATA } from './data/establishment';
 import { exportToXlsx } from './utils/export';
 import { DevelopmentPathwaysReport } from './components/DevelopmentPathwaysReport';
 
-// --- 1. DEFINE TYPES OUTSIDE COMPONENT (Fixes 'View' and 'OrgTab' errors) ---
+// --- CONSTANTS & TYPES ---
+const OFFICER_DATA_KEY = 'cna_officerData';
+const RAW_RESPONSE_COUNT_KEY = 'cna_rawResponseCount';
+const ESTABLISHMENT_DATA_KEY = 'cna_establishmentData';
+const AGENCY_TYPE_KEY = 'cna_agencyType';
+const AGENCY_NAME_KEY = 'cna_agencyName';
+const CORP_PLAN_CONTEXT_KEY = 'cna_corpPlanContext';
+
 type View = 'organisational' | 'individual' | 'pathways' | 'gesi' | 'cna' | 'settings' | 'survey-insights';
 type OrgTab = 'diagnostic' | 'overview' | 'divisional';
 
@@ -71,15 +78,15 @@ const deDuplicateOfficers = (officers: OfficerRecord[]): OfficerRecord[] => {
 };
 
 const App: React.FC = () => {
-    // --- 2. DEVICE DETECTION STATE ---
+    // --- DEVICE DETECTION ---
     const [deviceType, setDeviceType] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
 
-    // --- 3. AUTHENTICATION STATE ---
+    // --- AUTHENTICATION ---
     const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => 
         sessionStorage.getItem('isCnaAppLoggedIn') === 'true'
     );
 
-    // --- 4. NAVIGATION & MODAL STATE ---
+    // --- NAVIGATION & MODALS ---
     const [showWelcome, setShowWelcome] = useState<boolean>(false);
     const [currentView, setCurrentView] = useState<View>('organisational');
     const [activeOrgTab, setActiveOrgTab] = useState<OrgTab>('diagnostic');
@@ -113,7 +120,7 @@ const App: React.FC = () => {
     const [selectedOfficerForLndPlan, setSelectedOfficerForLndPlan] = useState<OfficerRecord | null>(null);
     const [selectedOfficerForPathway, setSelectedOfficerForPathway] = useState<OfficerRecord | null>(null);
 
-    // --- 5. DATA FETCHING & STORAGE ---
+    // --- DATA HANDLING ---
     const getFromStorage = <T,>(key: string, defaultValue: T): T => {
         try {
             const saved = localStorage.getItem(key);
@@ -129,7 +136,7 @@ const App: React.FC = () => {
     const [agencyName, setAgencyName] = useState<string>(() => getFromStorage(AGENCY_NAME_KEY, 'Department of Personnel Management'));
     const [corporatePlanContext, setCorporatePlanContext] = useState<string>(() => getFromStorage(CORP_PLAN_CONTEXT_KEY, ''));
 
-    // --- 6. EFFECTS (Device Detection & Auth) ---
+    // --- EFFECTS ---
     useEffect(() => {
         const handleResize = () => {
             const width = window.innerWidth;
@@ -142,11 +149,9 @@ const App: React.FC = () => {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    useEffect(() => { 
-        if (isLoggedIn) setShowWelcome(true); 
-    }, [isLoggedIn]);
+    useEffect(() => { if (isLoggedIn) setShowWelcome(true); }, [isLoggedIn]);
 
-    // --- 7. HANDLERS ---
+    // --- HANDLERS ---
     const handleLoginSuccess = () => {
         sessionStorage.setItem('isCnaAppLoggedIn', 'true');
         setIsLoggedIn(true);
@@ -160,7 +165,7 @@ const App: React.FC = () => {
     const handleNavigate = (view: View, tab?: OrgTab) => {
         setCurrentView(view);
         if (tab) setActiveOrgTab(tab);
-        if (deviceType === 'mobile') setIsSidebarOpen(false); // Auto-close sidebar on mobile
+        if (window.innerWidth < 768) setIsSidebarOpen(false);
     };
 
     const updateAndStore = <T,>(setter: any, key: string) => (newValue: T | ((prevState: T) => T)) => {
@@ -195,7 +200,6 @@ const App: React.FC = () => {
         exportToXlsx({ title: 'Consolidated Report', sections: [{ title: 'Dataset', content: [{ type: 'table', headers, rows }], orientation: 'landscape' }] });
     };
 
-    // --- 8. VIEW RENDERING ENGINE ---
     const renderCurrentView = () => {
         switch (currentView) {
             case 'organisational':
@@ -271,39 +275,25 @@ const App: React.FC = () => {
         }
     };
     
-    // --- 9. FINAL RENDER ---
+    // --- FINAL RENDER ---
     if (!isLoggedIn) return <LoginPage onLoginSuccess={handleLoginSuccess} />;
 
     return (
         <div className={`flex h-screen bg-[#F4F7F9] overflow-hidden relative ${deviceType}`}>
             
-            {/* BACKGROUND WATERMARK */}
-            <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-0">
-                <img 
-                    src="/PNG Crest.png" 
-                    alt="National Crest Watermark" 
-                    className={`object-contain opacity-[0.06] grayscale transition-all duration-500 ${
-                        deviceType === 'mobile' ? 'w-[95%]' : 'w-[80%] max-w-[1200px]'
-                    }`}
-                />
-            </div>
-
             {/* SIDEBAR NAVIGATION */}
-            <div className={`no-print shrink-0 z-50 relative ${deviceType === 'mobile' ? 'fixed inset-0 pointer-events-none' : ''}`}>
-                <Sidebar 
-                    currentView={currentView} 
-                    setCurrentView={handleNavigate} 
-                    onImportClick={() => setShowImportModal(true)} 
-                    onHelpClick={() => setShowHelpModal(true)} 
-                    onShowLndAiAssistant={() => setShowLndAiAssistant(true)} 
-                    onLogout={handleLogout} 
-                    onShowPowerBi={() => setShowPowerBiModal(true)} 
-                    isOpen={deviceType === 'desktop' ? true : isSidebarOpen}
-                    onClose={() => setIsSidebarOpen(false)}
-                />
-            </div>
+            <Sidebar 
+                currentView={currentView} 
+                setCurrentView={handleNavigate} 
+                onImportClick={() => setShowImportModal(true)} 
+                onHelpClick={() => setShowHelpModal(true)} 
+                onShowLndAiAssistant={() => setShowLndAiAssistant(true)} 
+                onLogout={handleLogout} 
+                onShowPowerBi={() => setShowPowerBiModal(true)} 
+                isOpen={isSidebarOpen}
+                onClose={() => setIsSidebarOpen(false)}
+            />
             
-            {/* CONTENT AREA */}
             <div className="flex-1 flex flex-col h-full overflow-hidden relative z-10 bg-transparent">
                 {deviceType === 'mobile' && (
                     <button 
@@ -352,12 +342,5 @@ const App: React.FC = () => {
         </div>
     );
 };
-
-const OFFICER_DATA_KEY = 'cna_officerData';
-const RAW_RESPONSE_COUNT_KEY = 'cna_rawResponseCount';
-const ESTABLISHMENT_DATA_KEY = 'cna_establishmentData';
-const AGENCY_TYPE_KEY = 'cna_agencyType';
-const AGENCY_NAME_KEY = 'cna_agencyName';
-const CORP_PLAN_CONTEXT_KEY = 'cna_corpPlanContext';
 
 export default App;
