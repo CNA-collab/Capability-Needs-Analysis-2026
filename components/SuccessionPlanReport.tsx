@@ -1,6 +1,11 @@
-import React, { useState, useEffect, useMemo } from 'react';
+/**
+ * PNG National CNA - Succession Strategy Report
+ * Replaces SVG placeholders with high-fidelity PNG branding.
+ */
+
+import React, { useState, useEffect } from 'react';
 import { GoogleGenAI, Type } from "@google/genai";
-import { OfficerRecord, EstablishmentRecord, AiSuccessionPlanReport, SuccessionCandidate } from '../types';
+import { OfficerRecord, EstablishmentRecord, AiSuccessionPlanReport } from '../types';
 import { AI_SUCCESSION_PLAN_REPORT_PROMPT_INSTRUCTIONS } from '../constants';
 import { XIcon, SparklesIcon, UsersIcon } from './icons';
 import { ExportMenu } from './ExportMenu';
@@ -13,6 +18,7 @@ interface ReportProps {
   onClose: () => void;
 }
 
+// SCHEMA DEFINITIONS
 const successionCandidateSchema = {
     type: Type.OBJECT,
     properties: {
@@ -37,15 +43,18 @@ const aiSuccessionPlanReportSchema = {
     required: ["executiveSummary", "successionPlan"],
 };
 
+// UPDATED: REAL PNG CREST COMPONENT
 const PNGNationalCrest = () => (
     <div className="flex flex-col items-center justify-center mb-8 border-b-2 border-slate-100 pb-6">
-        <div className="w-24 h-24 border-2 border-slate-200 rounded-full flex flex-col items-center justify-center bg-white text-slate-300 p-2 text-center shadow-sm mb-3">
-            <svg width="48" height="48" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="opacity-30 mb-1">
-                <path d="M50 10 L61 35 L95 35 L67 55 L78 85 L50 65 L22 85 L33 55 L5 35 L39 35 Z" fill="#EAB308" />
-            </svg>
-            <span className="text-[7px] font-black uppercase tracking-tighter">National Crest</span>
+        <div className="mb-4">
+            <img 
+                src="/Logo/PNG Crest.png" 
+                alt="National Crest of Papua New Guinea" 
+                className="w-28 h-auto drop-shadow-md"
+            />
         </div>
-        <p className="text-[11px] font-bold text-[#1A365D] uppercase tracking-[0.3em]">Independent State of Papua New Guinea</p>
+        <p className="text-[11px] font-black text-[#1A365D] uppercase tracking-[0.4em]">Independent State of Papua New Guinea</p>
+        <div className="w-16 h-1 bg-red-600 mt-2"></div>
     </div>
 );
 
@@ -63,28 +72,24 @@ export const SuccessionPlanReport: React.FC<ReportProps> = ({ data, establishmen
 
     useEffect(() => {
         const generateReport = async () => {
-            if (!process.env.API_KEY) {
-                setError("API key is not configured.");
+            const apiKey = process.env.API_KEY || (window as any).ENV?.API_KEY;
+            if (!apiKey) {
+                setError("AI Engine Authorization Missing. Please check System Settings.");
                 setLoading(false);
                 return;
             }
             try {
-                /* Correct initialization as per guidelines using named parameter */
-                const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+                const ai = new GoogleGenAI({ apiKey });
                 
                 const promptText = `Generate a High-Fidelity Succession Plan for "${agencyName}".
                 
                 **Lifecycle Mapping (Mandatory):**
-                For each identified successor:
-                1. Check if they have the skills but lack the qualification for the target position's grade.
-                2. If so, recommend specific SILAG or tertiary qualification courses.
-                3. Use the 'Development Needs / Actions' column to project specific training solutions (70:20:10).
+                Analyze qualifications vs grade requirements. If a successor lacks the required degree for a higher grade, prescribe SILAG or Tertiary interventions.
                 
-                Establishment Registry: ${JSON.stringify(establishmentData, null, 2)}
+                Establishment Registry: ${JSON.stringify(establishmentData.slice(0, 50), null, 2)}
                 CNA Records: ${JSON.stringify(data.map(o => ({ name: o.name, pos: o.position, grade: o.grade, qual: o.jobQualification, spa: o.spaRating })), null, 2)}
                 `;
                 
-                /* Updated model to gemini-3-flash-preview as per coding guidelines */
                 const response = await ai.models.generateContent({
                     model: 'gemini-3-flash-preview',
                     contents: promptText,
@@ -95,12 +100,11 @@ export const SuccessionPlanReport: React.FC<ReportProps> = ({ data, establishmen
                     },
                 });
 
-                /* Accessing .text property directly instead of text() method as per guidelines */
                 const textResponse = response.text || '';
                 setReport(JSON.parse(textResponse.trim()));
             } catch (e) {
                 console.error("Succession Plan Error:", e);
-                setError("System failed to generate leader pipeline assessment.");
+                setError("The AI Engine encountered an error analyzing the leadership pipeline.");
             } finally {
                 setLoading(false);
             }
@@ -139,20 +143,22 @@ export const SuccessionPlanReport: React.FC<ReportProps> = ({ data, establishmen
     };
     
     return (
-        <div className="fixed inset-0 bg-black/85 z-50 flex justify-center items-start p-4 pt-12 animate-fade-in no-print overflow-y-auto" aria-modal="true" role="dialog">
-            <div className="bg-slate-50 dark:bg-slate-950 rounded-[24px] shadow-2xl max-w-7xl w-full flex flex-col mb-12">
-                <header className="flex justify-between items-center p-8 border-b border-slate-200 dark:border-slate-800 flex-shrink-0 bg-white dark:bg-slate-900 rounded-t-[24px]">
+        <div className="fixed inset-0 bg-black/90 z-50 flex justify-center items-start p-4 pt-12 animate-fade-in no-print overflow-y-auto">
+            <div className="bg-slate-50 dark:bg-slate-950 rounded-[32px] shadow-2xl max-w-6xl w-full flex flex-col mb-12 overflow-hidden border border-white/10">
+                <header className="flex justify-between items-center p-8 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
                      <div className="flex items-center gap-5">
-                        <UsersIcon className="w-10 h-10 text-[#1A365D] dark:text-blue-400" />
+                        <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-2xl">
+                             <UsersIcon className="w-8 h-8 text-[#1A365D] dark:text-blue-400" />
+                        </div>
                         <div>
                             <h1 className="text-2xl font-black text-[#1A365D] dark:text-white uppercase tracking-tighter">Succession Strategy</h1>
                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Institutional Leadership Pipeline & Risk Monitor</p>
                         </div>
                     </div>
                      <div className="flex items-center gap-4">
-                        <ExportMenu onExport={handleExport as any} />
-                        <button onClick={onClose} className="p-3 bg-slate-100 hover:bg-rose-600 hover:text-white rounded-2xl transition-all shadow-sm">
-                            <XIcon className="w-7 h-7" />
+                        <ExportMenu onExport={handleExport} />
+                        <button onClick={onClose} className="p-3 bg-slate-100 hover:bg-rose-600 hover:text-white rounded-2xl transition-all shadow-sm group">
+                            <XIcon className="w-6 h-6 transition-transform group-hover:rotate-90" />
                         </button>
                     </div>
                 </header>
@@ -160,51 +166,58 @@ export const SuccessionPlanReport: React.FC<ReportProps> = ({ data, establishmen
                 <main className="p-10 bg-white dark:bg-slate-900 min-h-[600px]">
                     {loading ? (
                         <div className="flex flex-col items-center justify-center h-96">
-                            <SparklesIcon className="w-16 h-16 text-blue-500 animate-pulse" />
-                            <h2 className="mt-6 text-xl font-black text-slate-400 uppercase tracking-widest text-center">Scanning Establishment Registry for Risk...</h2>
+                            <div className="relative">
+                                <div className="absolute inset-0 bg-blue-400 blur-2xl opacity-20 animate-pulse"></div>
+                                <SparklesIcon className="w-16 h-16 text-blue-500 animate-spin-slow relative" />
+                            </div>
+                            <h2 className="mt-8 text-lg font-black text-slate-500 uppercase tracking-[0.3em] animate-pulse">Analyzing Registry...</h2>
                         </div>
                     ) : error ? (
-                        <div className="p-8 bg-rose-50 text-rose-700 rounded-2xl text-center font-bold">{error}</div>
+                        <div className="p-12 bg-rose-50 border-2 border-rose-100 text-rose-700 rounded-3xl text-center">
+                            <p className="font-black uppercase tracking-widest text-sm mb-2">System Alert</p>
+                            <p className="font-bold">{error}</p>
+                        </div>
                     ) : report && (
                         <div className="animate-fade-in max-w-5xl mx-auto">
                             <PNGNationalCrest />
+                            
                             <div className="text-center mb-12">
-                                <h1 className="text-3xl font-black text-[#1A365D] dark:text-white tracking-[0.2em] uppercase">OFFICIAL SUCCESSION REGISTER</h1>
-                                <p className="text-slate-500 font-bold mt-2 uppercase tracking-widest">{agencyName}</p>
+                                <h1 className="text-3xl font-black text-[#1A365D] dark:text-white tracking-[0.25em] uppercase">OFFICIAL SUCCESSION REGISTER</h1>
+                                <p className="text-slate-500 font-bold mt-2 uppercase tracking-widest border-t border-slate-100 pt-2 inline-block px-8">{agencyName}</p>
                             </div>
 
                             <ReportSection title="Executive Summary">
-                                <p className="leading-relaxed text-md font-medium">{report.executiveSummary}</p>
+                                <p className="leading-relaxed text-md font-medium text-slate-700">{report.executiveSummary}</p>
                             </ReportSection>
 
                             <ReportSection title="Succession Strategy & Lifecycle Intervention">
-                                <div className="overflow-x-auto border border-slate-200 dark:border-slate-800 rounded-[16px]">
+                                <div className="overflow-x-auto border border-slate-200 dark:border-slate-800 rounded-[20px] shadow-sm">
                                     <table className="w-full text-left text-[11px] border-collapse">
                                         <thead className="bg-[#1A365D] text-white">
                                             <tr>
-                                                <th className="p-4 uppercase tracking-widest font-black">Target Role</th>
-                                                <th className="p-4 uppercase tracking-widest font-black">Identified Successor(s)</th>
-                                                <th className="p-4 uppercase tracking-widest font-black text-center">Readiness</th>
-                                                <th className="p-4 uppercase tracking-widest font-black">Development Needs / Actions</th>
-                                                <th className="p-4 uppercase tracking-widest font-black text-center">Timeline</th>
+                                                <th className="p-5 uppercase tracking-widest font-black">Target Role</th>
+                                                <th className="p-5 uppercase tracking-widest font-black">Identified Successor(s)</th>
+                                                <th className="p-5 uppercase tracking-widest font-black text-center">Readiness</th>
+                                                <th className="p-5 uppercase tracking-widest font-black">Development Needs / Actions</th>
+                                                <th className="p-5 uppercase tracking-widest font-black text-center">Timeline</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                                             {report.successionPlan.map((plan, idx) => (
                                                 <tr key={idx} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                                                    <td className="p-4 font-bold text-slate-800 dark:text-white">{plan.roleOrPosition}</td>
-                                                    <td className="p-4 font-semibold text-slate-700 dark:text-slate-200">{plan.potentialSuccessors.join(', ')}</td>
-                                                    <td className="p-4 text-center">
-                                                        <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${
+                                                    <td className="p-5 font-bold text-slate-900 dark:text-white">{plan.roleOrPosition}</td>
+                                                    <td className="p-5 font-semibold text-slate-700 dark:text-slate-200">{plan.potentialSuccessors.join(', ')}</td>
+                                                    <td className="p-5 text-center">
+                                                        <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest ${
                                                             plan.readinessLevel === 'Ready Now' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
                                                         }`}>
                                                             {plan.readinessLevel}
                                                         </span>
                                                     </td>
-                                                    <td className="p-4 leading-relaxed font-semibold text-slate-600 dark:text-slate-400">
+                                                    <td className="p-5 leading-relaxed font-medium text-slate-600 dark:text-slate-400">
                                                         {plan.developmentNeeds}
                                                     </td>
-                                                    <td className="p-4 text-center font-black text-[#1A365D] dark:text-blue-400 whitespace-nowrap">{plan.estimatedTimeline}</td>
+                                                    <td className="p-5 text-center font-black text-[#1A365D] dark:text-blue-400 whitespace-nowrap">{plan.estimatedTimeline}</td>
                                                 </tr>
                                             ))}
                                         </tbody>
@@ -215,9 +228,9 @@ export const SuccessionPlanReport: React.FC<ReportProps> = ({ data, establishmen
                     )}
                 </main>
                 
-                <footer className="p-8 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 rounded-b-[24px] flex justify-between items-center text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">
+                <footer className="p-8 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">
                     <span>{CUSTODIAN}</span>
-                    <span>Classified Personnel Record</span>
+                    <span>Official Personnel Record - {new Date().getFullYear()}</span>
                 </footer>
             </div>
         </div>
