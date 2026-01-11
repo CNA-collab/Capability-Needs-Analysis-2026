@@ -31,16 +31,17 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                 {Array.from({ length: 144 }).map((_, i) => (
                     <div 
                         key={i} 
-                        className="flex items-center justify-center animate-pop-in"
+                        className="flex items-center justify-center animate-live-watermark"
                         style={{ 
-                            animationDelay: `${i * 0.01}s`,
-                            opacity: 0
+                            // Varied delays so they don't all pulse at the exact same time
+                            animationDelay: `${(i % 10) * 0.5}s`,
+                            opacity: 0.3
                         }}
                     >
-                        {/* THE CREST REMAINS UPRIGHT (COMPENSATING FOR GRID ROTATION) */}
+                        {/* THE CREST REMAINS UPRIGHT */}
                         <img 
                             src="/Logo/PNG Crest.png" 
-                            className="w-14 h-14 brightness-200 grayscale opacity-[0.40] transform -rotate-[45deg]" 
+                            className="w-14 h-14 brightness-200 grayscale transform -rotate-[45deg]" 
                             alt="" 
                         />
                     </div>
@@ -50,13 +51,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
             {/* LOGIN CARD */}
             <div className="relative z-10 w-full max-w-md p-10 bg-white shadow-[0_35px_80px_rgba(0,0,0,0.3)] rounded-[2.5rem] border border-white/20">
                 <div className="text-center mb-10">
-                    {/* WIDENED MAIN CREST */}
                     <img 
                         src="/Logo/PNG Crest.png" 
                         className="w-28 h-28 mx-auto mb-6 drop-shadow-xl" 
                         alt="Main DPM Crest" 
                     />
-                    {/* REMOVED "2026" PER REQUEST */}
                     <h2 className="text-3xl font-black text-slate-900 tracking-tighter uppercase">
                         CNA System
                     </h2>
@@ -103,12 +102,22 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
             </div>
 
             <style dangerouslySetInnerHTML={{ __html: `
-                @keyframes popIn {
-                    from { opacity: 0; transform: scale(0.6); }
-                    to { opacity: 0.40; transform: scale(1); }
+                @keyframes floatPulse {
+                    0% { 
+                        opacity: 0.2; 
+                        transform: translate(0, 0) scale(1); 
+                    }
+                    50% { 
+                        opacity: 0.45; 
+                        transform: translate(10px, -10px) scale(1.1); 
+                    }
+                    100% { 
+                        opacity: 0.2; 
+                        transform: translate(0, 0) scale(1); 
+                    }
                 }
-                .animate-pop-in {
-                    animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+                .animate-live-watermark {
+                    animation: floatPulse 6s ease-in-out infinite;
                 }
             `}} />
         </div>
