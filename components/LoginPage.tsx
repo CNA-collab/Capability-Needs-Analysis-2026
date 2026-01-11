@@ -21,8 +21,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
     };
 
     return (
-        /* VIBRANT SKY BLUE BACKGROUND */
-        <div className="relative min-h-screen w-full flex items-center justify-center bg-[#0EA5E9] overflow-hidden font-['Inter']">
+        /* SOFT SKY BLUE BACKGROUND - Calmer tone for 2026 UI */
+        <div className="relative min-h-screen w-full flex items-center justify-center bg-[#7DD3FC] overflow-hidden font-['Inter']">
             
             {/* 45 DEGREE DIAGONAL WATERMARK GRID */}
             <div 
@@ -33,15 +33,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                         key={i} 
                         className="flex items-center justify-center animate-live-watermark"
                         style={{ 
-                            // Varied delays so they don't all pulse at the exact same time
                             animationDelay: `${(i % 10) * 0.5}s`,
-                            opacity: 0.3
+                            opacity: 0.6 
                         }}
                     >
-                        {/* THE CREST REMAINS UPRIGHT */}
+                        {/* WHITE CREST WITH OVERLAY BLENDING */}
                         <img 
                             src="/Logo/PNG Crest.png" 
-                            className="w-14 h-14 brightness-200 grayscale transform -rotate-[45deg]" 
+                            className="w-14 h-14 brightness-0 invert opacity-20 mix-blend-overlay transform -rotate-[45deg]" 
                             alt="" 
                         />
                     </div>
@@ -49,7 +48,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
             </div>
 
             {/* LOGIN CARD */}
-            <div className="relative z-10 w-full max-w-md p-10 bg-white shadow-[0_35px_80px_rgba(0,0,0,0.3)] rounded-[2.5rem] border border-white/20">
+            <div className="relative z-10 w-full max-w-md p-10 bg-white shadow-[0_35px_80px_rgba(0,0,0,0.2)] rounded-[2.5rem] border border-white/40">
                 <div className="text-center mb-10">
                     <img 
                         src="/Logo/PNG Crest.png" 
@@ -71,7 +70,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                             type="text" 
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
-                            className="w-full px-5 py-4 rounded-2xl bg-slate-50 border-2 border-slate-100 focus:border-sky-500 focus:bg-white transition-all outline-none text-slate-900 font-bold"
+                            className="w-full px-5 py-4 rounded-2xl bg-slate-50 border-2 border-slate-100 focus:border-sky-400 focus:bg-white transition-all outline-none text-slate-900 font-bold"
                             placeholder="DPM_OP_0001"
                             required
                         />
@@ -82,7 +81,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                             type="password" 
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="w-full px-5 py-4 rounded-2xl bg-slate-50 border-2 border-slate-100 focus:border-sky-500 focus:bg-white transition-all outline-none text-slate-900 font-bold"
+                            className="w-full px-5 py-4 rounded-2xl bg-slate-50 border-2 border-slate-100 focus:border-sky-400 focus:bg-white transition-all outline-none text-slate-900 font-bold"
                             placeholder="••••••••"
                             required
                         />
@@ -103,21 +102,17 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
             <style dangerouslySetInnerHTML={{ __html: `
                 @keyframes floatPulse {
-                    0% { 
-                        opacity: 0.2; 
+                    0%, 100% { 
+                        opacity: 0.3; 
                         transform: translate(0, 0) scale(1); 
                     }
                     50% { 
-                        opacity: 0.45; 
-                        transform: translate(10px, -10px) scale(1.1); 
-                    }
-                    100% { 
-                        opacity: 0.2; 
-                        transform: translate(0, 0) scale(1); 
+                        opacity: 0.7; 
+                        transform: translate(5px, -5px) scale(1.05); 
                     }
                 }
                 .animate-live-watermark {
-                    animation: floatPulse 6s ease-in-out infinite;
+                    animation: floatPulse 8s ease-in-out infinite;
                 }
             `}} />
         </div>
