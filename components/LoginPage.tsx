@@ -24,14 +24,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
         <div className="relative min-h-screen w-full flex items-center justify-center bg-[#F1F5F9] overflow-hidden font-sans" 
              style={{ fontFamily: "'Inter', sans-serif" }}>
             
-            {/* DUAL WATERMARK LAYER - 80% VISIBILITY */}
+            {/* DUAL WATERMARK LAYER - SUBTLE 60% VISIBILITY */}
             <div className="absolute inset-0 flex items-center justify-between px-6 md:px-24 pointer-events-none z-0">
                 
-                {/* LEFT: GOLDEN JUBILEE LOGO (Background-removed effect) */}
+                {/* LEFT: GOLDEN JUBILEE LOGO */}
                 <div className="w-1/3 flex justify-start">
                     <img 
                         src="/Logo/Golden_Jubilee.png" 
-                        className="w-full max-w-[450px] h-auto opacity-80 mix-blend-multiply contrast-125" 
+                        className="w-full max-w-[420px] h-auto opacity-60 mix-blend-multiply contrast-125" 
                         alt="Golden Jubilee" 
                     />
                 </div>
@@ -40,13 +40,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                 <div className="w-1/3 flex justify-end">
                     <img 
                         src="/Logo/PNG Crest.png" 
-                        className="w-full max-w-[450px] h-auto opacity-80 mix-blend-multiply contrast-110" 
+                        className="w-full max-w-[420px] h-auto opacity-60 mix-blend-multiply contrast-110" 
                         alt="PNG Crest" 
                     />
                 </div>
             </div>
 
-            {/* SQUARE LOGIN CARD - High Contrast and Elevated */}
+            {/* SQUARE LOGIN CARD */}
             <div className="relative z-10 w-full max-w-[420px] aspect-square p-10 bg-white shadow-[0_50px_100px_rgba(15,23,42,0.25)] rounded-[3rem] border border-white flex flex-col justify-center">
                 <div className="text-center mb-8">
                     <img 
