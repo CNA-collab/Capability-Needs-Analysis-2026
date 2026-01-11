@@ -10,8 +10,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
-        
-        // Authorization Logic
         if (username.trim() === "DPM_OP_0001" && password.trim() === "CNA-Dev-2026") {
             onLoginSuccess(); 
         } else {
@@ -24,30 +22,30 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
         <div className="relative min-h-screen w-full flex items-center justify-center bg-[#F1F5F9] overflow-hidden font-sans" 
              style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
             
-            {/* DUAL WATERMARK LAYER */}
-            <div className="absolute inset-0 flex items-center justify-between px-12 pointer-events-none">
+            {/* DUAL WATERMARK LAYER - Fixed Filename & Positioning */}
+            <div className="absolute inset-0 flex items-center justify-between px-4 md:px-20 pointer-events-none z-0">
                 
                 {/* LEFT: GOLDEN JUBILEE LOGO */}
-                <div className="w-1/3 flex justify-center">
+                <div className="w-1/2 flex justify-start items-center">
                     <img 
-                        src="/Logo/Golden Jubilee.png" 
-                        className="w-full max-w-[450px] h-auto opacity-90 brightness-110 mix-blend-overlay transform -translate-x-10" 
-                        alt="Golden Jubilee Watermark" 
+                        src="/Logo/Golden_Jubilee.png" 
+                        className="w-full max-w-[400px] md:max-w-[500px] h-auto opacity-90 brightness-105 contrast-110 mix-blend-multiply" 
+                        alt="Golden Jubilee" 
                     />
                 </div>
 
                 {/* RIGHT: PNG NATIONAL CREST */}
-                <div className="w-1/3 flex justify-center">
+                <div className="w-1/2 flex justify-end items-center">
                     <img 
                         src="/Logo/PNG Crest.png" 
-                        className="w-full max-w-[450px] h-auto opacity-90 brightness-110 mix-blend-overlay transform translate-x-10" 
-                        alt="PNG Crest Watermark" 
+                        className="w-full max-w-[400px] md:max-w-[500px] h-auto opacity-90 brightness-105 contrast-110 mix-blend-multiply" 
+                        alt="PNG Crest" 
                     />
                 </div>
             </div>
 
-            {/* LOGIN CARD */}
-            <div className="relative z-10 w-full max-w-md p-10 bg-white/95 backdrop-blur-sm shadow-[0_35px_80px_rgba(0,0,0,0.1)] rounded-[2.5rem] border border-white/60">
+            {/* LOGIN CARD - Elevated with z-10 */}
+            <div className="relative z-10 w-full max-w-md p-10 bg-white shadow-[0_35px_80px_rgba(0,0,0,0.15)] rounded-[2.5rem] border border-white/60">
                 <div className="text-center mb-10">
                     <img 
                         src="/Logo/PNG Crest.png" 
@@ -69,7 +67,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                             type="text" 
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
-                            className="w-full px-5 py-4 rounded-xl bg-slate-50 border-2 border-slate-100 focus:border-red-600 focus:bg-white transition-all outline-none text-slate-900 font-medium placeholder:text-slate-300"
+                            className="w-full px-5 py-4 rounded-xl bg-slate-50 border-2 border-slate-100 focus:border-red-600 focus:bg-white transition-all outline-none text-slate-900 font-medium"
                             placeholder="Enter Username"
                             required
                         />
@@ -80,7 +78,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                             type="password" 
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="w-full px-5 py-4 rounded-xl bg-slate-50 border-2 border-slate-100 focus:border-red-600 focus:bg-white transition-all outline-none text-slate-900 font-medium placeholder:text-slate-300"
+                            className="w-full px-5 py-4 rounded-xl bg-slate-50 border-2 border-slate-100 focus:border-red-600 focus:bg-white transition-all outline-none text-slate-900 font-medium"
                             placeholder="••••••••"
                             required
                         />
