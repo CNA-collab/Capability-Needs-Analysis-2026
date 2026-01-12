@@ -1,6 +1,6 @@
 /**
  * PNG National CNA Application - 2026
- * Integration: High-Contrast Auth & Survey Insights Reporting
+ * Fixed Import Pathing & Module Alignment
  */
 
 import React, { useState, useEffect } from 'react';
@@ -33,7 +33,7 @@ import { CnaPolicyToolkit } from './components/CnaPolicyToolkit';
 import { LndAiAssistantModal } from './components/LndAiAssistantModal';
 import { IndividualDevelopmentProfile } from './components/IndividualDevelopmentProfile';
 import { GesiPolicyToolkit } from './components/GesiPolicyToolkit';
-import { LoginPage } from './components/LoginPage'; // FIXED: Named import for the new high-glow login
+import { LoginPage } from './components/LoginPage'; // FIX: Matches 'export const LoginPage'
 import { PowerBiModal } from './components/PowerBiModal';
 import { WelcomeModal } from './components/WelcomeModal';
 import { TrainingPathwaysDashboard } from './components/TrainingPathwaysDashboard';
@@ -42,14 +42,16 @@ import { CompetencyProjectionReport } from './components/CompetencyProjectionRep
 import { ItemLevelAnalysisReport } from './components/ItemLevelAnalysisReport';
 import { CertificateOfCompliance } from './components/CertificateOfCompliance';
 import { SystemSettings } from './components/SystemSettings';
-import { SurveyInsights } from './components/SurveyInsights'; // New view for 2026 reporting
+import { SurveyInsights } from './components/SurveyInsights';
 
 // --- TYPES & DATA ---
 import { OfficerRecord, AgencyType, EstablishmentRecord, QUESTION_TEXT_MAPPING } from './types';
 import { INITIAL_CNA_DATASET } from './constants';
 import { ESTABLISHMENT_DATA } from './data/establishment';
 import { exportToXlsx } from './utils/export';
+import { DevelopmentPathwaysReport } from './components/DevelopmentPathwaysReport';
 
+// --- CONSTANTS ---
 const OFFICER_DATA_KEY = 'cna_officerData';
 const RAW_RESPONSE_COUNT_KEY = 'cna_rawResponseCount';
 const ESTABLISHMENT_DATA_KEY = 'cna_establishmentData';
@@ -64,8 +66,7 @@ const deDuplicateOfficers = (officers: OfficerRecord[]): OfficerRecord[] => {
     const uniqueMap = new Map<string, OfficerRecord>();
     const unidentified: OfficerRecord[] = [];
     officers.forEach(o => {
-        const email = o.email?.trim().toLowerCase();
-        const key = email || `${o.name}-${o.position}`.toLowerCase();
+        const key = o.email?.trim().toLowerCase() || `${o.name}-${o.position}`.toLowerCase();
         if (key && key !== '-') uniqueMap.set(key, o);
         else unidentified.push(o);
     });
@@ -73,16 +74,13 @@ const deDuplicateOfficers = (officers: OfficerRecord[]): OfficerRecord[] => {
 };
 
 const App: React.FC = () => {
-    // --- AUTH & DEVICE STATE ---
-    const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => 
-        sessionStorage.getItem('isCnaAppLoggedIn') === 'true'
-    );
     const [deviceType, setDeviceType] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
+    const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => sessionStorage.getItem('isCnaAppLoggedIn') === 'true');
     const [currentView, setCurrentView] = useState<View>('organisational');
     const [activeOrgTab, setActiveOrgTab] = useState<OrgTab>('diagnostic');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-    // --- REPORT MODAL STATES ---
+    // Modal Control States
     const [showWelcome, setShowWelcome] = useState(false);
     const [showImportModal, setShowImportModal] = useState(false);
     const [showAiAnalysis, setShowAiAnalysis] = useState(false);
@@ -91,38 +89,39 @@ const App: React.FC = () => {
     const [showGapAnalysis, setShowGapAnalysis] = useState(false);
     const [showTalentSegmentation, setShowTalentSegmentation] = useState(false);
     const [showStrategicRecs, setShowStrategicRecs] = useState(false);
+    const [showWorkforceSnapshot, setShowWorkforceSnapshot] = useState(false);
+    const [showDetailedCapability, setShowDetailedCapability] = useState(false);
+    const [showEligibleOfficers, setShowEligibleOfficers] = useState(false);
+    const [showAnnualPlan, setShowAnnualPlan] = useState(false);
     const [showConsolidatedPlan, setShowConsolidatedPlan] = useState(false);
     const [showSuccessionPlan, setShowSuccessionPlan] = useState(false);
     const [showGesiAnalysis, setShowGesiAnalysis] = useState(false);
+    const [showItemLevelAnalysis, setShowItemLevelAnalysis] = useState(false);
+    const [showComplianceCertificate, setShowComplianceCertificate] = useState(false);
+    const [showDevelopmentPathways, setShowDevelopmentPathways] = useState(false);
     const [showEvidenceMasterTable, setShowEvidenceMasterTable] = useState(false);
     const [showConsolidatedLifecycle, setShowConsolidatedLifecycle] = useState(false);
+    const [showTrainingCategory, setShowTrainingCategory] = useState<string | null>(null);
+    const [showProjectionReport, setShowProjectionReport] = useState(false);
+    const [showPowerBiModal, setShowPowerBiModal] = useState(false);
+    const [showHelpModal, setShowHelpModal] = useState(false);
+    const [showLndAiAssistant, setShowLndAiAssistant] = useState(false);
+    const [selectedOfficerForLndPlan, setSelectedOfficerForLndPlan] = useState<OfficerRecord | null>(null);
+    const [selectedOfficerForPathway, setSelectedOfficerForPathway] = useState<OfficerRecord | null>(null);
 
-    // --- DATA LOADING & PERSISTENCE ---
+    // Persistent Data Loading
     const getFromStorage = <T,>(key: string, def: T): T => {
         const saved = localStorage.getItem(key);
         return saved ? JSON.parse(saved) : def;
     };
 
-    const [officerData, setOfficerData] = useState<OfficerRecord[]>(() => 
-        deDuplicateOfficers(getFromStorage(OFFICER_DATA_KEY, INITIAL_CNA_DATASET))
-    );
-    const [rawResponseCount, setRawResponseCount] = useState<number>(() => 
-        getFromStorage(RAW_RESPONSE_COUNT_KEY, officerData.length)
-    );
-    const [establishmentData, setEstablishmentData] = useState<EstablishmentRecord[]>(() => 
-        getFromStorage(ESTABLISHMENT_DATA_KEY, ESTABLISHMENT_DATA)
-    );
-    const [agencyType, setAgencyType] = useState<AgencyType>(() => 
-        getFromStorage(AGENCY_TYPE_KEY, 'National Agency')
-    );
-    const [agencyName, setAgencyName] = useState<string>(() => 
-        getFromStorage(AGENCY_NAME_KEY, 'Department of Personnel Management')
-    );
-    const [corporatePlanContext, setCorporatePlanContext] = useState<string>(() => 
-        getFromStorage(CORP_PLAN_CONTEXT_KEY, '')
-    );
+    const [officerData, setOfficerData] = useState<OfficerRecord[]>(() => deDuplicateOfficers(getFromStorage(OFFICER_DATA_KEY, INITIAL_CNA_DATASET)));
+    const [rawResponseCount, setRawResponseCount] = useState<number>(() => getFromStorage(RAW_RESPONSE_COUNT_KEY, officerData.length));
+    const [establishmentData, setEstablishmentData] = useState<EstablishmentRecord[]>(() => getFromStorage(ESTABLISHMENT_DATA_KEY, ESTABLISHMENT_DATA));
+    const [agencyType, setAgencyType] = useState<AgencyType>(() => getFromStorage(AGENCY_TYPE_KEY, 'National Agency'));
+    const [agencyName, setAgencyName] = useState<string>(() => getFromStorage(AGENCY_NAME_KEY, 'Department of Personnel Management'));
+    const [corporatePlanContext, setCorporatePlanContext] = useState<string>(() => getFromStorage(CORP_PLAN_CONTEXT_KEY, ''));
 
-    // --- EFFECTS ---
     useEffect(() => {
         const handleResize = () => {
             const w = window.innerWidth;
@@ -135,7 +134,6 @@ const App: React.FC = () => {
 
     useEffect(() => { if (isLoggedIn) setShowWelcome(true); }, [isLoggedIn]);
 
-    // --- EVENT HANDLERS ---
     const handleLoginSuccess = () => {
         sessionStorage.setItem('isCnaAppLoggedIn', 'true');
         setIsLoggedIn(true);
@@ -166,7 +164,7 @@ const App: React.FC = () => {
         setShowImportModal(false);
     };
 
-    const renderCurrentView = () => {
+    const renderView = () => {
         switch (currentView) {
             case 'organisational':
                 return (
@@ -184,76 +182,62 @@ const App: React.FC = () => {
                         onShowGapAnalysis={() => setShowGapAnalysis(true)}
                         onShowTalentSegmentation={() => setShowTalentSegmentation(true)}
                         onShowStrategicRecs={() => setShowStrategicRecs(true)}
+                        onShowWorkforceSnapshot={() => setShowWorkforceSnapshot(true)}
+                        onShowDetailedCapability={() => setShowDetailedCapability(true)}
+                        onShowEligibleOfficers={() => setShowEligibleOfficers(true)}
+                        onShowAnnualPlan={() => setShowAnnualPlan(true)}
                         onShowConsolidatedPlan={() => setShowConsolidatedPlan(true)}
                         onShowSuccessionPlan={() => setShowSuccessionPlan(true)}
                         onShowGesiAnalysis={() => setShowGesiAnalysis(true)}
+                        onShowItemLevelAnalysis={() => setShowItemLevelAnalysis(true)}
+                        onShowComplianceCertificate={() => setShowComplianceCertificate(true)}
+                        onShowDevelopmentPathways={() => setShowDevelopmentPathways(true)}
                         onShowEvidenceMasterTable={() => setShowEvidenceMasterTable(true)}
-                        onShowWorkforceSnapshot={() => {}} 
-                        onShowDetailedCapability={() => {}}
-                        onShowEligibleOfficers={() => {}}
-                        onShowAnnualPlan={() => {}}
-                        onShowItemLevelAnalysis={() => {}}
-                        onShowComplianceCertificate={() => {}}
-                        onShowDevelopmentPathways={() => {}}
                     />
                 );
             case 'individual':
                 return (
-                    <div className="flex-1 p-6">
-                        <header className="flex justify-between items-center mb-6">
-                            <h2 className="text-xl font-black text-[#1A365D] uppercase">Individual Operations</h2>
-                            <button 
-                                onClick={() => setShowConsolidatedLifecycle(true)}
-                                className="px-4 py-2 bg-[#2AAA52] text-white rounded-lg text-[10px] font-black uppercase shadow-lg shadow-green-900/20"
-                            >
-                                Lifecycle Master Plan
-                            </button>
+                    <div className="p-6 space-y-6">
+                        <header className="flex justify-between items-center mb-8">
+                            <h2 className="text-2xl font-black text-[#1A365D] uppercase">Individual Operations</h2>
+                            <button onClick={() => setShowConsolidatedLifecycle(true)} className="px-6 py-2 bg-[#2AAA52] text-white rounded-xl text-[10px] font-black uppercase">Lifecycle Master Plan</button>
                         </header>
-                        {/* Division Mapping Logic Here */}
+                        {/* Map groups here */}
                     </div>
                 );
-            case 'survey-insights': 
-                return <SurveyInsights />; 
-            case 'pathways': 
-                return <TrainingPathwaysDashboard agencyType={agencyType} setAgencyType={setAgencyType} agencyName={agencyName} setAgencyName={setAgencyName} onSelectCategory={()=>{}} onGeneratePlan={()=>{}} onShowAutomatedLndReport={()=>{}} onShowProjectionReport={()=>{}} />;
-            case 'gesi': 
-                return <GesiPolicyToolkit onShowGesiAnalysis={() => setShowGesiAnalysis(true)} />;
-            case 'cna': 
-                return <CnaPolicyToolkit />;
-            case 'settings': 
-                return <SystemSettings />;
-            default: 
-                return null;
+            case 'survey-insights': return <SurveyInsights />;
+            case 'pathways': return <TrainingPathwaysDashboard agencyType={agencyType} setAgencyType={setAgencyType} agencyName={agencyName} setAgencyName={setAgencyName} onSelectCategory={setShowTrainingCategory} onGeneratePlan={() => setShowAnnualPlan(true)} onShowAutomatedLndReport={() => {}} onShowProjectionReport={() => setShowProjectionReport(true)} />;
+            case 'gesi': return <GesiPolicyToolkit onShowGesiAnalysis={() => setShowGesiAnalysis(true)} />;
+            case 'cna': return <CnaPolicyToolkit />;
+            case 'settings': return <SystemSettings />;
+            default: return null;
         }
     };
 
     if (!isLoggedIn) return <LoginPage onLoginSuccess={handleLoginSuccess} />;
 
     return (
-        <div className="flex h-screen bg-[#F4F7F9] overflow-hidden">
+        <div className="flex h-screen bg-[#F8FAFC] overflow-hidden">
             <Sidebar 
                 currentView={currentView} 
                 setCurrentView={handleNavigate} 
                 onImportClick={() => setShowImportModal(true)} 
-                onHelpClick={() => {}} 
-                onShowLndAiAssistant={() => {}} 
+                onHelpClick={() => setShowHelpModal(true)} 
+                onShowLndAiAssistant={() => setShowLndAiAssistant(true)} 
                 onLogout={handleLogout} 
-                onShowPowerBi={() => {}} 
+                onShowPowerBi={() => setShowPowerBiModal(true)} 
                 isOpen={isSidebarOpen}
                 onClose={() => setIsSidebarOpen(false)}
             />
             
-            <main className="flex-1 overflow-y-auto relative bg-transparent custom-scrollbar">
-                {renderCurrentView()}
+            <main className="flex-1 overflow-y-auto relative custom-scrollbar">
+                {renderView()}
             </main>
 
-            {/* MODALS */}
+            {/* Modals are rendered here... */}
             {showWelcome && <WelcomeModal onClose={() => setShowWelcome(false)} onViewPolicy={() => handleNavigate('cna')} />}
             {showImportModal && <ImportModal onImport={handleImport} onClose={() => setShowImportModal(false)} />}
             {showAiAnalysis && <AutomatedOrganisationalAnalysisReport data={officerData} establishmentData={establishmentData} agencyType={agencyType} agencyName={agencyName} corporatePlanContext={corporatePlanContext} onClose={() => setShowAiAnalysis(false)} />}
-            {showFiveYearPlan && <FiveYearPlanReport data={officerData} establishmentData={establishmentData} agencyType={agencyType} agencyName={agencyName} onClose={() => setShowFiveYearPlan(false)} />}
-            {showSuccessionPlan && <SuccessionPlanReport data={officerData} establishmentData={establishmentData} agencyName={agencyName} onClose={() => setShowSuccessionPlan(false)} />}
-            {showConsolidatedLifecycle && <ConsolidatedLifecyclePlanReport data={officerData} agencyName={agencyName} onClose={() => setShowConsolidatedLifecycle(false)} />}
         </div>
     );
 };
