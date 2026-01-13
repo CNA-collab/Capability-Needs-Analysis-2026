@@ -24,16 +24,16 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
         <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-4 font-sans relative overflow-hidden">
             
             {/* FULL SCREEN BACKGROUND WATERMARK */}
-            {/* Optimized for a professional 'Outstanding' look: width increased to cover more screen */}
+            {/* Increased width to cover the screen and opacity for an outstanding look */}
             <div className="absolute inset-0 flex items-center justify-center opacity-[0.12] pointer-events-none select-none">
                 <img 
                     src="/Logo/PNG Crest.png" 
                     alt="" 
-                    className="w-[850px] md:w-[1100px] object-contain transition-all duration-700" 
+                    className="w-[900px] md:w-[1200px] object-contain transition-all duration-1000" 
                 />
             </div>
 
-            <div className="bg-white p-10 rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] w-full max-w-md border border-slate-100 relative z-10 backdrop-blur-sm">
+            <div className="bg-white p-10 rounded-[2.5rem] shadow-[0_25px_70px_-15px_rgba(0,0,0,0.2)] w-full max-w-md border border-slate-100 relative z-10 backdrop-blur-md">
                 
                 {/* NATIONAL COLORS STRIP */}
                 <div className="absolute top-0 left-0 w-full h-2 flex rounded-t-[2.5rem] overflow-hidden">
@@ -42,17 +42,22 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                     <div className="flex-1 bg-[#2AAA52]"></div>
                 </div>
                 
-                {/* Header Logo Section - Golden Jubilee Removed */}
+                {/* Header Logo - Golden Jubilee Removed */}
                 <div className="flex justify-center mt-4 mb-6">
                     <img src="/Logo/PNG Crest.png" alt="PNG Crest" className="h-20 object-contain drop-shadow-md" />
                 </div>
 
+                {/* Updated Branding Title */}
                 <div className="text-center mb-10">
-                    <h1 className="text-3xl font-black text-[#1A365D] uppercase tracking-tighter italic">CNA System 2026</h1>
+                    <h1 className="text-3xl font-black text-[#1A365D] uppercase tracking-tighter italic leading-tight">
+                        CNA System
+                    </h1>
                     <div className="flex items-center justify-center gap-2 mt-1">
-                         <div className="h-[1px] w-8 bg-slate-200"></div>
-                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em]">Official Government Portal</p>
-                         <div className="h-[1px] w-8 bg-slate-200"></div>
+                         <div className="h-[1px] w-6 bg-slate-200"></div>
+                         <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">
+                            Official Government HR Portal
+                         </p>
+                         <div className="h-[1px] w-6 bg-slate-200"></div>
                     </div>
                 </div>
                 
@@ -85,7 +90,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
                     <button 
                         type="submit"
-                        className="group relative w-full h-14 bg-[#1A365D] hover:bg-[#E11D48] text-white rounded-2xl font-black uppercase text-xs transition-all duration-500 shadow-xl hover:shadow-[0_10px_30px_rgba(225,29,72,0.3)] mt-4 active:scale-95"
+                        className="group relative w-full h-14 bg-[#1A365D] hover:bg-[#E11D48] text-white rounded-2xl font-black uppercase text-xs transition-all duration-500 shadow-xl hover:shadow-[0_15px_35px_rgba(225,29,72,0.3)] mt-4 active:scale-95"
                     >
                         <span className="relative z-10 flex items-center justify-center gap-2">
                             Authorize & Enter System
@@ -103,12 +108,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                 </div>
             </div>
 
-            {/* POLICY & SPONSOR LOGOS - Increased visibility (opacity) */}
-            <div className="mt-16 flex flex-wrap justify-center items-center gap-12 opacity-90 hover:opacity-100 transition-opacity duration-300">
-                <img src="/Logo/HRDSP.png" alt="HRDSP" className="h-14 object-contain grayscale hover:grayscale-0 transition-all" />
-                <img src="/Logo/MTDP IV.png" alt="MTDP IV" className="h-14 object-contain grayscale hover:grayscale-0 transition-all" />
-                <img src="/Logo/PNGV50.png" alt="PNG Vision 2050" className="h-16 object-contain grayscale hover:grayscale-0 transition-all" />
-                <img src="/Logo/SDGs.png" alt="SDGs" className="h-14 object-contain grayscale hover:grayscale-0 transition-all" />
+            {/* POLICY & SPONSOR LOGOS - Boosted visibility and size */}
+            <div className="mt-16 flex flex-wrap justify-center items-center gap-12 opacity-100 transition-opacity duration-300">
+                <img src="/Logo/HRDSP.png" alt="HRDSP" className="h-14 object-contain transition-all hover:scale-110" />
+                <img src="/Logo/MTDP IV.png" alt="MTDP IV" className="h-14 object-contain transition-all hover:scale-110" />
+                <img src="/Logo/PNGV50.png" alt="PNG Vision 2050" className="h-16 object-contain transition-all hover:scale-110" />
+                <img src="/Logo/SDGs.png" alt="SDGs" className="h-14 object-contain transition-all hover:scale-110" />
             </div>
         </div>
     );
