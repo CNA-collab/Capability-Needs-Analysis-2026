@@ -7,7 +7,7 @@ interface WelcomeModalProps {
 }
 
 const PNGNationalCrest = () => (
-    <div className="flex flex-col items-center justify-center mb-4">
+    <div className="flex flex-col items-center justify-center mb-4 relative z-10">
         {/* Adjusted size from w-36 to w-28 for better vertical fit */}
         <div className="w-28 h-28 bg-white rounded-full flex items-center justify-center shadow-2xl border-4 border-slate-50 p-2 overflow-hidden ring-4 ring-slate-100/30 relative group">
             <img 
@@ -32,10 +32,19 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({ onClose, onViewPolic
                 onClick={onClose}
             ></div>
             
-            {/* Modal Container: Added max-h-[90vh] and overflow-y-auto to ensure it fits the screen */}
-            <div className="relative w-full max-w-[500px] max-h-[90vh] bg-white/95 border border-white/20 shadow-[0_35px_60px_-15px_rgba(0,0,0,0.3)] rounded-[32px] overflow-y-auto flex flex-col animate-fade-in backdrop-blur-md custom-scrollbar">
+            {/* Modal Container */}
+            <div className="relative w-full max-w-[500px] max-h-[90vh] bg-white/95 border border-white/20 shadow-[0_35px_60px_-15px_rgba(0,0,0,0.3)] rounded-[32px] overflow-hidden flex flex-col animate-fade-in backdrop-blur-md">
                 
-                <div className="p-8 md:p-10 flex flex-col items-center text-center">
+                {/* PARLIAMENT HAUS WATERMARK */}
+                <div className="absolute inset-0 flex items-center justify-center opacity-[0.07] pointer-events-none select-none overflow-hidden">
+                    <img 
+                        src="/Logo/parliament haus.png" 
+                        alt="" 
+                        className="w-[120%] h-auto object-contain transform -rotate-12 translate-y-10" 
+                    />
+                </div>
+
+                <div className="relative z-10 p-8 md:p-10 flex flex-col items-center text-center overflow-y-auto custom-scrollbar">
                     <PNGNationalCrest />
 
                     <h1 className="text-2xl font-black text-slate-900 leading-tight uppercase tracking-tighter mb-1 mt-2">
@@ -50,7 +59,7 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({ onClose, onViewPolic
                             The <strong>National Capability Needs Analysis (CNA)</strong> system is active. Your access level allows for deep scanning, automated L&D plan generation, and board-level reporting.
                         </p>
 
-                        <div className="py-4 px-6 bg-slate-50/80 rounded-2xl border border-slate-100 shadow-inner">
+                        <div className="py-4 px-6 bg-white/50 rounded-2xl border border-slate-100 shadow-inner backdrop-blur-sm">
                             <p className="text-[13px] text-slate-500 leading-relaxed italic font-serif">
                                 "Empowering the public service through data-driven human capital realignment and strategic workforce planning."
                             </p>
@@ -76,8 +85,8 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({ onClose, onViewPolic
                     </div>
                 </div>
 
-                {/* Secure Footer Branding - More compact */}
-                <div className="bg-slate-100/50 p-4 border-t border-slate-200/60 flex justify-center items-center shrink-0">
+                {/* Secure Footer Branding */}
+                <div className="relative z-10 bg-slate-100/50 p-4 border-t border-slate-200/60 flex justify-center items-center shrink-0">
                     <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.4em] flex items-center gap-2">
                         <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
                         Official National Asset • DPM PNG
