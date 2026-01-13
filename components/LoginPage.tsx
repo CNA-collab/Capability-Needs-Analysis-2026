@@ -23,12 +23,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
     return (
         <div className="min-h-screen bg-[#F0F4F8] flex flex-col items-center justify-center p-4 font-sans relative overflow-hidden">
             
-            {/* DUAL BACKGROUND WATERMARKS (45% Visibility) */}
-            <div className="absolute top-[-5%] left-[-5%] opacity-45 pointer-events-none select-none">
-                <img src="/Logo/PNG Crest.png" alt="" className="w-[450px]" />
-            </div>
-            <div className="absolute bottom-[-5%] right-[-5%] opacity-45 pointer-events-none select-none">
-                <img src="/Logo/Golden_Jubilee.png" alt="" className="w-[450px]" />
+            {/* SINGLE CENTERED BACKGROUND WATERMARK */}
+            <div className="absolute inset-0 flex items-center justify-center opacity-[0.08] pointer-events-none select-none">
+                <img src="/Logo/PNG Crest.png" alt="" className="w-[550px] object-contain" />
             </div>
 
             <div className="bg-white p-10 rounded-[2.5rem] shadow-2xl w-full max-w-md border border-slate-100 relative z-10">
@@ -52,7 +49,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                 </div>
                 
                 <form onSubmit={handleLogin} className="space-y-4">
-                    {/* USERNAME FIELD */}
                     <div>
                         <label className="block text-[10px] font-black text-slate-500 uppercase mb-2 ml-1 tracking-widest text-center">Operator ID</label>
                         <input 
@@ -64,7 +60,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                         />
                     </div>
 
-                    {/* PASSWORD FIELD */}
                     <div>
                         <label className="block text-[10px] font-black text-slate-500 uppercase mb-2 ml-1 tracking-widest text-center">Security Access Token</label>
                         <input 
@@ -91,7 +86,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                     </button>
                 </form>
 
-                {/* DPM ADDRESS FOOTER */}
                 <div className="mt-10 text-center border-t border-slate-50 pt-6">
                     <p className="text-[9px] text-slate-400 font-bold uppercase tracking-[0.15em] leading-relaxed">
                         Department of Personnel Management<br/>
@@ -101,7 +95,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                 </div>
             </div>
 
-            {/* POLICY & SPONSOR LOGOS (Full Colors / 100% Opacity) */}
+            {/* POLICY & SPONSOR LOGOS (Maintained exactly as original) */}
             <div className="mt-10 flex flex-wrap justify-center items-center gap-10">
                 <img src="/Logo/HRDSP.png" alt="HRDSP" className="h-12 object-contain" />
                 <img src="/Logo/MTDP IV.png" alt="MTDP IV" className="h-12 object-contain" />
