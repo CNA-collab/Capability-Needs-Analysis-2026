@@ -23,8 +23,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
     return (
         <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-4 font-sans relative overflow-hidden">
             
-            {/* FULL SCREEN BACKGROUND WATERMARK */}
-            {/* Increased width to cover the screen and opacity for an outstanding look */}
+            {/* FULL SCREEN BACKGROUND WATERMARK - Maintained */}
             <div className="absolute inset-0 flex items-center justify-center opacity-[0.12] pointer-events-none select-none">
                 <img 
                     src="/Logo/PNG Crest.png" 
@@ -35,19 +34,19 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
             <div className="bg-white p-10 rounded-[2.5rem] shadow-[0_25px_70px_-15px_rgba(0,0,0,0.2)] w-full max-w-md border border-slate-100 relative z-10 backdrop-blur-md">
                 
-                {/* NATIONAL COLORS STRIP */}
+                {/* NATIONAL COLORS STRIP - Maintained */}
                 <div className="absolute top-0 left-0 w-full h-2 flex rounded-t-[2.5rem] overflow-hidden">
                     <div className="flex-1 bg-[#1A365D]"></div>
                     <div className="flex-1 bg-[#E11D48]"></div>
                     <div className="flex-1 bg-[#2AAA52]"></div>
                 </div>
                 
-                {/* Header Logo - Golden Jubilee Removed */}
+                {/* Header Logo - Maintained */}
                 <div className="flex justify-center mt-4 mb-6">
                     <img src="/Logo/PNG Crest.png" alt="PNG Crest" className="h-20 object-contain drop-shadow-md" />
                 </div>
 
-                {/* Updated Branding Title */}
+                {/* Updated Branding Title: Removed "2026" */}
                 <div className="text-center mb-10">
                     <h1 className="text-3xl font-black text-[#1A365D] uppercase tracking-tighter italic leading-tight">
                         CNA System
@@ -108,7 +107,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                 </div>
             </div>
 
-            {/* POLICY & SPONSOR LOGOS - Boosted visibility and size */}
+            {/* POLICY & SPONSOR LOGOS - Maintained with high visibility */}
             <div className="mt-16 flex flex-wrap justify-center items-center gap-12 opacity-100 transition-opacity duration-300">
                 <img src="/Logo/HRDSP.png" alt="HRDSP" className="h-14 object-contain transition-all hover:scale-110" />
                 <img src="/Logo/MTDP IV.png" alt="MTDP IV" className="h-14 object-contain transition-all hover:scale-110" />
