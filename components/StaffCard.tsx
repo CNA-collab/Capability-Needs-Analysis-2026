@@ -1,7 +1,12 @@
-
 import React from 'react';
 import { OfficerRecord } from '../types';
-import { UserCircleIcon, ExclamationTriangleIcon, SparklesIcon, SpinnerIcon, CalendarDaysIcon, AcademicCapIcon } from './icons';
+import { 
+    UserCircleIcon, 
+    SparklesIcon, 
+    SpinnerIcon, 
+    AcademicCapIcon, 
+    ShieldCheckIcon 
+} from './icons'; 
 import { UrgencyBadge, SPARatingBadge, GradingGroupBadge } from './Badges';
 
 interface StaffCardProps {
@@ -11,26 +16,46 @@ interface StaffCardProps {
   isLoadingSuggestions: boolean;
 }
 
-export const StaffCard: React.FC<StaffCardProps> = ({ officer, onViewSummary, onSuggestTraining, isLoadingSuggestions }) => {
-  const allRatings = officer.capabilityRatings;
+export const StaffCard: React.FC<StaffCardProps> = ({ 
+    officer, 
+    onViewSummary, 
+    onSuggestTraining, 
+    isLoadingSuggestions 
+}) => {
+  const allRatings = officer.capabilityRatings || [];
   const avgCapabilityScore = allRatings.length > 0
     ? allRatings.reduce((sum, r) => sum + r.currentScore, 0) / allRatings.length
     : 0;
 
   const scoreCurrent = avgCapabilityScore;
-  const scoreGap = 10 - scoreCurrent;
-
   const isRetiringSoon = officer.age && officer.age >= 55;
+  
+  /**
+   * 10:20:70 Logic
+   * Officers with a SPA Rating of 4 or 5 are qualified as Internal Mentors.
+   * This leverages internal human resources for the 20% (Social) and 70% (Experiential) 
+   * learning components, reducing reliance on the 10% (Formal/Paid) budget.
+   */
+  const isMentorQualified = parseInt(officer.spaRating || '0') >= 4;
 
   return (
     <div className="bg-[#FFFFFF] rounded-[20px] shadow-[0_8px_20px_rgba(0,0,0,0.04)] border border-slate-100 p-10 flex flex-col transition-all hover:shadow-xl hover:translate-y-[-2px] relative overflow-hidden group">
-        {isRetiringSoon && (
-            <div className="absolute top-4 right-4 animate-pulse">
-                <span className="px-3 py-1 bg-rose-100 text-rose-700 text-[9px] font-black uppercase tracking-widest rounded-full border border-rose-200">Retirement Prep Stage</span>
-            </div>
-        )}
+        {/* Top Badges Layer */}
+        <div className="absolute top-4 right-4 flex gap-2">
+            {isMentorQualified && (
+                <span className="px-3 py-1 bg-emerald-100 text-emerald-700 text-[8px] font-black uppercase tracking-widest rounded-full border border-emerald-200 flex items-center gap-1">
+                    <ShieldCheckIcon className="w-3 h-3" /> Internal Mentor (20% Social)
+                </span>
+            )}
+            {isRetiringSoon && (
+                <span className="px-3 py-1 bg-rose-100 text-rose-700 text-[8px] font-black uppercase tracking-widest rounded-full border border-rose-200 animate-pulse">
+                    Retirement Prep
+                </span>
+            )}
+        </div>
         
         <div className="flex-grow">
+            {/* Header Section */}
             <div className="flex justify-between items-start mb-8 pb-8 border-b border-slate-50">
                 <div className="flex items-start gap-6">
                     <div className="w-16 h-16 bg-[#F8FAFC] rounded-2xl flex items-center justify-center border border-slate-100 group-hover:bg-blue-50 transition-colors">
@@ -38,11 +63,15 @@ export const StaffCard: React.FC<StaffCardProps> = ({ officer, onViewSummary, on
                     </div>
                     <div>
                         <h3 className="text-xl font-black text-[#1A1A40] uppercase tracking-tight">{officer.name}</h3>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">{officer.position} — {officer.grade}</p>
-                        <p className="text-[10px] font-black text-[#1A365D] uppercase mt-2">Lifecycle: <span className="text-blue-500">{officer.lifecycleStage || 'Assessment Track'}</span></p>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+                            {officer.position} — {officer.grade}
+                        </p>
+                        <p className="text-[10px] font-black text-[#1A365D] uppercase mt-2">
+                            Lifecycle: <span className="text-blue-500">{officer.lifecycleStage || 'Assessment Track'}</span>
+                        </p>
                     </div>
                 </div>
-                <div className="flex flex-col items-end gap-3 flex-shrink-0">
+                <div className="flex flex-col items-end gap-3 flex-shrink-0 pt-2">
                     <div className="flex gap-2">
                         <GradingGroupBadge group={officer.gradingGroup} />
                         <UrgencyBadge level={officer.urgency} />
@@ -51,6 +80,7 @@ export const StaffCard: React.FC<StaffCardProps> = ({ officer, onViewSummary, on
                 </div>
             </div>
             
+            {/* Content Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                 <div>
                     <h4 className="text-[11px] font-black uppercase text-[#1A365D] tracking-[0.15em] mb-4 flex items-center gap-2">
@@ -63,23 +93,43 @@ export const StaffCard: React.FC<StaffCardProps> = ({ officer, onViewSummary, on
                              <p className="text-xs font-bold text-slate-700">{officer.jobQualification || 'Credentials Review Needed'}</p>
                         </div>
                         <div className="p-4 bg-[#F8FAFC] rounded-xl border border-slate-100">
-                             <p className="text-[9px] font-black uppercase text-slate-400 mb-2">Skill Gap Intensity</p>
-                             <p className="text-xs font-bold text-rose-600">{officer.technicalCapabilityGaps.length > 0 ? officer.technicalCapabilityGaps.join(', ') : 'Optimal Proficiency'}</p>
+                             <p className="text-[9px] font-black uppercase text-slate-400 mb-2">Technical Skill Gaps</p>
+                             <p className="text-xs font-bold text-rose-600">
+                                {officer.technicalCapabilityGaps && officer.technicalCapabilityGaps.length > 0 
+                                    ? officer.technicalCapabilityGaps.join(', ') 
+                                    : 'Optimal Proficiency'}
+                             </p>
                         </div>
                     </div>
                 </div>
                 
+                {/* 10:20:70 Pathway Section */}
                 <div>
-                    <h4 className="text-[11px] font-black uppercase text-[#1A365D] tracking-[0.15em] mb-4">Intervention Pathway</h4>
+                    <h4 className="text-[11px] font-black uppercase text-[#1A365D] tracking-[0.15em] mb-4">
+                        10:20:70 Intervention Pathway
+                    </h4>
                     <div className="space-y-4">
                         <p className="text-xs text-slate-600 leading-relaxed font-medium">
-                            Based on the <strong>Workforce Lifecycle Model</strong>, this officer is currently on the <strong>{officer.lifecycleStage || 'Growth'} Pathway</strong>. Proposed interventions focus on {isRetiringSoon ? 'Knowledge Transfer' : 'Credential Upgrading'} to align with the National Establishment Register.
+                            {isMentorQualified ? (
+                                <>
+                                    This officer is a <strong>Strategic Resource</strong>. Propose interventions 
+                                    that utilize them as an <strong>Internal Mentor (20%)</strong> to support junior 
+                                    staff while they pursue <strong>Experiential (70%)</strong> leadership tasks.
+                                </>
+                            ) : (
+                                <>
+                                    Proposed interventions focus on <strong>Internal Coaching (20%)</strong> and 
+                                    <strong>On-the-Job (70%)</strong> shadowing to address gaps. Formal external 
+                                    training (10%) should be considered only for critical technical certification.
+                                </>
+                            )}
                         </p>
                     </div>
                 </div>
             </div>
         </div>
       
+        {/* Footer Actions */}
         <div className="mt-10 pt-8 border-t border-slate-50 flex flex-wrap gap-8 justify-between items-center">
             <div className="flex-grow max-w-sm">
                 <div className="flex justify-between items-center mb-3">
@@ -89,7 +139,10 @@ export const StaffCard: React.FC<StaffCardProps> = ({ officer, onViewSummary, on
                     </span>
                 </div>
                 <div className="w-full bg-slate-50 rounded-full h-2 overflow-hidden border border-slate-100 p-0.5">
-                    <div className="bg-[#1A365D] h-full rounded-full transition-all duration-1000 shadow-sm" style={{ width: `${scoreCurrent * 10}%` }}></div>
+                    <div 
+                        className="bg-[#1A365D] h-full rounded-full transition-all duration-1000 shadow-sm" 
+                        style={{ width: `${scoreCurrent * 10}%` }}
+                    ></div>
                 </div>
             </div>
             <div className="flex gap-3">

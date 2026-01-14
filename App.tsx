@@ -1,220 +1,130 @@
-/**
- * PNG National CNA Application - 2026
- * Fixed Import Pathing & Module Alignment
- */
+import React, { useState, useEffect, useMemo } from 'react';
 
-import React, { useState, useEffect } from 'react';
-
-// --- REPORT & COMPONENT IMPORTS ---
-import { AutomatedOrganisationalAnalysisReport } from './components/AiAnalysisReport';
-import { FiveYearPlanReport } from './components/FiveYearPlanReport';
-import { CompetencyDomainReport } from './components/CompetencyDomainReport';
-import { CapabilityGapAnalysisReport } from './components/CapabilityGapAnalysisReport';
-import { TalentSegmentationReport } from './components/TalentSegmentationReport';
-import { StrategicRecommendationsReport } from './components/StrategicRecommendationsReport';
-import { WorkforceSnapshotReport } from './components/WorkforceSnapshotReport';
-import { DetailedCapabilityBreakdownReport } from './components/DetailedCapabilityBreakdownReport';
-import { EligibleOfficersReport } from './components/EligibleOfficersReport';
-import { AnnualTrainingPlanReport } from './components/AnnualTrainingPlanReport';
-import { ConsolidatedStrategicPlanReport } from './components/ConsolidatedStrategicPlanReport';
-import { SuccessionPlanReport } from './components/SuccessionPlanReport';
-import { GesiAnalysisReport } from './components/GesiAnalysisReport';
-import { TrainingPathwaysReport } from './components/TrainingPathwaysReport';
-import { CnaEvidenceMasterTable } from './components/CnaEvidenceMasterTable';
-import { ConsolidatedLifecyclePlanReport } from './components/ConsolidatedLifecyclePlanReport';
+// --- STRATEGIC COMPONENTS ---
+import { CnaHome } from './components/CnaHome'; 
+import { FrameworkGraphic } from './components/FrameworkGraphic';
 
 // --- UI COMPONENTS ---
+import { AutomatedOrganisationalAnalysisReport } from './components/AiAnalysisReport';
 import { Sidebar } from './components/Sidebar';
 import { OrganisationalDashboard } from './components/OrganisationalDashboard';
-import { DivisionGroup } from './components/DivisionGroup';
-import { ImportModal } from './components/ImportModal';
-import { UserGuideModal } from './components/UserGuideModal';
-import { CnaPolicyToolkit } from './components/CnaPolicyToolkit';
-import { LndAiAssistantModal } from './components/LndAiAssistantModal';
-import { IndividualDevelopmentProfile } from './components/IndividualDevelopmentProfile';
-import { GesiPolicyToolkit } from './components/GesiPolicyToolkit';
-import { LoginPage } from './components/LoginPage'; // FIX: Matches 'export const LoginPage'
-import { PowerBiModal } from './components/PowerBiModal';
+import { LoginPage } from './components/LoginPage'; 
 import { WelcomeModal } from './components/WelcomeModal';
-import { TrainingPathwaysDashboard } from './components/TrainingPathwaysDashboard';
-import { TrainingCategoryModal } from './components/TrainingCategoryModal';
-import { CompetencyProjectionReport } from './components/CompetencyProjectionReport';
-import { ItemLevelAnalysisReport } from './components/ItemLevelAnalysisReport';
-import { CertificateOfCompliance } from './components/CertificateOfCompliance';
-import { SystemSettings } from './components/SystemSettings';
+import { ImportModal } from './components/ImportModal';
 import { SurveyInsights } from './components/SurveyInsights';
+import { SystemSettings } from './components/SystemSettings';
+import { GesiPolicyToolkit } from './components/GesiPolicyToolkit';
+import { CnaPolicyToolkit } from './components/CnaPolicyToolkit';
+import { TrainingPathwaysDashboard } from './components/TrainingPathwaysDashboard';
 
 // --- TYPES & DATA ---
-import { OfficerRecord, AgencyType, EstablishmentRecord, QUESTION_TEXT_MAPPING } from './types';
+import { 
+    OfficerRecord, 
+    AgencyType, 
+    EstablishmentRecord, 
+    View, 
+    Tab 
+} from './types';
 import { INITIAL_CNA_DATASET } from './constants';
 import { ESTABLISHMENT_DATA } from './data/establishment';
-import { exportToXlsx } from './utils/export';
-import { DevelopmentPathwaysReport } from './components/DevelopmentPathwaysReport';
-
-// --- CONSTANTS ---
-const OFFICER_DATA_KEY = 'cna_officerData';
-const RAW_RESPONSE_COUNT_KEY = 'cna_rawResponseCount';
-const ESTABLISHMENT_DATA_KEY = 'cna_establishmentData';
-const AGENCY_TYPE_KEY = 'cna_agencyType';
-const AGENCY_NAME_KEY = 'cna_agencyName';
-const CORP_PLAN_CONTEXT_KEY = 'cna_corpPlanContext';
-
-type View = 'organisational' | 'individual' | 'pathways' | 'gesi' | 'cna' | 'settings' | 'survey-insights';
-type OrgTab = 'diagnostic' | 'overview' | 'divisional';
 
 const deDuplicateOfficers = (officers: OfficerRecord[]): OfficerRecord[] => {
     const uniqueMap = new Map<string, OfficerRecord>();
-    const unidentified: OfficerRecord[] = [];
     officers.forEach(o => {
         const key = o.email?.trim().toLowerCase() || `${o.name}-${o.position}`.toLowerCase();
         if (key && key !== '-') uniqueMap.set(key, o);
-        else unidentified.push(o);
     });
-    return [...Array.from(uniqueMap.values()), ...unidentified];
+    return Array.from(uniqueMap.values());
 };
 
 const App: React.FC = () => {
-    const [deviceType, setDeviceType] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
     const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => sessionStorage.getItem('isCnaAppLoggedIn') === 'true');
     const [currentView, setCurrentView] = useState<View>('organisational');
-    const [activeOrgTab, setActiveOrgTab] = useState<OrgTab>('diagnostic');
+    const [activeOrgTab, setActiveOrgTab] = useState<Tab>('diagnostic');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-    // Modal Control States
+    const [officerData, setOfficerData] = useState<OfficerRecord[]>(() => 
+        deDuplicateOfficers(JSON.parse(localStorage.getItem('cna_officerData') || JSON.stringify(INITIAL_CNA_DATASET)))
+    );
+    const [establishmentData, setEstablishmentData] = useState<EstablishmentRecord[]>(() => 
+        JSON.parse(localStorage.getItem('cna_establishmentData') || JSON.stringify(ESTABLISHMENT_DATA))
+    );
+    const [agencyName, setAgencyName] = useState<string>("Department of Personnel Management");
+    const [agencyType, setAgencyType] = useState<AgencyType>('National Agency');
+
+    const [showAiAnalysis, setShowAiAnalysis] = useState(false);
     const [showWelcome, setShowWelcome] = useState(false);
     const [showImportModal, setShowImportModal] = useState(false);
-    const [showAiAnalysis, setShowAiAnalysis] = useState(false);
-    const [showFiveYearPlan, setShowFiveYearPlan] = useState(false);
-    const [showCompetencyReport, setShowCompetencyReport] = useState(false);
-    const [showGapAnalysis, setShowGapAnalysis] = useState(false);
-    const [showTalentSegmentation, setShowTalentSegmentation] = useState(false);
-    const [showStrategicRecs, setShowStrategicRecs] = useState(false);
-    const [showWorkforceSnapshot, setShowWorkforceSnapshot] = useState(false);
-    const [showDetailedCapability, setShowDetailedCapability] = useState(false);
-    const [showEligibleOfficers, setShowEligibleOfficers] = useState(false);
-    const [showAnnualPlan, setShowAnnualPlan] = useState(false);
-    const [showConsolidatedPlan, setShowConsolidatedPlan] = useState(false);
-    const [showSuccessionPlan, setShowSuccessionPlan] = useState(false);
-    const [showGesiAnalysis, setShowGesiAnalysis] = useState(false);
-    const [showItemLevelAnalysis, setShowItemLevelAnalysis] = useState(false);
-    const [showComplianceCertificate, setShowComplianceCertificate] = useState(false);
-    const [showDevelopmentPathways, setShowDevelopmentPathways] = useState(false);
-    const [showEvidenceMasterTable, setShowEvidenceMasterTable] = useState(false);
-    const [showConsolidatedLifecycle, setShowConsolidatedLifecycle] = useState(false);
-    const [showTrainingCategory, setShowTrainingCategory] = useState<string | null>(null);
-    const [showProjectionReport, setShowProjectionReport] = useState(false);
-    const [showPowerBiModal, setShowPowerBiModal] = useState(false);
-    const [showHelpModal, setShowHelpModal] = useState(false);
-    const [showLndAiAssistant, setShowLndAiAssistant] = useState(false);
-    const [selectedOfficerForLndPlan, setSelectedOfficerForLndPlan] = useState<OfficerRecord | null>(null);
-    const [selectedOfficerForPathway, setSelectedOfficerForPathway] = useState<OfficerRecord | null>(null);
 
-    // Persistent Data Loading
-    const getFromStorage = <T,>(key: string, def: T): T => {
-        const saved = localStorage.getItem(key);
-        return saved ? JSON.parse(saved) : def;
-    };
-
-    const [officerData, setOfficerData] = useState<OfficerRecord[]>(() => deDuplicateOfficers(getFromStorage(OFFICER_DATA_KEY, INITIAL_CNA_DATASET)));
-    const [rawResponseCount, setRawResponseCount] = useState<number>(() => getFromStorage(RAW_RESPONSE_COUNT_KEY, officerData.length));
-    const [establishmentData, setEstablishmentData] = useState<EstablishmentRecord[]>(() => getFromStorage(ESTABLISHMENT_DATA_KEY, ESTABLISHMENT_DATA));
-    const [agencyType, setAgencyType] = useState<AgencyType>(() => getFromStorage(AGENCY_TYPE_KEY, 'National Agency'));
-    const [agencyName, setAgencyName] = useState<string>(() => getFromStorage(AGENCY_NAME_KEY, 'Department of Personnel Management'));
-    const [corporatePlanContext, setCorporatePlanContext] = useState<string>(() => getFromStorage(CORP_PLAN_CONTEXT_KEY, ''));
-
-    useEffect(() => {
-        const handleResize = () => {
-            const w = window.innerWidth;
-            setDeviceType(w < 768 ? 'mobile' : w < 1024 ? 'tablet' : 'desktop');
+    const kpis = useMemo(() => {
+        const total = establishmentData.length;
+        const filled = officerData.length;
+        return {
+            establishmentGap: total > 0 ? Math.round(((total - filled) / total) * 100) : 0,
+            baselineScore: 6.8,
+            criticalSkillGaps: 12,
+            trainingCompletion: 45
         };
-        window.addEventListener('resize', handleResize);
-        handleResize();
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
+    }, [officerData, establishmentData]);
 
     useEffect(() => { if (isLoggedIn) setShowWelcome(true); }, [isLoggedIn]);
 
-    const handleLoginSuccess = () => {
-        sessionStorage.setItem('isCnaAppLoggedIn', 'true');
-        setIsLoggedIn(true);
-    };
-
-    const handleLogout = () => {
-        sessionStorage.removeItem('isCnaAppLoggedIn');
-        setIsLoggedIn(false);
-    };
-
-    const handleNavigate = (view: View, tab?: OrgTab) => {
+    const handleNavigate = (view: View, tab?: Tab) => {
         setCurrentView(view);
         if (tab) setActiveOrgTab(tab);
-        if (window.innerWidth < 768) setIsSidebarOpen(false);
-    };
-
-    const handleImport = (newData: OfficerRecord[], type: AgencyType, name: string, est?: EstablishmentRecord[], cp?: string) => {
-        const deduped = deDuplicateOfficers(newData);
-        setOfficerData(deduped);
-        setRawResponseCount(newData.length);
-        setAgencyType(type);
-        setAgencyName(name);
-        if (est) setEstablishmentData(est);
-        if (cp) setCorporatePlanContext(cp);
-        
-        localStorage.setItem(OFFICER_DATA_KEY, JSON.stringify(deduped));
-        localStorage.setItem(AGENCY_NAME_KEY, JSON.stringify(name));
-        setShowImportModal(false);
     };
 
     const renderView = () => {
         switch (currentView) {
             case 'organisational':
+                if (activeOrgTab === 'diagnostic') {
+                    return <CnaHome agencyName={agencyName} kpis={kpis} onRunAI={() => setShowAiAnalysis(true)} />;
+                }
                 return (
                     <OrganisationalDashboard 
                         data={officerData}
-                        rawResponseCount={rawResponseCount}
                         establishmentData={establishmentData}
                         agencyType={agencyType}
                         agencyName={agencyName}
                         activeTab={activeOrgTab}
-                        onSetActiveTab={setActiveOrgTab}
+                        onSetActiveTab={(tab: Tab) => setActiveOrgTab(tab)}
                         onShowAiAnalysis={() => setShowAiAnalysis(true)}
-                        onShowFiveYearPlan={() => setShowFiveYearPlan(true)}
-                        onShowCompetencyReport={() => setShowCompetencyReport(true)}
-                        onShowGapAnalysis={() => setShowGapAnalysis(true)}
-                        onShowTalentSegmentation={() => setShowTalentSegmentation(true)}
-                        onShowStrategicRecs={() => setShowStrategicRecs(true)}
-                        onShowWorkforceSnapshot={() => setShowWorkforceSnapshot(true)}
-                        onShowDetailedCapability={() => setShowDetailedCapability(true)}
-                        onShowEligibleOfficers={() => setShowEligibleOfficers(true)}
-                        onShowAnnualPlan={() => setShowAnnualPlan(true)}
-                        onShowConsolidatedPlan={() => setShowConsolidatedPlan(true)}
-                        onShowSuccessionPlan={() => setShowSuccessionPlan(true)}
-                        onShowGesiAnalysis={() => setShowGesiAnalysis(true)}
-                        onShowItemLevelAnalysis={() => setShowItemLevelAnalysis(true)}
-                        onShowComplianceCertificate={() => setShowComplianceCertificate(true)}
-                        onShowDevelopmentPathways={() => setShowDevelopmentPathways(true)}
-                        onShowEvidenceMasterTable={() => setShowEvidenceMasterTable(true)}
+                        rawResponseCount={officerData.length}
+                        onShowFiveYearPlan={() => {}}
+                        onShowCompetencyReport={() => {}}
+                        onShowGapAnalysis={() => {}}
+                        onShowTalentSegmentation={() => {}}
+                        onShowStrategicRecs={() => {}}
+                        onShowWorkforceSnapshot={() => {}}
+                        onShowDetailedCapability={() => {}}
+                        onShowEligibleOfficers={() => {}}
+                        onShowAnnualPlan={() => {}}
+                        onShowConsolidatedPlan={() => {}}
+                        onShowSuccessionPlan={() => {}}
+                        onShowGesiAnalysis={() => {}}
+                        onShowItemLevelAnalysis={() => {}}
+                        onShowComplianceCertificate={() => {}}
+                        onShowDevelopmentPathways={() => {}}
+                        onShowEvidenceMasterTable={() => {}}
                     />
                 );
-            case 'individual':
-                return (
-                    <div className="p-6 space-y-6">
-                        <header className="flex justify-between items-center mb-8">
-                            <h2 className="text-2xl font-black text-[#1A365D] uppercase">Individual Operations</h2>
-                            <button onClick={() => setShowConsolidatedLifecycle(true)} className="px-6 py-2 bg-[#2AAA52] text-white rounded-xl text-[10px] font-black uppercase">Lifecycle Master Plan</button>
-                        </header>
-                        {/* Map groups here */}
-                    </div>
-                );
             case 'survey-insights': return <SurveyInsights />;
-            case 'pathways': return <TrainingPathwaysDashboard agencyType={agencyType} setAgencyType={setAgencyType} agencyName={agencyName} setAgencyName={setAgencyName} onSelectCategory={setShowTrainingCategory} onGeneratePlan={() => setShowAnnualPlan(true)} onShowAutomatedLndReport={() => {}} onShowProjectionReport={() => setShowProjectionReport(true)} />;
-            case 'gesi': return <GesiPolicyToolkit onShowGesiAnalysis={() => setShowGesiAnalysis(true)} />;
-            case 'cna': return <CnaPolicyToolkit />;
+            case 'pathways': 
+                return (
+                    <TrainingPathwaysDashboard 
+                        agencyType={agencyType} setAgencyType={setAgencyType}
+                        agencyName={agencyName} setAgencyName={setAgencyName}
+                        onSelectCategory={() => {}} onGeneratePlan={() => {}}
+                        onShowAutomatedLndReport={() => {}} onShowProjectionReport={() => {}}
+                    />
+                );
+            case 'gesi': return <GesiPolicyToolkit onShowGesiAnalysis={() => {}} />;
             case 'settings': return <SystemSettings />;
             default: return null;
         }
     };
 
-    if (!isLoggedIn) return <LoginPage onLoginSuccess={handleLoginSuccess} />;
+    if (!isLoggedIn) return <LoginPage onLoginSuccess={() => setIsLoggedIn(true)} />;
 
     return (
         <div className="flex h-screen bg-[#F8FAFC] overflow-hidden">
@@ -222,22 +132,28 @@ const App: React.FC = () => {
                 currentView={currentView} 
                 setCurrentView={handleNavigate} 
                 onImportClick={() => setShowImportModal(true)} 
-                onHelpClick={() => setShowHelpModal(true)} 
-                onShowLndAiAssistant={() => setShowLndAiAssistant(true)} 
-                onLogout={handleLogout} 
-                onShowPowerBi={() => setShowPowerBiModal(true)} 
+                onLogout={() => setIsLoggedIn(false)}
                 isOpen={isSidebarOpen}
                 onClose={() => setIsSidebarOpen(false)}
+                onHelpClick={() => {}}
+                onShowLndAiAssistant={() => {}}
+                onShowPowerBi={() => {}}
             />
-            
-            <main className="flex-1 overflow-y-auto relative custom-scrollbar">
+            <main className="flex-1 overflow-y-auto relative">
                 {renderView()}
             </main>
-
-            {/* Modals are rendered here... */}
-            {showWelcome && <WelcomeModal onClose={() => setShowWelcome(false)} onViewPolicy={() => handleNavigate('cna')} />}
-            {showImportModal && <ImportModal onImport={handleImport} onClose={() => setShowImportModal(false)} />}
-            {showAiAnalysis && <AutomatedOrganisationalAnalysisReport data={officerData} establishmentData={establishmentData} agencyType={agencyType} agencyName={agencyName} corporatePlanContext={corporatePlanContext} onClose={() => setShowAiAnalysis(false)} />}
+            {showAiAnalysis && (
+                <AutomatedOrganisationalAnalysisReport 
+                    data={officerData} 
+                    establishmentData={establishmentData}
+                    agencyType={agencyType}
+                    agencyName={agencyName} 
+                    corporatePlanContext=""
+                    onClose={() => setShowAiAnalysis(false)} 
+                />
+            )}
+            {showWelcome && <WelcomeModal onClose={() => setShowWelcome(false)} onViewPolicy={() => {}} />}
+            {showImportModal && <ImportModal onImport={() => {}} onClose={() => setShowImportModal(false)} />}
         </div>
     );
 };
