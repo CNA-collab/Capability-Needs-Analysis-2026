@@ -1,11 +1,14 @@
-
-import React, { useState, useEffect, useMemo } from 'react';
-import { GoogleGenAI, Type } from "@google/genai";
+import React, { useState, useEffect } from 'react';
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { OfficerRecord, EstablishmentRecord, IndividualLndPlan, AgencyType } from '../types';
-import { AI_AUTOMATED_INDIVIDUAL_LND_PLANS_PROMPT_INSTRUCTIONS } from '../constants';
-import { XIcon, SparklesIcon, IdentificationIcon, UserCircleIcon } from './icons';
-import { ExportMenu } from './ExportMenu';
-import { exportToPdf, exportToDocx, exportToXlsx, ReportData, copyForSheets, exportToCsv } from '../utils/export';
+
+// Icons internalized to prevent import errors
+const XIcon = ({ className }: { className?: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={className}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+);
+const SparklesIcon = ({ className }: { className?: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={className}><path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" /></svg>
+);
 
 interface ReportProps {
     data: OfficerRecord[];
@@ -15,150 +18,85 @@ interface ReportProps {
     onClose: () => void;
 }
 
-// NOTE: A full schema for IndividualLndPlan is very large. This is a simplified version for brevity.
-// A production implementation would have a complete schema matching the type.
-const aiAutomatedIndividualLndPlansSchema = {
-    type: Type.OBJECT,
-    properties: {
-        plans: {
-            type: Type.ARRAY,
-            items: {
-                type: Type.OBJECT,
-                properties: {
-                    id: { type: Type.STRING },
-                    officer: {
-                        type: Type.OBJECT,
-                        properties: {
-                            positionNumber: { type: Type.STRING },
-                            division: { type: Type.STRING },
-                            grade: { type: Type.STRING },
-                            designation: { type: Type.STRING },
-                            occupant: { type: Type.STRING },
-                            status: { type: Type.STRING },
-                        },
-                        required: ["positionNumber", "division", "grade", "designation", "occupant", "status"]
-                    },
-                    age: { type: Type.NUMBER },
-                    performanceCategory: { type: Type.STRING },
-                    promotionPotential: { type: Type.STRING },
-                    // Simplified for this example
-                    trainingNeeds: { type: Type.OBJECT }, 
-                    coreCompetencies: { type: Type.ARRAY, items: { type: Type.OBJECT } },
-                },
-                 required: ["id", "officer", "age", "performanceCategory", "promotionPotential", "trainingNeeds", "coreCompetencies"]
-            }
-        }
-    },
-    required: ["plans"]
-};
-
-export const AutomatedIndividualLndPlansReport: React.FC<ReportProps> = ({ data, establishmentData, agencyName, agencyType, onClose }) => {
+export const AutomatedIndividualLndPlansReport: React.FC<ReportProps> = ({ data, agencyName, onClose }) => {
     const [report, setReport] = useState<IndividualLndPlan[] | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const [selectedPlan, setSelectedPlan] = useState<IndividualLndPlan | null>(null);
 
     useEffect(() => {
-        const generateReport = async () => {
-            if (!process.env.API_KEY) {
-                setError("API key is not configured.");
+        const runAI = async () => {
+            const apiKey = process.env.REACT_APP_GEMINI_API_KEY || "";
+            if (!apiKey) {
+                setError("API Key Missing in .env file");
                 setLoading(false);
                 return;
             }
-            try {
-                /* Correct initialization as per guidelines */
-                const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-                const promptText = `Please analyze the following data to generate an Individual L&D Plan for each officer.\n\nAGENCY CONTEXT: ${agencyName} (${agencyType})\n\nCNA DATA:\n${JSON.stringify(data, null, 2)}\n\nESTABLISHMENT DATA:\n${JSON.stringify(establishmentData, null, 2)}`;
-                
-                /* Updated model to gemini-3-flash-preview as per guidelines */
-                const response = await ai.models.generateContent({
-                    model: 'gemini-3-flash-preview',
-                    contents: promptText,
-                    config: {
-                        systemInstruction: AI_AUTOMATED_INDIVIDUAL_LND_PLANS_PROMPT_INSTRUCTIONS,
-                        responseMimeType: "application/json",
-                        responseSchema: aiAutomatedIndividualLndPlansSchema,
-                    },
-                });
 
-                /* Accessing .text property directly as per guidelines */
-                const jsonStr = response.text?.trim() || '{}';
-                const result = JSON.parse(jsonStr) as { plans: IndividualLndPlan[] };
-                setReport(result.plans);
-            } catch (e) {
-                console.error("AI Automated Individual L&D Plans Error:", e);
-                setError("An error occurred while generating the AI analysis for the individual L&D plans.");
+            try {
+                const genAI = new GoogleGenerativeAI(apiKey);
+                const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+                const prompt = `Generate PNG Government L&D plans using the 10:20:70 model for ${agencyName}.
+                10% Formal, 20% Coaching, 70% Experiential. 
+                Return JSON format with "plans" array. 
+                Data: ${JSON.stringify(data.slice(0, 5))}`;
+
+                const result = await model.generateContent(prompt);
+                const response = await result.response;
+                const parsed = JSON.parse(response.text());
+                setReport(parsed.plans);
+            } catch (err) {
+                setError("AI Generation failed. Check API key and console.");
+                console.error(err);
             } finally {
                 setLoading(false);
             }
         };
-        generateReport();
-    }, [data, establishmentData, agencyName, agencyType]);
-    
-    const renderContent = () => {
-        if (loading) return <div className="text-center p-8"><SparklesIcon className="w-12 h-12 mx-auto animate-pulse text-amber-500" /> <p className="mt-2">Generating individual plans...</p></div>;
-        if (error) return <div className="p-8 bg-red-100 text-red-700 rounded-md text-center"><strong>Error:</strong> {error}</div>;
-        if (!report || report.length === 0) return <div className="text-center p-8">No L&D plans could be generated from the provided data.</div>;
-        
-        return (
-            <div className="bg-white dark:bg-slate-800/50 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-4">
-                <p className="text-sm text-slate-600 dark:text-slate-300 mb-4">The AI has generated {report.length} individual L&D plans. Select an officer to view their detailed plan.</p>
-                <ul className="space-y-2 max-h-[60vh] overflow-y-auto">
-                    {report.map(plan => (
-                        <li key={plan.id}>
-                            <button onClick={() => setSelectedPlan(plan)} className="w-full text-left p-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-md flex items-center gap-3">
-                                <UserCircleIcon className="w-6 h-6 text-slate-500 flex-shrink-0" />
-                                <div>
-                                    <p className="font-semibold">{plan.officer.occupant}</p>
-                                    <p className="text-xs text-slate-500">{plan.officer.designation} - {plan.officer.grade}</p>
-                                </div>
-                            </button>
-                        </li>
-                    ))}
-                </ul>
-            </div>
-        );
-    };
-
-    const renderDetailView = () => {
-        if (!selectedPlan) return null;
-        
-        return (
-            <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center p-4" onClick={() => setSelectedPlan(null)}>
-                <div className="bg-slate-50 dark:bg-slate-900 rounded-lg shadow-xl max-w-4xl w-full max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
-                    <header className="p-4 border-b flex justify-between items-center">
-                        <h3 className="text-lg font-bold">L&D Plan for {selectedPlan.officer.occupant}</h3>
-                        <button onClick={() => setSelectedPlan(null)}><XIcon className="w-6 h-6"/></button>
-                    </header>
-                    <main className="p-4 overflow-y-auto space-y-4 text-sm">
-                        {/* Simplified Detail View */}
-                        <div className="text-sm">
-                           <p><strong>Performance:</strong> {selectedPlan.performanceCategory}</p>
-                           <p><strong>Promotion Potential:</strong> {selectedPlan.promotionPotential}</p>
-                           <p><strong>Total Training Needs Identified:</strong> {Object.values(selectedPlan.trainingNeeds).flat().length}</p>
-                           <h4 className="font-bold mt-2">Core Competencies Focus:</h4>
-                           <ul className="list-disc list-inside">{selectedPlan.coreCompetencies.map((c,i) => <li key={i}>{c.skill} (Target: {c.year})</li>)}</ul>
-                        </div>
-                    </main>
-                </div>
-            </div>
-        );
-    };
+        runAI();
+    }, [data, agencyName]);
 
     return (
-        <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-start p-4 pt-12 animate-fade-in" aria-modal="true" role="dialog">
-            {renderDetailView()}
-            <div className="bg-slate-100 dark:bg-slate-900 rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col">
-                <header className="flex justify-between items-center p-4 border-b border-slate-200 dark:border-slate-700 flex-shrink-0">
-                    <div className="flex items-center gap-3">
-                        <IdentificationIcon className="w-7 h-7 text-amber-600" />
-                        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">AI-Generated Individual L&D Plans</h1>
-                    </div>
-                    <button onClick={onClose} className="p-1 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700" aria-label="Close report">
-                        <XIcon className="w-6 h-6 text-slate-600 dark:text-slate-300" />
-                    </button>
+        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex justify-center p-4">
+            <div className="bg-white w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[90vh]">
+                <header className="p-6 bg-[#1A365D] text-white flex justify-between items-center">
+                    <h2 className="text-xl font-black uppercase tracking-tight">AI 10:20:70 Learning Plans</h2>
+                    <button onClick={onClose} className="hover:bg-white/10 p-2 rounded-full"><XIcon className="w-6 h-6" /></button>
                 </header>
-                <main className="overflow-y-auto p-6">{renderContent()}</main>
+                
+                <div className="flex-1 overflow-y-auto p-8">
+                    {loading ? (
+                        <div className="flex flex-col items-center justify-center h-full">
+                            <SparklesIcon className="w-12 h-12 text-blue-500 animate-spin mb-4" />
+                            <p className="font-bold text-slate-400 uppercase text-xs">Mapping HR Resources...</p>
+                        </div>
+                    ) : error ? (
+                        <div className="p-6 bg-red-50 text-red-600 rounded-xl border border-red-100 font-bold text-center">{error}</div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {report?.map((plan, idx) => (
+                                <div key={idx} className="p-5 border border-slate-200 rounded-2xl bg-slate-50">
+                                    <h3 className="font-black text-[#1A365D] uppercase text-sm mb-1">{plan.officer.occupant}</h3>
+                                    <p className="text-[10px] font-bold text-slate-500 uppercase mb-4">{plan.officer.designation}</p>
+                                    
+                                    <div className="space-y-3">
+                                        <div className="p-3 bg-blue-100/50 rounded-lg">
+                                            <p className="text-[9px] font-black text-blue-700 uppercase">70% Experiential</p>
+                                            <p className="text-xs font-medium">{plan.trainingNeeds.experiential[0]}</p>
+                                        </div>
+                                        <div className="p-3 bg-emerald-100/50 rounded-lg">
+                                            <p className="text-[9px] font-black text-emerald-700 uppercase">20% Social (Coaching)</p>
+                                            <p className="text-xs font-medium">{plan.trainingNeeds.social[0]}</p>
+                                        </div>
+                                        <div className="p-3 bg-rose-100/50 rounded-lg">
+                                            <p className="text-[9px] font-black text-rose-700 uppercase">10% Formal</p>
+                                            <p className="text-xs font-medium">{plan.trainingNeeds.formal[0]}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );

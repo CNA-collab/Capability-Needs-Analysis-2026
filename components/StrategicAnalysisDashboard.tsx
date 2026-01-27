@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { OfficerRecord, EstablishmentRecord, GradingGroup } from '../types';
+import { OfficerRecord, EstablishmentRecord } from '../types';
 import { XIcon, ChartBarSquareIcon, SparklesIcon, UsersIcon, AcademicCapIcon } from './icons';
 import { ChartComponent } from './charts';
 
@@ -44,7 +44,7 @@ export const StrategicAnalysisDashboard: React.FC<DashboardProps> = ({ cnaData, 
             const group = o.gradingGroup || 'Other';
             acc[group] = (acc[group] || 0) + 1;
             return acc;
-        }, {} as Record<GradingGroup | 'Other', number>);
+        }, {} as Record<string, number>);
 
         const avgExperience = cnaData.reduce((sum, o) => sum + (o.yearsOfExperience || 0), 0) / (cnaData.filter(o => o.yearsOfExperience).length || 1);
 

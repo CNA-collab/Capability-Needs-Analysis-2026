@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { GoogleGenAI, Type } from "@google/genai";
-import { OfficerRecord, EstablishmentRecord, AgencyType, QUESTION_TEXT_MAPPING, StructuredCorporatePlan } from '../types';
-import { XIcon, SparklesIcon, DocumentChartBarIcon, ArrowDownTrayIcon, BookOpenIcon } from './icons';
+import { OfficerRecord, EstablishmentRecord, AgencyType } from '../types';
+import { XIcon, SparklesIcon, ArrowDownTrayIcon } from './icons';
 import { ExportMenu } from './ExportMenu';
 import { exportToPdf, exportToDocx, exportToXlsx, ReportData } from '../utils/export';
 import { DataAggregator } from '../services/DataAggregator';
@@ -52,7 +51,7 @@ const ReportSection: React.FC<{ title: string; children: React.ReactNode; formal
     </div>
 );
 
-export const AutomatedOrganisationalAnalysisReport: React.FC<ReportProps> = ({ data, establishmentData, agencyType, agencyName, corporatePlanContext, onClose }) => {
+export const AutomatedOrganizationalAnalysisReport: React.FC<ReportProps> = ({ data, establishmentData, agencyType, agencyName, corporatePlanContext, onClose }) => {
     const [aiContent, setAiContent] = useState<AiGeneratedSections | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
@@ -164,7 +163,7 @@ export const AutomatedOrganisationalAnalysisReport: React.FC<ReportProps> = ({ d
             <div className="bg-[#F3F4F6] rounded-2xl shadow-2xl max-w-5xl w-full flex flex-col mb-12">
                 <header className="flex justify-between items-center p-6 border-b border-slate-200 flex-shrink-0 bg-white rounded-t-2xl">
                     <div className="flex items-center gap-3">
-                        <DocumentChartBarIcon className="w-8 h-8 text-blue-600" />
+                        <SparklesIcon className="w-8 h-8 text-blue-600" />
                         <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tighter">Strategic Analysis Report</h1>
                     </div>
                     <div className="flex items-center gap-4">
@@ -172,7 +171,7 @@ export const AutomatedOrganisationalAnalysisReport: React.FC<ReportProps> = ({ d
                             onClick={() => setShowMobileReadMode(true)}
                             className="md:hidden flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-[10px] font-black uppercase tracking-widest"
                         >
-                            <BookOpenIcon className="w-4 h-4" /> Read Mode
+                            Read Mode
                         </button>
                         <ExportMenu onExport={handleExport} />
                         <button onClick={onClose} className="p-2 rounded-xl bg-slate-100 hover:bg-rose-600 hover:text-white transition-all"><XIcon className="w-6 h-6" /></button>
@@ -220,3 +219,15 @@ export const AutomatedOrganisationalAnalysisReport: React.FC<ReportProps> = ({ d
         </div>
     );
 };
+
+export interface StructuredCorporatePlan {
+    strategic_goals: {
+        vision: string;
+        mission: string;
+        objectives: string[];
+    };
+    financial_context: string;
+    risk_assessment: string;
+    personnel_establishment: string;
+    training_needs: string;
+}

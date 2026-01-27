@@ -1,201 +1,82 @@
+import React from 'react';
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { GoogleGenAI, Type } from "@google/genai";
-import { OfficerRecord, IndividualLndPlanRecord, AgencyType } from '../types';
-import { AI_AUTOMATED_INDIVIDUAL_PLANS_V2_PROMPT_INSTRUCTIONS } from '../constants';
-import { XIcon, SparklesIcon, IdentificationIcon, UserCircleIcon } from './icons';
-import { ExportMenu } from './ExportMenu';
-import { exportToPdf, exportToDocx, exportToXlsx, ReportData, copyForSheets, exportToCsv } from '../utils/export';
-
-interface ReportProps {
-    data: OfficerRecord[];
-    agencyName: string;
-    agencyType: AgencyType;
-    onClose: () => void;
+interface IconProps {
+    className?: string;
 }
 
-const lndTrainingNeedSchema = {
-    type: Type.OBJECT,
-    properties: {
-        perceivedArea: { type: Type.STRING },
-        jobRequirement: { type: Type.STRING },
-        proposedCourse: { type: Type.STRING },
-        institution: { type: Type.STRING },
-        fundingSource: { type: Type.STRING },
-        yearOfCommencement: { type: Type.NUMBER },
-        remarks: { type: Type.STRING },
-    },
-     required: ["perceivedArea", "jobRequirement", "proposedCourse", "institution", "fundingSource", "yearOfCommencement", "remarks"]
-};
+// NAVIGATION & UI ICONS
+export const XIcon: React.FC<IconProps> = ({ className }) => (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+    </svg>
+);
 
-const aiAutomatedIndividualPlansV2Schema = {
-    type: Type.OBJECT,
-    properties: {
-        plans: {
-            type: Type.ARRAY,
-            items: {
-                type: Type.OBJECT,
-                properties: {
-                    organizationName: { type: Type.STRING },
-                    division: { type: Type.STRING },
-                    officerName: { type: Type.STRING },
-                    positionNumber: { type: Type.STRING },
-                    designation: { type: Type.STRING },
-                    dateOfBirth: { type: Type.STRING },
-                    officerStatus: { type: Type.STRING },
-                    highestQualification: { type: Type.STRING },
-                    commencementDate: { type: Type.STRING },
-                    gradeLevel: { type: Type.STRING },
-                    trainingNeeds: {
-                        type: Type.OBJECT,
-                        properties: {
-                            longTerm: { type: Type.ARRAY, items: lndTrainingNeedSchema },
-                            shortTerm: { type: Type.ARRAY, items: lndTrainingNeedSchema },
-                        },
-                        required: ["longTerm", "shortTerm"]
-                    },
-                    knowledgeChecklist: {
-                        type: Type.OBJECT,
-                        properties: {
-                            'Project Management': { type: Type.BOOLEAN },
-                            'GESI Skills': { type: Type.BOOLEAN },
-                            'Legislative Knowledge (Cocoa Act, PSMA, General Orders, PFMA, PNG Constitution)': { type: Type.BOOLEAN },
-                            'Government Policy Familiarity': { type: Type.BOOLEAN },
-                            'International Trade & Certification': { type: Type.BOOLEAN },
-                            'Sustainability & Compliance': { type: Type.BOOLEAN },
-                        },
-                    },
-                    otherKnowledge: { type: Type.ARRAY, items: { type: Type.STRING } },
-                    ageGroup: { type: Type.STRING },
-                    performanceLevel: { type: Type.STRING },
-                    promotionPotential: { type: Type.STRING },
-                },
-                 required: ["organizationName", "division", "officerName", "positionNumber", "designation", "dateOfBirth", "officerStatus", "highestQualification", "commencementDate", "gradeLevel", "trainingNeeds", "knowledgeChecklist", "otherKnowledge", "ageGroup", "performanceLevel", "promotionPotential"]
-            }
-        }
-    },
-    required: ["plans"]
-};
+export const ChevronDownIcon: React.FC<IconProps> = ({ className }) => (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+    </svg>
+);
 
-export const AutomatedIndividualPlansReportV2: React.FC<ReportProps> = ({ data, agencyName, agencyType, onClose }) => {
-    const [report, setReport] = useState<IndividualLndPlanRecord[] | null>(null);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string | null>(null);
-    const [selectedPlan, setSelectedPlan] = useState<IndividualLndPlanRecord | null>(null);
+// AI & ANALYTICS ICONS
+export const SparklesIcon: React.FC<IconProps> = ({ className }) => (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-7.714 2.143L11 21l-2.286-6.857L1 12l7.714-2.143L11 3z" />
+    </svg>
+);
 
-    useEffect(() => {
-        const generateReport = async () => {
-            if (!process.env.API_KEY) {
-                setError("API key is not configured.");
-                setLoading(false);
-                return;
-            }
-            try {
-                /* Correct initialization as per guidelines */
-                const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-                const promptText = `Please analyze the following data to generate an Individual L&D Plan (V2 format) for each officer.\n\nAGENCY CONTEXT: ${agencyName} (${agencyType})\n\nCNA DATA:\n${JSON.stringify(data, null, 2)}`;
-                
-                /* Updated model to gemini-3-flash-preview as per guidelines */
-                const response = await ai.models.generateContent({
-                    model: 'gemini-3-flash-preview',
-                    contents: promptText,
-                    config: {
-                        systemInstruction: AI_AUTOMATED_INDIVIDUAL_PLANS_V2_PROMPT_INSTRUCTIONS,
-                        responseMimeType: "application/json",
-                        responseSchema: aiAutomatedIndividualPlansV2Schema,
-                    },
-                });
+export const ChartBarSquareIcon: React.FC<IconProps> = ({ className }) => (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
+    </svg>
+);
 
-                /* Accessing .text property directly as per guidelines */
-                const jsonStr = response.text?.trim() || '{}';
-                const result = JSON.parse(jsonStr) as { plans: Omit<IndividualLndPlanRecord, 'id'>[] };
-                const plansWithIds = result.plans.map(p => ({ ...p, id: p.positionNumber || crypto.randomUUID() }));
-                setReport(plansWithIds as IndividualLndPlanRecord[]);
-            } catch (e) {
-                console.error("AI Automated Individual L&D Plans V2 Error:", e);
-                setError("An error occurred while generating the AI analysis for the individual L&D plans (V2).");
-            } finally {
-                setLoading(false);
-            }
-        };
-        generateReport();
-    }, [data, agencyName, agencyType]);
-    
-    const renderContent = () => {
-        if (loading) return <div className="text-center p-8"><SparklesIcon className="w-12 h-12 mx-auto animate-pulse text-amber-500" /> <p className="mt-2">Generating individual plans (V2)...</p></div>;
-        if (error) return <div className="p-8 bg-red-100 text-red-700 rounded-md text-center"><strong>Error:</strong> {error}</div>;
-        if (!report || report.length === 0) return <div className="text-center p-8">No L&D plans could be generated from the provided data.</div>;
-        
-        return (
-            <div className="bg-white dark:bg-slate-800/50 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-4">
-                <p className="text-sm text-slate-600 dark:text-slate-300 mb-4">The AI has generated {report.length} individual L&D plans (V2 Format). Select an officer to view their detailed plan.</p>
-                <ul className="space-y-2 max-h-[60vh] overflow-y-auto">
-                    {report.map(plan => (
-                        <li key={plan.id}>
-                            <button onClick={() => setSelectedPlan(plan)} className="w-full text-left p-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-md flex items-center gap-3">
-                                <UserCircleIcon className="w-6 h-6 text-slate-500 flex-shrink-0" />
-                                <div>
-                                    <p className="font-semibold">{plan.officerName}</p>
-                                    <p className="text-xs text-slate-500">{plan.designation} - {plan.gradeLevel}</p>
-                                </div>
-                            </button>
-                        </li>
-                    ))}
-                </ul>
-            </div>
-        );
-    };
+// USER & TEAM ICONS
+export const UserCircleIcon: React.FC<IconProps> = ({ className }) => (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+);
 
-    const renderDetailView = () => {
-        if (!selectedPlan) return null;
-        
-        const allNeeds = [
-            ...(selectedPlan.trainingNeeds.longTerm || []).map(n => ({...n, type: 'Long-Term'})),
-            ...(selectedPlan.trainingNeeds.shortTerm || []).map(n => ({...n, type: 'Short-Term'}))
-        ];
+export const UsersIcon: React.FC<IconProps> = ({ className }) => (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+    </svg>
+);
 
-        return (
-            <div className="fixed inset-0 bg-black/60 z-[60] flex justify-center items-center p-4" onClick={() => setSelectedPlan(null)}>
-                <div className="bg-slate-50 dark:bg-slate-900 rounded-lg shadow-xl max-w-4xl w-full max-h-[85vh] flex flex-col" onClick={e => e.stopPropagation()}>
-                    <header className="p-4 border-b flex justify-between items-center">
-                        <h3 className="text-lg font-bold">L&D Plan (V2): {selectedPlan.officerName}</h3>
-                        <button onClick={() => setSelectedPlan(null)}><XIcon className="w-6 h-6"/></button>
-                    </header>
-                    <main className="p-4 overflow-y-auto space-y-4 text-sm">
-                        {/* Simplified Detail View */}
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-3 bg-slate-200 dark:bg-slate-800 rounded-md">
-                            <div><strong>Position:</strong> {selectedPlan.designation} ({selectedPlan.positionNumber})</div>
-                            <div><strong>Status:</strong> {selectedPlan.officerStatus}</div>
-                            <div><strong>Highest Qualification:</strong> {selectedPlan.highestQualification}</div>
-                            <div><strong>Age Group:</strong> {selectedPlan.ageGroup}</div>
-                            <div><strong>Performance:</strong> {selectedPlan.performanceLevel}</div>
-                            <div><strong>Promotion Potential:</strong> {selectedPlan.promotionPotential}</div>
-                        </div>
-                        <div>
-                            <h4 className="font-bold mb-2">Training Needs ({allNeeds.length})</h4>
-                            <div className="overflow-x-auto border rounded-md">
-                                <table className="w-full text-xs">
-                                    <thead className="bg-slate-200 dark:bg-slate-800"><tr>{["Type", "Course", "Justification", "Year", "Funding"].map(h=><th key={h} className="p-2 text-left">{h}</th>)}</tr></thead>
-                                    <tbody>{allNeeds.map((n, i) => <tr key={i} className="border-t"><td className="p-2">{n.type}</td><td className="p-2 font-semibold">{n.proposedCourse}</td><td className="p-2">{n.jobRequirement}</td><td className="p-2">{n.yearOfCommencement}</td><td className="p-2">{n.fundingSource}</td></tr>)}</tbody>
-                                </table>
-                            </div>
-                        </div>
-                        <div>
-                            <h4 className="font-bold mb-2">Knowledge Competencies</h4>
-                            <ul className="list-disc list-inside">
-                               {Object.entries(selectedPlan.knowledgeChecklist).filter(([,v])=>v).map(([k]) => <li key={k}>{k}</li>)}
-                               {selectedPlan.otherKnowledge.map(k => <li key={k}><em>{k} (Other)</em></li>)}
-                            </ul>
-                        </div>
-                    </main>
-                </div>
-            </div>
-        );
-    };
+export const AcademicCapIcon: React.FC<IconProps> = ({ className }) => (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.26 10.147L12 14.404l7.74-4.257m0 0L12 5.89l-7.74 4.257m0 0L12 14.404l7.74-4.257M12 14.404v6.75M4.26 10.147v4.536L12 19.125l7.74-4.442v-4.536" />
+    </svg>
+);
 
-    return (
-        <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-start p-4 pt-12 animate-fade-in" aria-modal="true" role="dialog">
-            {renderDetailView()}
-            <div className="bg-slate-100 dark:bg-slate-900 rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col">
-                <header className="flex justify-between items-center p-4 border-b border-slate-200 dark:border-slate-700 flex-shrink-0">
-                    <div className="flex items-center gap
+// EXPORT & DATA ICONS
+export const DocumentIcon: React.FC<IconProps> = ({ className }) => (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+    </svg>
+);
+
+export const TableCellsIcon: React.FC<IconProps> = ({ className }) => (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+    </svg>
+);
+
+export const ClipboardIcon: React.FC<IconProps> = ({ className }) => (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+    </svg>
+);
+
+export const ArrowDownTrayIcon: React.FC<IconProps> = ({ className }) => (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+    </svg>
+);
+
+export const SpinnerIcon: React.FC<IconProps> = ({ className }) => (
+    <svg className={`animate-spin ${className}`} fill="none" viewBox="0 0 24 24">
+        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    </svg>
+);

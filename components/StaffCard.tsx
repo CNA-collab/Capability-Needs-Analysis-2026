@@ -4,8 +4,7 @@ import {
     UserCircleIcon, 
     SparklesIcon, 
     SpinnerIcon, 
-    AcademicCapIcon, 
-    ShieldCheckIcon 
+    AcademicCapIcon
 } from './icons'; 
 import { UrgencyBadge, SPARatingBadge, GradingGroupBadge } from './Badges';
 
@@ -44,7 +43,7 @@ export const StaffCard: React.FC<StaffCardProps> = ({
         <div className="absolute top-4 right-4 flex gap-2">
             {isMentorQualified && (
                 <span className="px-3 py-1 bg-emerald-100 text-emerald-700 text-[8px] font-black uppercase tracking-widest rounded-full border border-emerald-200 flex items-center gap-1">
-                    <ShieldCheckIcon className="w-3 h-3" /> Internal Mentor (20% Social)
+                    ✓ Internal Mentor (20% Social)
                 </span>
             )}
             {isRetiringSoon && (

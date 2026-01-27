@@ -3,7 +3,7 @@ import {
     DocumentIcon, 
     TableCellsIcon, 
     ClipboardIcon, 
-    PrinterIcon, 
+    SpinnerIcon, 
     ChevronDownIcon,
     ArrowDownTrayIcon 
 } from './icons';
@@ -69,7 +69,7 @@ export const ExportMenu: React.FC<ExportMenuProps> = ({ onExport }) => {
                             onClick={() => handleExport('print')} 
                             className="w-full group flex items-center px-4 py-3 text-sm text-slate-700 hover:bg-slate-900 hover:text-white transition-colors"
                         >
-                            <PrinterIcon className="mr-3 h-5 w-5 text-slate-500 group-hover:text-white" /> 
+                            <SpinnerIcon className="mr-3 h-5 w-5 text-slate-500 group-hover:text-white" /> 
                             <span className="font-bold">Direct Print / Save</span>
                         </button>
 
