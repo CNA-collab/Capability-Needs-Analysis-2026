@@ -2,8 +2,47 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { GoogleSheetsService } from '../services/GoogleSheetsService';
 import { transformSheetDataForCharts } from '../utils/chartUtils';
 import { ChartComponent } from './charts';
-import { OfficerRecord } from '../types';
+import { OfficerRecord, EstablishmentRecord, StructuredCorporatePlan } from '../types';
 import { AcademicCapIcon, UsersIcon, ChartBarSquareIcon } from './icons';
+
+// Helper functions for cross-referencing data sources
+const calculateStaffingVsObjectives = (establishmentData: EstablishmentRecord[], corporatePlanData: StructuredCorporatePlan): number => {
+    // Calculate alignment between current staffing and strategic objectives
+    const totalPositions = establishmentData.length;
+    const filledPositions = establishmentData.filter(e => e.occupant !== 'VACANT').length;
+    const strategicObjectives = corporatePlanData?.strategic_goals?.objectives?.length || 0;
+
+    if (totalPositions === 0 || strategicObjectives === 0) return 0;
+
+    // Simple alignment ratio: filled positions vs strategic objectives coverage
+    return Math.min(100, Math.round((filledPositions / totalPositions) * (strategicObjectives / 5) * 100));
+};
+
+const calculateTrainingVsGaps = (surveyData: Record<string, unknown>[], corporatePlanData: StructuredCorporatePlan): number => {
+    // Calculate how well training needs in corporate plan align with survey gaps
+    const trainingNeeds = corporatePlanData?.training_needs || '';
+    const surveyGaps = surveyData.length; // Simplified: number of survey responses indicating gaps
+
+    if (surveyGaps === 0) return 0;
+
+    // Simple coverage ratio: training needs coverage vs identified gaps
+    const coverageRatio = trainingNeeds.length > 0 ? Math.min(100, (trainingNeeds.length / surveyGaps) * 100) : 0;
+    return Math.round(coverageRatio);
+};
+
+const calculateObjectivesVsTraining = (corporatePlanData: StructuredCorporatePlan, establishmentData: EstablishmentRecord[], surveyData: Record<string, unknown>[]): number => {
+    // Calculate how well strategic objectives are supported by training delivery
+    const objectives = corporatePlanData?.strategic_goals?.objectives || [];
+    const trainingNeeds = corporatePlanData?.training_needs || '';
+    const totalStaff = establishmentData.length;
+    const surveyResponses = surveyData.length;
+
+    if (objectives.length === 0 || totalStaff === 0) return 0;
+
+    // Simple support ratio: objectives supported by training vs total objectives
+    const supportRatio = trainingNeeds.length > 0 ? Math.min(100, (objectives.length / 5) * (surveyResponses / totalStaff) * 100) : 0;
+    return Math.round(supportRatio);
+};
 
 interface SurveyInsightsProps {
     officers: OfficerRecord[];
@@ -16,9 +55,11 @@ interface SurveyInsightsProps {
             trainingCompletion: number;
         };
     };
+    corporatePlanData?: StructuredCorporatePlan;
+    establishmentData?: EstablishmentRecord[];
 }
 
-export const SurveyInsights: React.FC<SurveyInsightsProps> = ({ officers, baselineData }) => {
+export const SurveyInsights: React.FC<SurveyInsightsProps> = ({ officers, baselineData, corporatePlanData, establishmentData }) => {
     const [sheetData, setSheetData] = useState<Record<string, unknown>[]>([]);
     const [columns, setColumns] = useState<string[]>([]);
     const [selectedColumn, setSelectedColumn] = useState<string>('');
@@ -29,7 +70,8 @@ export const SurveyInsights: React.FC<SurveyInsightsProps> = ({ officers, baseli
     // Clean State Management - Prevent Flickering
     const reconciledData = useMemo(() => {
         // Three Pillars Reconciliation
-        const establishmentData = officers || [];
+        const officerData = officers || [];
+        const establishmentRecords = establishmentData || [];
         const surveyData = sheetData || [];
         const corporatePlan = baselineData?.kpis || {
             establishmentGap: 0,
@@ -42,20 +84,32 @@ export const SurveyInsights: React.FC<SurveyInsightsProps> = ({ officers, baseli
         const capabilityGapIndex = corporatePlan.baselineScore && corporatePlan.establishmentGap ?
             ((corporatePlan.establishmentGap / 100) * 10).toFixed(1) : '0.0';
 
-        const successionBenchStrength = establishmentData.length > 0 && corporatePlan.criticalSkillGaps ?
-            ((corporatePlan.criticalSkillGaps / establishmentData.length) * 100).toFixed(1) : '0.0';
+        const successionBenchStrength = officerData.length > 0 && corporatePlan.criticalSkillGaps ?
+            ((corporatePlan.criticalSkillGaps / officerData.length) * 100).toFixed(1) : '0.0';
+
+        // Multi-dimensional misalignment analysis
+        const misalignments = {
+            staffingVsObjectives: establishmentRecords && corporatePlanData ?
+                calculateStaffingVsObjectives(establishmentRecords, corporatePlanData) : 0,
+            trainingVsGaps: surveyData && corporatePlanData ?
+                calculateTrainingVsGaps(surveyData, corporatePlanData) : 0,
+            objectivesVsTraining: corporatePlanData && establishmentRecords && surveyData ?
+                calculateObjectivesVsTraining(corporatePlanData, establishmentRecords, surveyData) : 0
+        };
 
         return {
-            establishmentData,
+            officerData,
+            establishmentRecords,
             surveyData,
             corporatePlan,
             capabilityGapIndex,
             successionBenchStrength,
-            totalStaff: establishmentData.length,
-            skillDiversification: establishmentData.length > 0 ?
-                new Set(establishmentData.map(o => o.grade)).size : 0
+            totalStaff: officerData.length,
+            skillDiversification: officerData.length > 0 ?
+                new Set(officerData.map(o => o.grade)).size : 0,
+            misalignments
         };
-    }, [officers, sheetData, baselineData]);
+    }, [officers, sheetData, baselineData, corporatePlanData, establishmentData]);
 
     // 10:20:70 Learning Framework Logic
     const learningFramework = useMemo(() => {
@@ -172,14 +226,36 @@ export const SurveyInsights: React.FC<SurveyInsightsProps> = ({ officers, baseli
                         <p className="text-xs text-slate-400 mt-1">Critical Roles Coverage</p>
                     </div>
                     <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 text-center">
-                        <p className="text-xs font-black text-slate-500 uppercase mb-2">Skill Diversification</p>
-                        <p className="text-3xl font-black text-purple-600">{reconciledData.skillDiversification}</p>
-                        <p className="text-xs text-slate-400 mt-1">Grade Levels</p>
+                        <p className="text-xs font-black text-slate-500 uppercase mb-2">Staffing vs Objectives</p>
+                        <p className="text-3xl font-black text-indigo-600">{reconciledData.misalignments.staffingVsObjectives}%</p>
+                        <p className="text-xs text-slate-400 mt-1">Alignment Ratio</p>
                     </div>
                     <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 text-center">
-                        <p className="text-xs font-black text-slate-500 uppercase mb-2">Total Workforce</p>
-                        <p className="text-3xl font-black text-slate-900">{reconciledData.totalStaff}</p>
-                        <p className="text-xs text-slate-400 mt-1">Active Officers</p>
+                        <p className="text-xs font-black text-slate-500 uppercase mb-2">Training vs Gaps</p>
+                        <p className="text-3xl font-black text-teal-600">{reconciledData.misalignments.trainingVsGaps}%</p>
+                        <p className="text-xs text-slate-400 mt-1">Coverage Ratio</p>
+                    </div>
+                </div>
+
+                {/* Multi-Dimensional Misalignment Analysis */}
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <h3 className="text-lg font-black text-slate-900 uppercase mb-4">Multi-Dimensional Misalignment Analysis</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="text-center">
+                            <p className="text-sm font-bold text-slate-600 mb-2">Staffing vs Strategic Objectives</p>
+                            <p className="text-2xl font-black text-indigo-600">{reconciledData.misalignments.staffingVsObjectives}%</p>
+                            <p className="text-xs text-slate-400">Current staffing alignment with corporate goals</p>
+                        </div>
+                        <div className="text-center">
+                            <p className="text-sm font-bold text-slate-600 mb-2">Training Coverage vs Skill Gaps</p>
+                            <p className="text-2xl font-black text-teal-600">{reconciledData.misalignments.trainingVsGaps}%</p>
+                            <p className="text-xs text-slate-400">Training programs addressing identified gaps</p>
+                        </div>
+                        <div className="text-center">
+                            <p className="text-sm font-bold text-slate-600 mb-2">Objectives vs Training Delivery</p>
+                            <p className="text-2xl font-black text-orange-600">{reconciledData.misalignments.objectivesVsTraining}%</p>
+                            <p className="text-xs text-slate-400">Strategic objectives supported by training</p>
+                        </div>
                     </div>
                 </div>
 

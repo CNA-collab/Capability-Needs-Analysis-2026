@@ -6,7 +6,9 @@
     "clevel",
     "colour",
     "concl",
+    "defval",
     "exceljs",
+    "filenumber",
     "gantt",
     "HAUS",
     "importmap",
@@ -25,7 +27,8 @@
     "Somare",
     "spreadsheetml",
     "textnodes",
-    "UDHR"
+    "UDHR",
+    "upskilling"
   ],
   "ignorePaths": [
     "node_modules/**",

@@ -3,6 +3,7 @@ import { OfficerRecord, UrgencyLevel, TrainingRecord, CapabilityRating, Performa
 import { getGradingGroup } from './helpers';
 
 // Make XLSX available from the global scope (loaded via script tag)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare const XLSX: any;
 
 /**
@@ -57,7 +58,7 @@ const findHeader = (headers: string[], possibleNames: string[]): string | null =
 
     // 2. Try Partial/Fuzzy Matches using regex boundaries
     for (const name of possibleNames) {
-        const escapedName = name.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+        const escapedName = name.replace(/([.*+?^=!:${}()|[\]/\\])/g, "\\$1");
         const regex = new RegExp(`\\b${escapedName}\\b`, 'i');
         const foundIndex = headers.findIndex(h => regex.test(String(h || '').trim()));
         if (foundIndex > -1) return headers[foundIndex];
@@ -73,12 +74,12 @@ const findHeader = (headers: string[], possibleNames: string[]): string | null =
     return null;
 };
 
-const parseArrayString = (value: any): string[] => {
+const parseArrayString = (value: unknown): string[] => {
     if (typeof value !== 'string' || !value.trim()) return [];
     return value.split(/[,;]/).map(s => s.trim()).filter(Boolean);
 };
 
-const parseBoolean = (value: any): boolean | undefined => {
+const parseBoolean = (value: unknown): boolean | undefined => {
     if (typeof value === 'boolean') return value;
     if (typeof value === 'string') {
         const lowerVal = value.trim().toLowerCase();
@@ -88,7 +89,7 @@ const parseBoolean = (value: any): boolean | undefined => {
     return undefined;
 };
 
-const parseTrainingHistory = (value: any): TrainingRecord[] => {
+const parseTrainingHistory = (value: unknown): TrainingRecord[] => {
     if (typeof value !== 'string' || !value.trim()) return [];
     const records: TrainingRecord[] = [];
     const entries = value.split(',');
@@ -148,7 +149,7 @@ const assessGapTag = (officer: OfficerRecord): { tag: GapTag, reason: string } =
     return { tag: '[ALIGNED]', reason: 'Meets both academic requirements and functional competency standards.' };
 };
 
-const processParsedData = (jsonData: any[], headers: string[], agencyType: AgencyType): { data: OfficerRecord[], preview: any[], headers: string[] } => {
+const processParsedData = (jsonData: unknown[], headers: string[], agencyType: AgencyType): { data: OfficerRecord[], preview: unknown[], headers: string[] } => {
     if (jsonData.length === 0) {
         throw new Error('The imported data is empty or contains no data rows.');
     }
@@ -252,15 +253,17 @@ const processParsedData = (jsonData: any[], headers: string[], agencyType: Agenc
             yearsOfExperience: parseInt(get('yearsOfExperience'), 10) || undefined,
             employmentStatus: String(get('employmentStatus')).trim() || undefined,
             fileNumber: String(get('fileNumber')).trim() || undefined,
-            lifecycleStage: String(get('lifecycleStage')).trim() as any || undefined,
+            lifecycleStage: String(get('lifecycleStage')).trim() || '',
             retirementEligibilityDate: String(get('retirementEligibilityDate')).trim() || undefined,
-            promotionEligibilityStatus: String(get('promotionEligibilityStatus')).trim() as any || undefined,
+            promotionEligibilityStatus: String(get('promotionEligibilityStatus')).trim() || undefined,
             tnaProcessExists: parseBoolean(get('tnaProcessExists')),
             tnaAssessmentMethods: parseArrayString(get('tnaAssessmentMethods')),
             tnaProcessDocumented: parseBoolean(get('tnaProcessDocumented')),
             tnaDesiredCourses: String(get('tnaDesiredCourses')).trim() || undefined,
             tnaInterestedTopics: parseArrayString(get('tnaInterestedTopics')),
             tnaPriorities: String(get('tnaPriorities')).trim() || undefined,
+            gapTag: '[ALIGNED]' as GapTag,
+            gapTagReason: '',
         };
 
         // Automated Gap Analysis Tagging
@@ -284,7 +287,7 @@ const ESTABLISHMENT_HEADER_MAPPING: Record<keyof EstablishmentRecord, string[]> 
     gen: ['gen', 'gender', 'sex']
 };
 
-export const parseCnaFile = (file: File, agencyType: AgencyType): Promise<{ data: OfficerRecord[], preview: any[], headers: string[] }> => {
+export const parseCnaFile = (file: File, agencyType: AgencyType): Promise<{ data: OfficerRecord[], preview: unknown[], headers: string[] }> => {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -292,7 +295,7 @@ export const parseCnaFile = (file: File, agencyType: AgencyType): Promise<{ data
                 const data = new Uint8Array(e.target!.result as ArrayBuffer);
                 const workbook = XLSX.read(data, { type: 'array' });
                 
-                let allRows: any[] = [];
+                let allRows: unknown[] = [];
                 let commonHeaders: string[] = [];
 
                 workbook.SheetNames.forEach((sheetName, index) => {
@@ -311,7 +314,7 @@ export const parseCnaFile = (file: File, agencyType: AgencyType): Promise<{ data
     });
 };
 
-export const parseEstablishmentFile = (file: File, agencyType: AgencyType): Promise<{ data: EstablishmentRecord[] }> => {
+export const parseEstablishmentFile = (file: File, agencyType: AgencyType): Promise<{ data: EstablishmentRecord[] }> => { // eslint-disable-line @typescript-eslint/no-unused-vars
      return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -327,7 +330,7 @@ export const parseEstablishmentFile = (file: File, agencyType: AgencyType): Prom
                     const headers = XLSX.utils.sheet_to_json(worksheet, { header: 1 })[0] || [];
                     
                     if (jsonData.length > 0) {
-                        const { data: sheetRecords } = processEstablishmentJson(jsonData, headers, agencyType);
+                        const { data: sheetRecords } = processEstablishmentJson(jsonData, headers);
                         allRecords = [...allRecords, ...sheetRecords];
                     }
                 });
@@ -339,7 +342,7 @@ export const parseEstablishmentFile = (file: File, agencyType: AgencyType): Prom
     });
 };
 
-const processEstablishmentJson = (jsonData: any[], headers: string[], agencyType: AgencyType): { data: EstablishmentRecord[] } => {
+const processEstablishmentJson = (jsonData: unknown[], headers: string[]): { data: EstablishmentRecord[] } => {
     const resolvedHeaders: Partial<Record<keyof EstablishmentRecord, string>> = {};
     for (const key in ESTABLISHMENT_HEADER_MAPPING) {
         const headerKey = key as keyof EstablishmentRecord;
@@ -358,15 +361,15 @@ const processEstablishmentJson = (jsonData: any[], headers: string[], agencyType
             grade: String(get('grade')).trim(),
             designation: String(get('designation')).trim(),
             occupant: isVacant ? 'VACANT' : occupant,
-            status: isVacant ? 'Vacant' : (['Confirmed', 'Probation', 'Other'].includes(String(get('status'))) ? String(get('status')) as any : 'Confirmed'),
-            gen: String(get('gen')).trim().toUpperCase() as any,
+            status: isVacant ? 'Vacant' : (['Confirmed', 'Probation', 'Other'].includes(String(get('status'))) ? String(get('status')) : 'Confirmed'),
+            gen: String(get('gen')).trim().toUpperCase(),
         };
     }).filter(r => r.positionNumber);
     
     return { data: establishmentRecords };
 };
 
-export const parsePastedData = (pastedText: string, agencyType: AgencyType): Promise<{ data: OfficerRecord[], preview: any[], headers: string[] }> => {
+export const parsePastedData = (pastedText: string, agencyType: AgencyType): Promise<{ data: OfficerRecord[], preview: unknown[], headers: string[] }> => {
     return new Promise((resolve, reject) => {
         const rows = pastedText.split('\n').map(row => row.split('\t'));
         if (rows.length < 2) return reject(new Error('Pasted data must contain at least a header row.'));
@@ -377,5 +380,63 @@ export const parsePastedData = (pastedText: string, agencyType: AgencyType): Pro
             return obj;
         });
         resolve(processParsedData(jsonData, headers, agencyType));
+    });
+};
+
+const CORPORATE_PLAN_HEADER_MAPPING: Record<string, string[]> = {
+    vision: ['vision', 'mission statement', 'organizational vision'],
+    mission: ['mission', 'mission statement', 'organizational mission'],
+    objectives: ['objectives', 'strategic objectives', 'goals', 'key objectives'],
+    training_needs: ['training needs', 'learning needs', 'capacity building'],
+    financial_context: ['financial context', 'budget', 'funding', 'resources'],
+    risk_assessment: ['risk assessment', 'risks', 'challenges'],
+    personnel_establishment: ['personnel establishment', 'staffing', 'workforce'],
+    full_document_context: ['full context', 'summary', 'overview', 'description']
+};
+
+export const parseCorporatePlanFile = (file: File): Promise<{ data: unknown }> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const data = new Uint8Array(e.target!.result as ArrayBuffer);
+                const workbook = XLSX.read(data, { type: 'array' });
+
+                let corporatePlanData: unknown = {};
+
+                workbook.SheetNames.forEach((sheetName) => {
+                    const worksheet = workbook.Sheets[sheetName];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+                    const headers = XLSX.utils.sheet_to_json(worksheet, { header: 1 })[0] || [];
+
+                    if (jsonData.length > 0) {
+                        const resolvedHeaders: Partial<Record<string, string>> = {};
+                        for (const key in CORPORATE_PLAN_HEADER_MAPPING) {
+                            const found = findHeader(headers, CORPORATE_PLAN_HEADER_MAPPING[key]);
+                            if (found) resolvedHeaders[key] = found;
+                        }
+
+                        // Extract data from the first row (assuming structured data)
+                        const firstRow = jsonData[0];
+                        corporatePlanData = {
+                            strategic_goals: {
+                                vision: firstRow[resolvedHeaders.vision || ''] || '',
+                                mission: firstRow[resolvedHeaders.mission || ''] || '',
+                                values: [], // Can be extended if values are in separate columns
+                                objectives: String(firstRow[resolvedHeaders.objectives || ''] || '').split(',').map((obj: string) => obj.trim())
+                            },
+                            training_needs: firstRow[resolvedHeaders.training_needs || ''] || '',
+                            financial_context: firstRow[resolvedHeaders.financial_context || ''] || '',
+                            risk_assessment: firstRow[resolvedHeaders.risk_assessment || ''] || '',
+                            personnel_establishment: firstRow[resolvedHeaders.personnel_establishment || ''] || '',
+                            full_document_context: firstRow[resolvedHeaders.full_document_context || ''] || ''
+                        };
+                    }
+                });
+
+                resolve({ data: corporatePlanData });
+            } catch (err) { reject(err); }
+        };
+        reader.readAsArrayBuffer(file);
     });
 };

@@ -1,26 +1,16 @@
 import React, { useState, useMemo } from 'react';
+import { EligibleOfficer } from '../types';
 import { XIcon, DocumentChartBarIcon, UsersIcon, ClipboardDocumentListIcon, PresentationChartLineIcon } from './icons';
 import { ExportMenu } from './ExportMenu';
+
 
 // --- MAIN COMPONENT ---
 
 type ReportType = 'full' | 'eligible' | 'cna' | 'yearly' | 'none';
 
-interface Officer {
-    occupant: string;
-    designation: string;
-    positionNumber: string;
-    status: string;
-    cnaSubmission: string;
-    trainingYear: number[];
-    courseDetails?: string;
-    branch: string;
-    grade: string;
-}
-
 interface ReportProps {
     division: string;
-    officers: Officer[];
+    officers: EligibleOfficer[];
     yearHeaders: number[];
     onClose: () => void;
 }

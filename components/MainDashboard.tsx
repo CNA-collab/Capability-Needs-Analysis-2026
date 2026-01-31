@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { View, UrgencyLevel, GradingGroup, PerformanceRatingLevel, CapabilityItemAnalysis } from '../types';
+import { View, UrgencyLevel, GradingGroup, PerformanceRatingLevel, CapabilityRating, GapTag, TrainingRecord, OfficerRecord } from '../types';
 import { Sidebar } from './Sidebar';
 import { ReportingSuiteModal } from './ReportingSuiteModal';
 import { StrategicAnalysisDashboard } from './StrategicAnalysisDashboard';
@@ -8,7 +8,7 @@ import { ExpenditureReview } from './ExpenditureReview';
 import { CnaPolicyToolkit } from './CnaPolicyToolkit';
 import { GesiPolicyToolkit } from './GesiPolicyToolkit';
 
-
+// Individual-focused components
 import { WelcomeModal } from './WelcomeModal';
 import {
     ChartBarSquareIcon,
@@ -46,8 +46,54 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ onLogout }) => {
         }
     }), []);
 
+    // Demo establishment data
+    const demoEstablishmentData = useMemo(() => [
+        {
+            positionNumber: 'NP-001',
+            division: 'Policy & Planning',
+            grade: 'Grade 12',
+            designation: 'Senior Planning Officer',
+            occupant: 'John Smith',
+            status: 'Confirmed',
+            gen: 'M'
+        },
+        {
+            positionNumber: 'NP-002',
+            division: 'M&E Division',
+            grade: 'Grade 11',
+            designation: 'Monitoring & Evaluation Specialist',
+            occupant: 'Mary Johnson',
+            status: 'Confirmed',
+            gen: 'F'
+        },
+        {
+            positionNumber: 'NP-003',
+            division: 'Program Implementation',
+            grade: 'Grade 10',
+            designation: 'Project Manager',
+            occupant: 'David Wilson',
+            status: 'Confirmed',
+            gen: 'M'
+        }
+    ], []);
+
+    // Demo corporate plan data
+    const demoCorporatePlanData = useMemo(() => ({
+        strategic_goals: {
+            vision: 'To be a leading public service organization in PNG',
+            mission: 'Deliver efficient and effective public services',
+            objectives: ['Improve service delivery', 'Enhance workforce capabilities', 'Strengthen governance'],
+            values: ['Integrity', 'Excellence', 'Innovation']
+        },
+        training_needs: 'Leadership development, technical skills enhancement, digital literacy',
+        financial_context: 'Budget allocation for training programs',
+        risk_assessment: 'Skills gaps in critical areas',
+        personnel_establishment: 'Current staffing levels adequate but skill gaps exist',
+        full_document_context: 'Strategic plan focuses on organizational development and capacity building'
+    }), []);
+
     // Demo officers data (simplified for demo purposes)
-    const demoOfficers = useMemo(() => [
+    const demoOfficers: OfficerRecord[] = useMemo(() => [
         {
             employmentStatus: 'Confirmed',
             lifecycleStage: 'Peak Performer',
@@ -68,7 +114,13 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ onLogout }) => {
             division: 'Policy & Planning',
             grade: 'Grade 12',
             performanceRatingLevel: 'Well Above Required' as PerformanceRatingLevel,
-            capabilityRatings: [] as CapabilityItemAnalysis[],
+            capabilityRatings: [] as CapabilityRating[],
+            gapTag: '[ALIGNED]' as GapTag,
+            gapTagReason: 'Strong alignment with organizational goals',
+            trainingHistory: [] as TrainingRecord[],
+            trainingPreferences: ['Leadership Development', 'Strategic Planning'],
+            ictSkills: ['Advanced Excel', 'PowerPoint'],
+            leadershipCapabilityGaps: [],
             // Additional properties for ReportingSuiteModal
             occupant: 'John Smith',
             designation: 'Senior Planning Officer',
@@ -97,7 +149,13 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ onLogout }) => {
             division: 'M&E Division',
             grade: 'Grade 11',
             performanceRatingLevel: 'Above Required' as PerformanceRatingLevel,
-            capabilityRatings: [] as CapabilityItemAnalysis[],
+            capabilityRatings: [] as CapabilityRating[],
+            gapTag: '[SKILL_GAP]' as GapTag,
+            gapTagReason: 'Needs development in data analytics',
+            trainingHistory: [] as TrainingRecord[],
+            trainingPreferences: ['Data Analytics', 'Monitoring & Evaluation'],
+            ictSkills: ['Excel', 'SPSS'],
+            leadershipCapabilityGaps: [],
             // Additional properties for ReportingSuiteModal
             occupant: 'Mary Johnson',
             designation: 'Monitoring & Evaluation Specialist',
@@ -126,7 +184,13 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ onLogout }) => {
             division: 'Program Implementation',
             grade: 'Grade 10',
             performanceRatingLevel: 'Below Required Level' as PerformanceRatingLevel,
-            capabilityRatings: [] as CapabilityItemAnalysis[],
+            capabilityRatings: [] as CapabilityRating[],
+            gapTag: '[CRITICAL_GAP]' as GapTag,
+            gapTagReason: 'Critical gap in project management skills',
+            trainingHistory: [] as TrainingRecord[],
+            trainingPreferences: ['Project Management', 'Team Leadership'],
+            ictSkills: ['MS Project', 'Word'],
+            leadershipCapabilityGaps: ['Team Management'],
             // Additional properties for ReportingSuiteModal
             occupant: 'David Wilson',
             designation: 'Project Manager',
@@ -137,26 +201,7 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ onLogout }) => {
         }
     ], []);
 
-    const getLifecycleStageClass = (lifecycleStage: string) => {
-        switch (lifecycleStage) {
-            case 'Peak Performer':
-                return 'bg-emerald-100 text-emerald-800';
-            case 'High Potential':
-                return 'bg-blue-100 text-blue-800';
-            default:
-                return 'bg-amber-100 text-amber-800';
-        }
-    };
 
-    const getPerformanceRatingClass = (performanceRating: string) => {
-        if (performanceRating === 'Exceeds Expectations') {
-            return 'text-emerald-600';
-        } else if (performanceRating === 'Meets Expectations') {
-            return 'text-blue-600';
-        } else {
-            return 'text-amber-600';
-        }
-    };
 
     const renderView = () => {
         switch (currentView) {
@@ -285,64 +330,140 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ onLogout }) => {
                     <div className="p-8">
                         <div className="mb-6">
                             <h2 className="text-2xl font-black text-slate-900 uppercase mb-2">Individual Operations</h2>
-                            <p className="text-slate-600">Quick view of officer results after analyzing CNA data, establishment register, and corporate plan</p>
+                            <p className="text-slate-600">Access individual officer reports, forms, and tools in a horizontal view</p>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {demoOfficers.map(officer => {
-                                const lifecycleStageClass = getLifecycleStageClass(officer.lifecycleStage);
-
-                                return (
-                                    <div key={officer.name} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:shadow-lg transition-shadow">
-                                        <div className="flex items-start justify-between mb-4">
-                                            <div>
-                                                <h3 className="text-lg font-black text-slate-900">{officer.name}</h3>
-                                                <p className="text-sm text-slate-600">{officer.position}</p>
-                                            </div>
-                                            <div className={`px-2 py-1 rounded-full text-xs font-bold uppercase ${lifecycleStageClass}`}>
-                                                {officer.lifecycleStage}
-                                            </div>
-                                        </div>
-
-                                    <div className="space-y-3 mb-4">
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-sm font-bold text-slate-500">Grade:</span>
-                                            <span className="text-sm font-black text-slate-900">{officer.grade}</span>
-                                        </div>
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-sm font-bold text-slate-500">Division:</span>
-                                            <span className="text-sm font-black text-slate-900">{officer.division}</span>
-                                        </div>
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-sm font-bold text-slate-500">Performance:</span>
-                                            <span className={`text-sm font-black ${getPerformanceRatingClass(officer.performanceRatingLevel)}`}>
-                                                {officer.performanceRatingLevel}
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <div className="mb-4">
-                                        <p className="text-sm font-bold text-slate-500 mb-2">Capability Gaps:</p>
-                                        <div className="flex flex-wrap gap-1">
-                                            {officer.technicalCapabilityGaps.map((gap) => (
-                                                <span key={gap} className="px-2 py-1 bg-red-100 text-red-800 text-xs font-bold rounded-full">
-                                                    {gap}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    <div className="flex gap-2">
-                                        <button className="flex-1 bg-blue-600 text-white px-3 py-2 rounded-xl text-xs font-black uppercase hover:bg-blue-700 transition-colors">
-                                            View Details
+                        {/* Horizontal Scrollable Container */}
+                        <div className="overflow-x-auto pb-4">
+                            <div className="flex gap-6 min-w-max">
+                                {/* Reports */}
+                                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 min-w-[300px]">
+                                    <h3 className="text-lg font-black text-slate-900 uppercase mb-4">Reports</h3>
+                                    <div className="space-y-3">
+                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+                                            <h4 className="font-bold text-slate-900 text-sm">Individual Talent Card Report</h4>
+                                            <p className="text-xs text-slate-600">Individual talent assessment</p>
                                         </button>
-                                        <button className="flex-1 bg-emerald-600 text-white px-3 py-2 rounded-xl text-xs font-black uppercase hover:bg-emerald-700 transition-colors">
-                                            Generate Plan
+                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+                                            <h4 className="font-bold text-slate-900 text-sm">Eligible Officers Report</h4>
+                                            <p className="text-xs text-slate-600">Training eligibility assessment</p>
+                                        </button>
+                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+                                            <h4 className="font-bold text-slate-900 text-sm">Training Needs Analysis Report</h4>
+                                            <p className="text-xs text-slate-600">Comprehensive training needs assessment</p>
+                                        </button>
+                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+                                            <h4 className="font-bold text-slate-900 text-sm">Training Plan Report</h4>
+                                            <p className="text-xs text-slate-600">Strategic training planning</p>
+                                        </button>
+                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+                                            <h4 className="font-bold text-slate-900 text-sm">Succession Plan Report</h4>
+                                            <p className="text-xs text-slate-600">Leadership succession planning</p>
+                                        </button>
+                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+                                            <h4 className="font-bold text-slate-900 text-sm">Talent Segmentation Report</h4>
+                                            <p className="text-xs text-slate-600">Talent categorization and analysis</p>
+                                        </button>
+                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+                                            <h4 className="font-bold text-slate-900 text-sm">Individual Development Profile</h4>
+                                            <p className="text-xs text-slate-600">Personal development profile</p>
                                         </button>
                                     </div>
                                 </div>
-                            );
-                        })}
+
+                                {/* Forms */}
+                                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 min-w-[300px]">
+                                    <h3 className="text-lg font-black text-slate-900 uppercase mb-4">Forms</h3>
+                                    <div className="space-y-3">
+                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+                                            <h4 className="font-bold text-slate-900 text-sm">Individual Lnd Plan Form</h4>
+                                            <p className="text-xs text-slate-600">Personal learning and development planning</p>
+                                        </button>
+                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+                                            <h4 className="font-bold text-slate-900 text-sm">Job Group Knowledge Form</h4>
+                                            <p className="text-xs text-slate-600">Job group knowledge requirements</p>
+                                        </button>
+                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+                                            <h4 className="font-bold text-slate-900 text-sm">Automated Eligibility Form</h4>
+                                            <p className="text-xs text-slate-600">Automated eligibility assessment</p>
+                                        </button>
+                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+                                            <h4 className="font-bold text-slate-900 text-sm">Manual Eligible Officer Form</h4>
+                                            <p className="text-xs text-slate-600">Manual officer eligibility form</p>
+                                        </button>
+                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+                                            <h4 className="font-bold text-slate-900 text-sm">Edit Eligible Officer Modal</h4>
+                                            <p className="text-xs text-slate-600">Edit officer eligibility details</p>
+                                        </button>
+                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+                                            <h4 className="font-bold text-slate-900 text-sm">Edit Experience Modal</h4>
+                                            <p className="text-xs text-slate-600">Edit work experience details</p>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Tools */}
+                                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 min-w-[300px]">
+                                    <h3 className="text-lg font-black text-slate-900 uppercase mb-4">Tools</h3>
+                                    <div className="space-y-3">
+                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+                                            <h4 className="font-bold text-slate-900 text-sm">Staff Card</h4>
+                                            <p className="text-xs text-slate-600">Individual staff information card</p>
+                                        </button>
+                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+                                            <h4 className="font-bold text-slate-900 text-sm">Succession Planning Table</h4>
+                                            <p className="text-xs text-slate-600">Succession planning interface</p>
+                                        </button>
+                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+                                            <h4 className="font-bold text-slate-900 text-sm">Framework Graphic</h4>
+                                            <p className="text-xs text-slate-600">10:20:70 framework visualization</p>
+                                        </button>
+                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+                                            <h4 className="font-bold text-slate-900 text-sm">Export Menu</h4>
+                                            <p className="text-xs text-slate-600">Data export options</p>
+                                        </button>
+                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+                                            <h4 className="font-bold text-slate-900 text-sm">Lnd Ai Assistant Modal</h4>
+                                            <p className="text-xs text-slate-600">AI-powered L&D assistance</p>
+                                        </button>
+                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+                                            <h4 className="font-bold text-slate-900 text-sm">User Guide Modal</h4>
+                                            <p className="text-xs text-slate-600">System user guide</p>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Additional Reports */}
+                                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 min-w-[300px]">
+                                    <h3 className="text-lg font-black text-slate-900 uppercase mb-4">More Reports</h3>
+                                    <div className="space-y-3">
+                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+                                            <h4 className="font-bold text-slate-900 text-sm">Training Eligibility Summary Report</h4>
+                                            <p className="text-xs text-slate-600">Training eligibility overview</p>
+                                        </button>
+                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+                                            <h4 className="font-bold text-slate-900 text-sm">Training Pathways Report</h4>
+                                            <p className="text-xs text-slate-600">Training pathway development</p>
+                                        </button>
+                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+                                            <h4 className="font-bold text-slate-900 text-sm">Development Pathways Report</h4>
+                                            <p className="text-xs text-slate-600">Career development pathways</p>
+                                        </button>
+                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+                                            <h4 className="font-bold text-slate-900 text-sm">Competency Domain Report</h4>
+                                            <p className="text-xs text-slate-600">Domain-specific competency analysis</p>
+                                        </button>
+                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+                                            <h4 className="font-bold text-slate-900 text-sm">Capability Gap Analysis Report</h4>
+                                            <p className="text-xs text-slate-600">Identify and analyze capability gaps</p>
+                                        </button>
+                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+                                            <h4 className="font-bold text-slate-900 text-sm">Bulk Talent Card Report</h4>
+                                            <p className="text-xs text-slate-600">Bulk talent card generation</p>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 );
@@ -355,6 +476,8 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ onLogout }) => {
                             agencyName: demoData.agencyName,
                             kpis: demoData.kpis
                         }}
+                        corporatePlanData={demoCorporatePlanData}
+                        establishmentData={demoEstablishmentData}
                     />
                 );
 
@@ -725,9 +848,9 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ onLogout }) => {
                 onClose={() => {}}
             />
 
-            <main className="flex-1 overflow-y-auto ml-64 pt-20">
+            <main className="flex-1 overflow-y-auto ml-0 md:ml-64 pt-20">
                 {/* Top Header with Reporting Suite */}
-                <header className="bg-white border-b border-slate-200 px-8 py-4 flex justify-between items-center fixed top-0 left-64 right-0 z-20">
+                <header className="bg-white border-b border-slate-200 px-8 py-4 flex justify-between items-center fixed top-0 left-0 md:left-64 right-0 z-20">
                     <div>
                         <h1 className="text-xl font-black text-slate-900 uppercase">
                             {demoData.agencyName}

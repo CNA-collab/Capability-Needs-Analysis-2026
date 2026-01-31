@@ -1,34 +1,19 @@
 import React, { useState } from 'react';
 import { XIcon, DocumentArrowUpIcon, SpinnerIcon, CheckCircleIcon, ArrowRightIcon, GlobeAltIcon, ExclamationTriangleIcon } from './icons';
 import { OfficerRecord, AgencyType, EstablishmentRecord } from '../types';
-import { parseCnaFile, parsePastedData, parseEstablishmentFile } from '../utils/import';
-import { GoogleGenAI, Type } from "@google/genai";
+import { parseCnaFile, parsePastedData, parseEstablishmentFile, parseCorporatePlanFile } from '../utils/import';
 import { GoogleSheetsService } from '../services/GoogleSheetsService';
 
 interface ImportModalProps {
     onImport: (
-        data: OfficerRecord[], 
-        agencyType: AgencyType, 
-        agencyName: string, 
-        establishmentData?: EstablishmentRecord[], 
-        corporatePlanContext?: string
+        data: OfficerRecord[],
+        agencyType: AgencyType,
+        agencyName: string,
+        establishmentData?: EstablishmentRecord[],
+        corporatePlanContext?: unknown
     ) => void;
     onClose: () => void;
 }
-
-
-const fileToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => {
-            const result = reader.result as string;
-            const base64String = result.split(',')[1];
-            resolve(base64String);
-        };
-        reader.onerror = error => reject(error);
-    });
-};
 
 export const ImportModal: React.FC<ImportModalProps> = ({ onImport, onClose }) => {
     const [step, setStep] = useState<'upload' | 'mapping'>('upload');
@@ -41,9 +26,9 @@ export const ImportModal: React.FC<ImportModalProps> = ({ onImport, onClose }) =
     const [agencyType, setAgencyType] = useState<AgencyType>('National Agency');
     const [agencyName, setAgencyName] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
-    const [isProcessingPdf, setIsProcessingPdf] = useState(false);
+    const [isProcessingCorporatePlan, setIsProcessingCorporatePlan] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [corporatePlanSummary, setCorporatePlanSummary] = useState<string | null>(null);
+    const [corporatePlanData, setCorporatePlanData] = useState<unknown | null>(null);
     
     const [importedCnaResult, setImportedCnaResult] = useState<{ data: OfficerRecord[], headers: string[] } | null>(null);
     const [importedEstablishmentResult, setImportedEstablishmentResult] = useState<{ data: EstablishmentRecord[] } | null>(null);
@@ -61,72 +46,26 @@ export const ImportModal: React.FC<ImportModalProps> = ({ onImport, onClose }) =
         return match ? match[1] : input.trim();
     };
 
-    const processCorporatePlanPdf = async (file: File) => {
-        if (!process.env.API_KEY) {
-            setError("Security Gate: API key not configured for Document Intelligence.");
-            return;
-        }
-
-        // Lower limit to prevent RPC payload timeouts
+    const processCorporatePlanFile = async (file: File) => {
+        // Check file size limit
         if (file.size > 10 * 1024 * 1024) {
-            setError("Strategic Document too large (Limit: 10MB). Please compress or use a summary version.");
+            setError("Corporate Plan file too large (Limit: 10MB). Please use a smaller file.");
             setCorporatePlanFile(null);
             return;
         }
-        
-        setIsProcessingPdf(true);
+
+        setIsProcessingCorporatePlan(true);
         setError(null);
 
         try {
-            /* Correct initialization as per guidelines */
-            const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-            const base64Data = await fileToBase64(file);
-
-            const schema = {
-                type: Type.OBJECT,
-                properties: {
-                    strategic_goals: {
-                        type: Type.OBJECT,
-                        properties: {
-                            vision: { type: Type.STRING },
-                            mission: { type: Type.STRING },
-                            values: { type: Type.ARRAY, items: { type: Type.STRING } },
-                            objectives: { type: Type.ARRAY, items: { type: Type.STRING } }
-                        },
-                        required: ["vision", "mission", "objectives"]
-                    },
-                    training_needs: { type: Type.STRING },
-                    financial_context: { type: Type.STRING },
-                    risk_assessment: { type: Type.STRING },
-                    personnel_establishment: { type: Type.STRING },
-                    full_document_context: { type: Type.STRING }
-                },
-                required: ["strategic_goals", "training_needs", "financial_context", "risk_assessment", "personnel_establishment", "full_document_context"]
-            };
-            
-            const response = await ai.models.generateContent({
-                model: 'gemini-3-flash-preview', 
-                contents: { 
-                    parts: [
-                        { inlineData: { mimeType: 'application/pdf', data: base64Data } },
-                        { text: "Extract strategic data buckets. Return strictly JSON." }
-                    ] 
-                },
-                config: {
-                    systemInstruction: "You are a Strategic Data Architect. Extract objectives, training needs, and risk profiles from the PDF.",
-                    responseMimeType: "application/json",
-                    responseSchema: schema
-                }
-            });
-
-            /* Accessing .text property directly instead of text() method */
-            setCorporatePlanSummary(response.text?.trim() || '');
+            const result = await parseCorporatePlanFile(file);
+            setCorporatePlanData(result.data);
         } catch (e: unknown) {
-            console.error("PDF Scan Error:", e);
-            setError("Document Analysis Failure. This usually happens with complex PDFs or network timeouts. Try a smaller version.");
+            console.error("Corporate Plan Processing Error:", e);
+            setError("Failed to process Corporate Plan file. Please check the file format.");
             setCorporatePlanFile(null);
         } finally {
-            setIsProcessingPdf(false);
+            setIsProcessingCorporatePlan(false);
         }
     };
 
@@ -134,7 +73,7 @@ export const ImportModal: React.FC<ImportModalProps> = ({ onImport, onClose }) =
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
             setCorporatePlanFile(file);
-            processCorporatePlanPdf(file);
+            processCorporatePlanFile(file);
         }
     };
 
@@ -146,7 +85,7 @@ export const ImportModal: React.FC<ImportModalProps> = ({ onImport, onClose }) =
                 agencyType,
                 agencyName,
                 importedEstablishmentResult?.data,
-                corporatePlanSummary || undefined
+                corporatePlanData || undefined
             );
         }
     };
@@ -286,13 +225,13 @@ export const ImportModal: React.FC<ImportModalProps> = ({ onImport, onClose }) =
                                 </div>
                                 <div>
                                     <h3 className="text-[10px] font-black text-slate-400 mb-2 uppercase tracking-widest">4. Strategic Plan Scan</h3>
-                                    <div className={`border border-slate-200 rounded-xl p-4 flex items-center justify-between shadow-sm transition-all ${corporatePlanSummary ? 'bg-emerald-50 border-emerald-200' : 'bg-white'}`}>
+                                    <div className={`border border-slate-200 rounded-xl p-4 flex items-center justify-between shadow-sm transition-all ${corporatePlanData ? 'bg-emerald-50 border-emerald-200' : 'bg-white'}`}>
                                         <div className="flex items-center gap-3">
-                                            {isProcessingPdf ? <SpinnerIcon className="w-5 h-5 text-amber-600 animate-spin" /> : corporatePlanSummary ? <CheckCircleIcon className="w-5 h-5 text-emerald-500" /> : <div className="w-5 h-5 border-2 border-slate-200 rounded-full"></div>}
-                                            <span className="text-xs font-bold text-slate-500 truncate max-w-[150px]">{corporatePlanFile ? corporatePlanFile.name : "Attach PDF Plan"}</span>
+                                            {isProcessingCorporatePlan ? <SpinnerIcon className="w-5 h-5 text-amber-600 animate-spin" /> : corporatePlanData ? <CheckCircleIcon className="w-5 h-5 text-emerald-500" /> : <div className="w-5 h-5 border-2 border-slate-200 rounded-full"></div>}
+                                            <span className="text-xs font-bold text-slate-500 truncate max-w-[150px]">{corporatePlanFile ? corporatePlanFile.name : "Attach Excel Plan"}</span>
                                         </div>
-                                        <input type="file" accept=".pdf" onChange={handleCorporatePlanChange} className="hidden" id="cp-file-upload" disabled={isProcessingPdf} />
-                                        <label htmlFor="cp-file-upload" className={`cursor-pointer px-4 py-2 bg-slate-100 rounded-lg text-[10px] font-black uppercase text-[#1A365D] ${isProcessingPdf ? 'opacity-50 pointer-events-none' : 'hover:bg-blue-600 hover:text-white transition-all'}`}>Scan</label>
+                                        <input type="file" accept=".xlsx,.csv" onChange={handleCorporatePlanChange} className="hidden" id="cp-file-upload" disabled={isProcessingCorporatePlan} />
+                                        <label htmlFor="cp-file-upload" className={`cursor-pointer px-4 py-2 bg-slate-100 rounded-lg text-[10px] font-black uppercase text-[#1A365D] ${isProcessingCorporatePlan ? 'opacity-50 pointer-events-none' : 'hover:bg-blue-600 hover:text-white transition-all'}`}>Upload</label>
                                     </div>
                                 </div>
                             </div>
@@ -318,9 +257,9 @@ export const ImportModal: React.FC<ImportModalProps> = ({ onImport, onClose }) =
                 <footer className="p-8 border-t border-slate-100 flex justify-end gap-4 bg-slate-50/50 rounded-b-[32px]">
                     <button onClick={onClose} className="px-6 py-3 text-xs font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 transition-colors">Cancel</button>
                     {step === 'upload' ? (
-                        <button 
-                            onClick={handleProceedToMapping} 
-                            disabled={isProcessing || isProcessingPdf || (!cnaFile && !pastedData && !googleSheetInput)}
+                        <button
+                            onClick={handleProceedToMapping}
+                            disabled={isProcessing || isProcessingCorporatePlan || (!cnaFile && !pastedData && !googleSheetInput)}
                             className="flex items-center gap-3 px-10 py-3 bg-[#1A365D] text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl hover:translate-y-[-2px] transition-all disabled:bg-slate-200"
                         >
                             {isProcessing ? <SpinnerIcon className="w-5 h-5 animate-spin" /> : <><ArrowRightIcon className="w-5 h-5" /><span>Analyze Schema</span></>}

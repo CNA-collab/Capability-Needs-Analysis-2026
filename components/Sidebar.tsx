@@ -59,10 +59,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
             )}
 
             <aside className={`
-                fixed md:relative z-50 h-screen transition-all duration-300 ease-in-out
+                fixed z-50 h-screen transition-all duration-300 ease-in-out
                 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 border-r border-white/20 flex flex-col
                 ${isCollapsed ? 'w-20' : 'w-64'}
-                ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+                ${isOpen ? 'translate-x-0' : '-translate-x-full'}
             `}>
                 
                 {/* TOP SECTION: PNG CREST */}

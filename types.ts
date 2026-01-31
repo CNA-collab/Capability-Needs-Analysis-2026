@@ -14,6 +14,24 @@ export type PerformanceRatingLevel = 'Well Above Required' | 'Above Required' | 
 
 export type GradingGroup = 'Junior Officer' | 'Senior Officer' | 'Manager' | 'Senior Management' | 'Other';
 
+export type GapTag = '[ALIGNED]' | '[SKILL_GAP]' | '[QUAL_GAP]' | '[CRITICAL_GAP]';
+
+export type CurrentScoreCategory = 'High' | 'Moderate' | 'Low';
+
+export interface TrainingRecord {
+    courseName: string;
+    completionDate: string;
+}
+
+export interface CapabilityRating {
+    questionCode: string;
+    currentScore: number;
+    realisticScore: number;
+    gapScore: number;
+    gapCategory: 'No Gap' | 'Minor Gap' | 'Moderate Gap' | 'Critical Gap';
+    currentScoreCategory: CurrentScoreCategory;
+}
+
 export type JobGroupType = '1️⃣ Senior Executive Managers' | '2️⃣ Middle Managers' | '3️⃣ All Line Staff';
 
 export type JobGroup = 'Senior Executive Managers' | 'Supervisors' | 'Administration' | 'Finance' | 'Economics' | 'ICT Officers' | 'Field Officers' | 'Executive Secretaries' | 'Support Staff';
@@ -48,6 +66,8 @@ export interface IndividualLndPlan {
 }
 
 // 3. Core Records
+export type Officer = OfficerRecord;
+
 export interface OfficerRecord {
     employmentStatus: string;
     lifecycleStage: string;
@@ -68,7 +88,24 @@ export interface OfficerRecord {
     division: string;
     grade: string;
     performanceRatingLevel: PerformanceRatingLevel;
-    capabilityRatings: CapabilityItemAnalysis[];
+    capabilityRatings: CapabilityRating[];
+    gapTag: GapTag;
+    gapTagReason: string;
+    trainingHistory: TrainingRecord[];
+    trainingPreferences: string[];
+    ictSkills: string[];
+    leadershipCapabilityGaps: string[];
+    misalignmentFlag?: string;
+    promotionEligibilityStatus?: string;
+    retirementEligibilityDate?: string;
+    tnaProcessExists?: boolean;
+    tnaAssessmentMethods?: string[];
+    tnaProcessDocumented?: boolean;
+    tnaDesiredCourses?: string;
+    tnaInterestedTopics?: string[];
+    tnaPriorities?: string;
+    fileNumber?: string;
+    nextTrainingDueDate?: string;
 }
 
 export interface EstablishmentRecord {

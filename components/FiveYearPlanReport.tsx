@@ -23,7 +23,7 @@ const ReportSection: React.FC<{ title: string; children: React.ReactNode; classN
 );
 
 // eslint-disable-next-line no-empty-pattern
-const FiveYearPlanReport: React.FC<FiveYearPlanReportProps> = ({  }) => {
+export const FiveYearPlanReport: React.FC<FiveYearPlanReportProps> = ({  }) => {
     return (
         <div>
             <ReportSection title="Five Year Plan Report">
@@ -32,5 +32,3 @@ const FiveYearPlanReport: React.FC<FiveYearPlanReportProps> = ({  }) => {
         </div>
     );
 };
-
-export default FiveYearPlanReport;
