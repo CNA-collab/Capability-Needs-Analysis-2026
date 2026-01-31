@@ -1,5 +1,17 @@
 import React, { useState } from 'react';
 import { View } from '../types';
+import {
+    ChartBarSquareIcon,
+    UsersIcon,
+    BookOpenIcon,
+    ShieldCheckIcon,
+    DocumentIcon,
+    PresentationChartLineIcon,
+    LightBulbIcon,
+    SparklesIcon,
+    ArrowDownTrayIcon,
+    ArrowLeftIcon,
+} from './icons';
 
 interface SidebarProps {
     currentView: View;
@@ -26,40 +38,40 @@ export const Sidebar: React.FC<SidebarProps> = ({
     const [isCollapsed, setIsCollapsed] = useState(false);
 
     const menuItems = [
-        { id: 'organisational', label: 'Dashboard', icon: '📊' },
-        { id: 'individual', label: 'Operations', icon: '👥' },
-        { id: 'pathways', label: 'Pathways', icon: '🛤️' },
-        { id: 'gesi', label: 'GESI Toolkit', icon: '⚖️' },
-        { id: 'cna', label: 'CNA Policy Toolkit', icon: '📜' },
-        { id: 'survey-insights', label: 'Survey Insights', icon: '📈' },
-        { id: 'settings', label: 'Settings', icon: '⚙️' },
+        { id: 'organizational', label: 'Dashboard', icon: ChartBarSquareIcon },
+        { id: 'individual', label: 'Operations', icon: UsersIcon },
+        { id: 'pathways', label: 'Pathways', icon: BookOpenIcon },
+        { id: 'gesi', label: 'GESI Toolkit', icon: ShieldCheckIcon },
+        { id: 'cna', label: 'CNA Policy Toolkit', icon: DocumentIcon },
+        { id: 'survey-insights', label: 'Survey Insights', icon: PresentationChartLineIcon },
+        { id: 'settings', label: 'Settings', icon: LightBulbIcon },
     ];
 
     return (
         <>
             {/* MOBILE OVERLAY */}
             {isOpen && (
-                <div 
-                    className="fixed inset-0 bg-slate-900/40 z-40 md:hidden backdrop-blur-sm" 
+                <div
+                    className="fixed inset-0 bg-slate-900/50 z-40 md:hidden backdrop-blur-sm"
                     onClick={onClose}
                 />
             )}
 
             <aside className={`
                 fixed md:relative z-50 h-screen transition-all duration-300 ease-in-out
-                bg-[#1A365D] border-r border-blue-900/30 flex flex-col
-                ${isCollapsed ? 'w-20' : 'w-64'} 
+                bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 border-r border-white/20 flex flex-col
+                ${isCollapsed ? 'w-20' : 'w-64'}
                 ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
             `}>
                 
                 {/* TOP SECTION: PNG CREST */}
                 <div className="p-6 flex flex-col items-center">
                     <div className="mb-6 flex justify-center w-full bg-white/10 p-2 rounded-2xl">
-                        <img 
-                            src="/Logo/PNG Crest.png" 
-                            alt="PNG Crest" 
-                            className="transition-all duration-300 object-contain brightness-0 invert"
-                            style={{ width: isCollapsed ? '28px' : '38px' }} 
+                        <img
+                            src="/Logo/PNG Crest.png"
+                            alt="PNG Crest"
+                            className="transition-all duration-300 object-contain"
+                            style={{ width: isCollapsed ? '28px' : '38px' }}
                             onError={(e) => (e.currentTarget.src = "https://via.placeholder.com/40?text=PNG")}
                         />
                     </div>
@@ -73,9 +85,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </div>
 
                 {/* COLLAPSE TOGGLE */}
-                <button 
+                <button
                     onClick={() => setIsCollapsed(!isCollapsed)}
-                    className="hidden md:flex absolute -right-3 top-20 bg-white text-[#1A365D] rounded-full w-6 h-6 items-center justify-center shadow-lg z-[60] border border-blue-100"
+                    className="hidden md:flex absolute -right-3 top-20 bg-white text-slate-900 rounded-full w-6 h-6 items-center justify-center shadow-lg z-[60] border border-white/20"
                 >
                     <span className="text-[10px]">{isCollapsed ? '▶' : '◀'}</span>
                 </button>
@@ -91,12 +103,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                             }}
                             className={`
                                 w-full flex items-center gap-4 px-3 py-3 rounded-xl transition-all duration-200 group
-                                ${currentView === item.id 
-                                    ? 'bg-red-600 text-white shadow-lg shadow-red-900/20' 
-                                    : 'text-blue-100/70 hover:bg-white/10 hover:text-white'}
+                                ${currentView === item.id
+                                    ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-900/20'
+                                    : 'text-slate-300 hover:bg-white/10 hover:text-white'}
                             `}
                         >
-                            <span className="text-xl">{item.icon}</span>
+                            <item.icon className="w-5 h-5" />
                             {!isCollapsed && (
                                 <span className="text-[10px] font-black uppercase tracking-tight">
                                     {item.label}
@@ -105,32 +117,32 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         </button>
                     ))}
 
-                    <div className="pt-4 mt-4 border-t border-blue-800/50">
-                        <button 
+                    <div className="pt-4 mt-4 border-t border-white/20">
+                        <button
                             onClick={onShowLndAiAssistant}
                             className="w-full flex items-center gap-4 px-3 py-3 rounded-xl text-emerald-400 hover:bg-emerald-500/10 transition-all"
                         >
-                            <span className="text-xl">🤖</span>
+                            <SparklesIcon className="w-5 h-5" />
                             {!isCollapsed && <span className="text-[10px] font-black uppercase tracking-tight">AI L&D Assistant</span>}
                         </button>
                     </div>
                 </nav>
 
                 {/* BOTTOM ACTIONS */}
-                <div className="p-4 mt-auto border-t border-blue-800/50 bg-blue-900/20">
-                    <button 
+                <div className="p-4 mt-auto border-t border-white/20 bg-white/5">
+                    <button
                         onClick={onImportClick}
-                        className="w-full flex items-center gap-4 px-3 py-3 rounded-xl text-blue-200 hover:bg-white/10 transition-all mb-1"
+                        className="w-full flex items-center gap-4 px-3 py-3 rounded-xl text-slate-300 hover:bg-white/10 transition-all mb-1"
                     >
-                        <span className="text-xl">📥</span>
+                        <ArrowDownTrayIcon className="w-5 h-5" />
                         {!isCollapsed && <span className="text-[10px] font-black uppercase tracking-tight">Import Data</span>}
                     </button>
-                    
-                    <button 
+
+                    <button
                         onClick={onLogout}
                         className="w-full flex items-center gap-4 px-3 py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-all"
                     >
-                        <span className="text-xl">🚪</span>
+                        <ArrowLeftIcon className="w-5 h-5" />
                         {!isCollapsed && <span className="text-[10px] font-black uppercase tracking-tight">Logout</span>}
                     </button>
                 </div>

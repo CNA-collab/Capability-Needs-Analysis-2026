@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { GoogleGenAI, Type } from "@google/genai";
-import { OfficerRecord, AiDetailedCapabilityReport, AgencyType, CapabilityItemAnalysis, AiReportSummary, QUESTION_TEXT_MAPPING, SuccessionCandidate } from '../types';
+import { OfficerRecord, AiDetailedCapabilityReport, AgencyType, CapabilityItemAnalysis, AiReportSummary, QUESTION_TEXT_MAPPING } from '../types';
 import { AI_DETAILED_CAPABILITY_REPORT_PROMPT_INSTRUCTIONS } from '../constants';
 import { XIcon, SparklesIcon, ClipboardDocumentListIcon } from './icons';
 import { ExportMenu } from './ExportMenu';
@@ -183,8 +183,7 @@ export const DetailedCapabilityBreakdownReport: React.FC<ReportProps> = ({ data,
                     totalOfficers: data.length,
                     officerData: data.map(o => ({
                         capabilityRatings: o.capabilityRatings,
-                        technicalCapabilityGaps: o.technicalCapabilityGaps,
-                        leadershipCapabilityGaps: o.leadershipCapabilityGaps
+                        technicalCapabilityGaps: o.technicalCapabilityGaps
                     }))
                 };
 
@@ -367,8 +366,8 @@ Please analyze the following aggregated Capability Needs Analysis (CNA) survey d
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {report.successionPlan.map((plan, index) => (
-                                            <tr key={index} className="border-b border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                                        {report.successionPlan.map((plan) => (
+                                            <tr key={plan.roleOrPosition} className="border-b border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50">
                                                 <td className="p-2 font-semibold">{plan.roleOrPosition}</td>
                                                 <td className="p-2">{plan.potentialSuccessors.join(', ')}</td>
                                                 <td className="p-2">{plan.readinessLevel}</td>

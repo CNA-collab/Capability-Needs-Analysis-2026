@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { GoogleGenAI, Type } from "@google/genai";
-import { OfficerRecord, AiJobGroupTrainingNeedsReport, AgencyType, AiReportSummary, JobGroup, JobGroupTrainingNeed, QUESTION_TEXT_MAPPING } from '../types';
+import { OfficerRecord, AiJobGroupTrainingNeedsReport, AgencyType, JobGroup, QUESTION_TEXT_MAPPING } from '../types';
 import { AI_JOB_GROUP_TRAINING_NEEDS_PROMPT_INSTRUCTIONS } from '../constants';
-import { XIcon, SparklesIcon, CalendarDaysIcon, ChevronDownIcon } from './icons';
+import { XIcon, SparklesIcon, CalendarDaysIcon } from './icons';
 import { ExportMenu } from './ExportMenu';
 import { exportToPdf, exportToDocx, exportToXlsx, ReportData } from '../utils/export';
 
@@ -168,14 +168,14 @@ Please analyze the following Capability Needs Analysis (CNA) survey data and gen
 
     const getReportDataForExport = (): ReportData => {
         if (!report) throw new Error("AI report not available");
-        
+
         const tableHeaders = ['Job Group', ...yearHeaders.map(String)];
-        
+
         const tableRows = Object.entries(dataForCalendar).map(([jobGroup, yearData]) => {
             const row = [jobGroup];
             yearHeaders.forEach(year => {
-                const needs = (yearData as any)[year];
-                row.push(needs ? needs.map((n: any) => n.skill).join('; ') : '');
+                const needs = yearData[year];
+                row.push(needs ? needs.map(n => n.skill).join('; ') : '');
             });
             return row;
         });
@@ -252,9 +252,9 @@ Please analyze the following Capability Needs Analysis (CNA) survey data and gen
                                             <td className="p-3 font-bold align-top text-slate-900 dark:text-slate-100 sticky left-0 bg-white dark:bg-slate-800/50">{jobGroup}</td>
                                             {yearHeaders.map(year => (
                                                 <td key={year} className="p-2 align-top border-l border-slate-200 dark:border-slate-700">
-                                                    {(yearData as any)[year] && (yearData as any)[year].length > 0 ? (
+                                                    {yearData[year] && yearData[year].length > 0 ? (
                                                         <ul className="space-y-2 text-xs">
-                                                            {(yearData as any)[year].map((need: any, index: number) => (
+                                                            {yearData[year].map((need, index: number) => (
                                                                 <li key={index} className="p-1.5 bg-blue-100/50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 rounded-md">
                                                                     <p className="font-semibold">{need.skill}</p>
                                                                 </li>

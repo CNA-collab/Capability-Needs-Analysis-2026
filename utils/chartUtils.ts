@@ -6,8 +6,10 @@
  * @param columnName The exact header name to aggregate
  * @returns Array of { category: string, score: number }
  */
+type RawSheetData = Record<string, unknown>;
+
 export const transformSheetDataForCharts = (
-    rawData: any[], 
+    rawData: RawSheetData[],
     columnName: string
 ): { category: string, score: number }[] => {
     if (!rawData || !Array.isArray(rawData) || rawData.length === 0) return [];
@@ -18,7 +20,7 @@ export const transformSheetDataForCharts = (
         .filter(val => val !== null && val !== undefined && String(val).trim() !== '')
         .slice(0, 10);
 
-    const isNumerical = samples.length > 0 && samples.every(s => !isNaN(parseFloat(s)));
+    const isNumerical = samples.length > 0 && samples.every(s => !isNaN(parseFloat(String(s))));
 
     if (isNumerical) {
         return calculateNumericalDistribution(rawData, columnName);
@@ -30,10 +32,10 @@ export const transformSheetDataForCharts = (
 /**
  * Counts occurrences of each unique string value.
  */
-const calculateCategoricalFrequencies = (rawData: any[], columnName: string) => {
-    const frequencyMap = rawData.reduce((acc: Map<string, number>, row: any) => {
-        const rawValue = row[columnName];
-        
+const calculateCategoricalFrequencies = (rawData: RawSheetData[], columnName: string) => {
+    const frequencyMap = rawData.reduce((acc: Map<string, number>, row: RawSheetData) => {
+        const rawValue = row[columnName] as string | number | null | undefined;
+
         if (rawValue === null || rawValue === undefined || String(rawValue).trim() === '') {
             return acc;
         }
@@ -45,16 +47,19 @@ const calculateCategoricalFrequencies = (rawData: any[], columnName: string) => 
     }, new Map<string, number>());
 
     return Array.from(frequencyMap.entries())
-        .map(([category, score]) => ({ category, score }))
+        .map((/* In the context of the `calculateCategoricalFrequencies` and
+        `calculateNumericalDistribution` functions, `[category, score]` is a destructuring
+        assignment used to extract values from an array. */
+        [category, score]) => ({ category, score }))
         .sort((a, b) => b.score - a.score);
 };
 
 /**
  * Groups numbers into logical buckets or keeps them as discrete values if range is small.
  */
-const calculateNumericalDistribution = (rawData: any[], columnName: string) => {
+const calculateNumericalDistribution = (rawData: RawSheetData[], columnName: string) => {
     const values = rawData
-        .map(row => parseFloat(row[columnName]))
+        .map((row: RawSheetData) => parseFloat(String(row[columnName])))
         .filter(val => !isNaN(val));
 
     if (values.length === 0) return [];

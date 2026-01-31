@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { GoogleGenAI, Type } from "@google/genai";
-import { OfficerRecord, AiAnnualTrainingPlan, AnnualTrainingPlanItem, AgencyType, AiReportSummary, FundingSource, QUESTION_TEXT_MAPPING, SuccessionCandidate } from '../types';
+import { OfficerRecord, AiAnnualTrainingPlan, AgencyType, QUESTION_TEXT_MAPPING } from '../types';
 import { AI_ANNUAL_TRAINING_PLAN_PROMPT_INSTRUCTIONS } from '../constants';
-import { XIcon, SparklesIcon, ChartBarSquareIcon, ArrowPathIcon, DocumentChartBarIcon, ArrowLeftIcon, ArrowRightIcon, HomeIcon } from './icons';
+import { XIcon, SparklesIcon, ArrowPathIcon, DocumentChartBarIcon, ArrowLeftIcon, ArrowRightIcon, HomeIcon } from './icons';
 import { ExportMenu } from './ExportMenu';
 import { exportToPdf, exportToDocx, exportToXlsx, ReportData } from '../utils/export';
 import { saveReportToCache, getReportFromCache, clearReportCache } from '../utils/reportCache';
@@ -258,7 +258,7 @@ export const AnnualTrainingPlanReport: React.FC<ReportProps> = ({ data, agencyTy
                                             <td className="p-2 font-semibold">{item.trainingArea}</td>
                                             <td className="p-2">{item.targetAudience}</td>
                                             <td className="p-2">{item.deliveryMethod}</td>
-                                            <td className="p-2"><PriorityBadge level={item.priority as any} /></td>
+                                            <td className="p-2"><PriorityBadge level={item.priority as unknown as 'High' | 'Medium' | 'Low'} /></td>
                                             <td className="p-2">{item.quarter}</td>
                                             <td className="p-2">{item.estimatedCost}</td>
                                             <td className="p-2 text-xs">{item.rationale}</td>
@@ -324,7 +324,7 @@ export const AnnualTrainingPlanReport: React.FC<ReportProps> = ({ data, agencyTy
                             <ArrowPathIcon className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
                             <span>Refresh</span>
                         </button>
-                        <ExportMenu onExport={handleExport as any} />
+                        <ExportMenu onExport={handleExport as unknown as (format: 'pdf' | 'xlsx' | 'docx') => void} />
                         <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700" aria-label="Close report">
                             <XIcon className="w-6 h-6 text-gray-600 dark:text-gray-300" />
                         </button>

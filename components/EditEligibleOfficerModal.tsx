@@ -36,7 +36,7 @@ type FormState = EligibleOfficer & {
     trainingYears: Record<number, boolean>;
 };
 
-export const EditEligibleOfficerModal: React.FC<ModalProps> = ({ officer, allOfficers, onUpdate, onClose, yearOptions }) => {
+export const EditEligibleOfficerModal: React.FC<ModalProps> = ({ officer, onUpdate, onClose, yearOptions }) => {
     // Initialize state with a function to ensure the correct shape from the start
     const [formState, setFormState] = useState<FormState>(() => ({
         ...officer,
@@ -96,7 +96,7 @@ export const EditEligibleOfficerModal: React.FC<ModalProps> = ({ officer, allOff
             notes: (formState.notes || '').trim(),
             trainingQuarters: (formState.trainingQuarters || '').trim(),
             // Convert the `trainingYears` object back to a `trainingYear` array
-            trainingYear: Object.entries(formState.trainingYears)
+            trainingYear: Object.entries(trainingYears)
                 .filter(([, checked]) => checked)
                 .map(([year]) => parseInt(year)),
         };
@@ -105,7 +105,7 @@ export const EditEligibleOfficerModal: React.FC<ModalProps> = ({ officer, allOff
     };
 
     return (
-        <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center p-4 animate-fade-in" aria-modal="true" role="dialog">
+        <dialog className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center p-4 animate-fade-in" aria-modal="true">
             <div className="bg-slate-100 dark:bg-slate-900 rounded-xl shadow-2xl max-w-2xl w-full flex flex-col">
                  <header className="flex justify-between items-center p-4 border-b border-slate-200 dark:border-slate-700">
                     <div>
@@ -185,7 +185,7 @@ export const EditEligibleOfficerModal: React.FC<ModalProps> = ({ officer, allOff
                         <div className="p-3 my-2 bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-300 rounded-lg">
                             <p className="font-bold mb-1">Please fix the following issues:</p>
                             <ul className="list-disc list-inside text-sm space-y-1">
-                                {errors.map((err, index) => <li key={index}>{err}</li>)}
+                                {errors.map((err) => <li key={err}>{err}</li>)}
                             </ul>
                         </div>
                     )}
@@ -199,6 +199,6 @@ export const EditEligibleOfficerModal: React.FC<ModalProps> = ({ officer, allOff
                     </footer>
                 </form>
             </div>
-        </div>
+        </dialog>
     );
 };

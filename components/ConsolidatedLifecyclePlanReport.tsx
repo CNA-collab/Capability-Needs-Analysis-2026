@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GoogleGenAI, Type } from "@google/genai";
-import { OfficerRecord, QUESTION_TEXT_MAPPING } from '../types';
-import { XIcon, SparklesIcon, ClipboardDocumentListIcon, UserCircleIcon, CheckCircleIcon, ArrowRightIcon } from './icons';
+import { OfficerRecord, AiConsolidatedLifecyclePlanReport } from '../types';
+import { XIcon, ClipboardDocumentListIcon } from './icons';
 import { ExportMenu } from './ExportMenu';
 import { exportToPdf, exportToDocx, exportToXlsx, ReportData } from '../utils/export';
 
@@ -65,7 +65,7 @@ const StatCard: React.FC<{ label: string; value: number; color: string }> = ({ l
 );
 
 export const ConsolidatedLifecyclePlanReport: React.FC<ReportProps> = ({ data, agencyName, onClose }) => {
-    const [report, setReport] = useState<any>(null);
+    const [report, setReport] = useState<AiConsolidatedLifecyclePlanReport | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -130,12 +130,12 @@ export const ConsolidatedLifecyclePlanReport: React.FC<ReportProps> = ({ data, a
             sections: [
                 { title: "Executive Strategic Overview", content: [report.executiveSummary] },
                 { title: "Strategic Insights by Cohort", content: [report.strategicInsights] },
-                { 
-                    title: "Individual Path Assignments", 
+                {
+                    title: "Individual Path Assignments",
                     content: [{
                         type: 'table',
                         headers: ['Officer', 'Assigned Stage', 'Objective', 'Primary Intervention', 'Timeline'],
-                        rows: report.individualPaths.map((p: any) => [
+                        rows: report.individualPaths.map((p) => [
                             p.officerName, p.assignedStage, p.primaryObjective, p.suggestedIntervention, p.staggeredTimeline
                         ])
                     }],
@@ -147,6 +147,22 @@ export const ConsolidatedLifecyclePlanReport: React.FC<ReportProps> = ({ data, a
         else if (format === 'xlsx') exportToXlsx(reportData);
         else if (format === 'docx') exportToDocx(reportData);
     };
+
+    if (error) {
+        return (
+            <div className="fixed inset-0 bg-[#0F172A]/90 backdrop-blur-xl z-[100] flex items-center justify-center p-6">
+                <div className="text-center">
+                    <div className="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mb-6 mx-auto">
+                        <svg className="w-8 h-8 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                        </svg>
+                    </div>
+                    <h2 className="text-2xl font-black text-white uppercase tracking-tighter mb-2">Consolidation Failed</h2>
+                    <p className="text-slate-400 font-medium">{error}</p>
+                </div>
+            </div>
+        );
+    }
 
     if (loading) return (
         <div className="fixed inset-0 bg-[#0F172A]/90 backdrop-blur-xl z-[100] flex items-center justify-center p-6">
@@ -171,7 +187,7 @@ export const ConsolidatedLifecyclePlanReport: React.FC<ReportProps> = ({ data, a
                         </div>
                     </div>
                     <div className="flex items-center gap-4">
-                        <ExportMenu onExport={handleExport as any} />
+                        <ExportMenu onExport={handleExport} />
                         <button onClick={onClose} className="p-3 bg-slate-50 text-slate-400 hover:bg-rose-600 hover:text-white rounded-2xl transition-all shadow-sm"><XIcon className="w-8 h-8" /></button>
                     </div>
                 </header>
@@ -205,7 +221,7 @@ export const ConsolidatedLifecyclePlanReport: React.FC<ReportProps> = ({ data, a
                     <div className="p-8 bg-[#1A365D] rounded-[32px] text-white shadow-2xl relative overflow-hidden">
                          <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-32 -mt-32"></div>
                          <h3 className="text-xs font-black text-blue-300 uppercase tracking-[0.3em] mb-4">Strategic Lifecycle Insights</h3>
-                         <p className="text-md leading-relaxed font-light italic opacity-90">"{report?.strategicInsights}"</p>
+                         <p className="text-md leading-relaxed font-light italic opacity-90">&quot;{report?.strategicInsights}&quot;</p>
                     </div>
 
                     {/* 4. Full Personnel Path Registry */}
@@ -227,7 +243,7 @@ export const ConsolidatedLifecyclePlanReport: React.FC<ReportProps> = ({ data, a
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-50">
-                                    {report?.individualPaths.map((path: any, i: number) => (
+                                    {report?.individualPaths.map((path, i: number) => (
                                         <tr key={i} className="hover:bg-slate-50/50 transition-colors group">
                                             <td className="p-5 font-black text-slate-900 uppercase tracking-tighter">{path.officerName}</td>
                                             <td className="p-5">
@@ -252,7 +268,7 @@ export const ConsolidatedLifecyclePlanReport: React.FC<ReportProps> = ({ data, a
                     <div className="bg-slate-50 p-10 rounded-[40px] text-center border border-dashed border-slate-300">
                          <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.5em] mb-4">Official Declaration</h3>
                          <p className="text-sm italic text-slate-500 font-serif leading-relaxed max-w-2xl mx-auto">
-                            "This Consolidated Life Cycle Plan constitutes the validated strategic roadmap for the 2025-2029 period. Individual officer paths are aligned with national establishment requirements and capability diagnostic results."
+                            &quot;This Consolidated Life Cycle Plan constitutes the validated strategic roadmap for the 2025-2029 period. Individual officer paths are aligned with national establishment requirements and capability diagnostic results.&quot;
                          </p>
                     </div>
 

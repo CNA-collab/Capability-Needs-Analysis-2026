@@ -1,11 +1,44 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GoogleGenAI, Type } from "@google/genai";
-import { OfficerRecord, AiIndividualDevelopmentPlan, AiLearningSolution, QUESTION_TEXT_MAPPING } from '../types';
+import { OfficerRecord } from '../types';
 import { AI_INDIVIDUAL_DEVELOPMENT_PLAN_PROMPT_INSTRUCTIONS } from '../constants';
-import { XIcon, SparklesIcon, UserCircleIcon, CalendarDaysIcon, IdentificationIcon, AcademicCapIcon, BuildingOfficeIcon, ChevronDownIcon, ArrowDownTrayIcon } from './icons';
-import { exportToDocx, exportToXlsx, exportToCsv, copyForSheets, ReportData } from '../utils/export';
+import { XIcon, SparklesIcon, ArrowDownTrayIcon } from './icons';
+import { exportToDocx, ReportData } from '../utils/export';
 import { exportOfficialReport } from '../utils/pdfExport';
 import { ExportMenu } from './ExportMenu';
+
+interface LearningSolution {
+    experiential70: string;
+    social20: string;
+    formal10: string;
+}
+
+interface Need {
+    perceivedArea: string;
+    jobRequirement: string;
+    proposedCourse: string;
+    institution: string;
+    fundingSource: string;
+    yearOfCommencement: number;
+    gapType: 'Skill' | 'Qualification';
+    remarks: string;
+    learningSolution: LearningSolution;
+}
+
+interface PlanCategory {
+    category: 'Qualifications & Experience' | 'Skills' | 'Knowledge';
+    needs: Need[];
+}
+
+interface IndividualDevelopmentReport {
+    officerStatus: string;
+    age: number;
+    lifecycleStage: string;
+    retirementWarning: string;
+    performanceCategory: 'Excellent' | 'Satisfactory' | 'Unsatisfactory';
+    promotionPotential: 'Overdue for Promotion' | 'Promotion Now' | 'Needs Development' | 'Not Promotable';
+    plan: PlanCategory[];
+}
 
 interface SummaryProps {
   officer: OfficerRecord;
@@ -70,11 +103,12 @@ const PNGNationalCrestPlaceholder = () => (
     </div>
 );
 
-export const IndividualDevelopmentProfile: React.FC<SummaryProps> = ({ officer, agencyName, onClose }) => {
-    const [report, setReport] = useState<any>(null);
+export const IndividualDevelopmentProfile: React.FC<SummaryProps> = ({ officer, onClose }) => {
+    const [report, setReport] = useState<IndividualDevelopmentReport | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+    // eslint-disable-next-line no-empty-pattern
+    const [] = useState<Set<string>>(new Set());
 
     useEffect(() => {
         const generateReport = async () => {
@@ -88,10 +122,11 @@ export const IndividualDevelopmentProfile: React.FC<SummaryProps> = ({ officer, 
                     config: {
                         systemInstruction: AI_INDIVIDUAL_DEVELOPMENT_PLAN_PROMPT_INSTRUCTIONS,
                         responseMimeType: "application/json",
-                        responseSchema: aiIndividualDevelopmentPlanSchema as any,
+                        responseSchema: aiIndividualDevelopmentPlanSchema as unknown,
                     },
                 });
                 setReport(JSON.parse(response.text?.trim() || '{}'));
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             } catch (e) { setError("Failed to aggregate lifecycle data."); } finally { setLoading(false); }
         };
         generateReport();
@@ -110,14 +145,6 @@ export const IndividualDevelopmentProfile: React.FC<SummaryProps> = ({ officer, 
         }
     };
 
-    const toggleRow = (key: string) => {
-        setExpandedRows(prev => {
-            const newSet = new Set(prev);
-            if (newSet.has(key)) newSet.delete(key);
-            else newSet.add(key);
-            return newSet;
-        });
-    };
 
     return (
         <div className="fixed inset-0 bg-black/85 z-50 flex justify-center items-start overflow-y-auto no-print px-4 py-10">
@@ -166,10 +193,10 @@ export const IndividualDevelopmentProfile: React.FC<SummaryProps> = ({ officer, 
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {report.plan?.map((category: any) => (
+                                        {report.plan?.map((category: PlanCategory) => (
                                             <React.Fragment key={category.category}>
                                                 <tr className="bg-slate-100 border-y border-slate-200"><td colSpan={4} className="p-5 font-black text-[#1A365D] uppercase tracking-widest">{category.category}</td></tr>
-                                                {category.needs.map((need: any, index: number) => (
+                                                {category.needs.map((need: Need, index: number) => (
                                                     <tr key={index} className="bg-white border-b border-slate-100 hover:bg-slate-50 transition-colors">
                                                         <td className="p-5 font-bold text-slate-700">{need.perceivedArea}</td>
                                                         <td className="p-5"><span className="px-2 py-1 bg-teal-50 text-teal-700 rounded text-[9px] font-black uppercase">{need.gapType || 'Skill'}</span></td>

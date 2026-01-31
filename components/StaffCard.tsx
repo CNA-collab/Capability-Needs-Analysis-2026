@@ -23,7 +23,7 @@ export const StaffCard: React.FC<StaffCardProps> = ({
 }) => {
   const allRatings = officer.capabilityRatings || [];
   const avgCapabilityScore = allRatings.length > 0
-    ? allRatings.reduce((sum, r) => sum + r.currentScore, 0) / allRatings.length
+    ? allRatings.reduce((sum, r) => sum + r.averageCurrentRating, 0) / allRatings.length
     : 0;
 
   const scoreCurrent = avgCapabilityScore;

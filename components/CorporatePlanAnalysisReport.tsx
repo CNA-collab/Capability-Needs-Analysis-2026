@@ -122,8 +122,8 @@ export const CorporatePlanAnalysisReport: React.FC<ReportProps> = ({ data, onClo
                      <div className="mt-6">
                         <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-2">🏅 Top 5 Participants</h3>
                         <ol className="list-decimal list-inside space-y-2 bg-gray-100 dark:bg-blue-950/40 p-4 rounded-md">
-                            {analysis.topParticipants.map((p, index) => (
-                                <li key={index} className="flex justify-between items-center text-sm">
+                            {analysis.topParticipants.map((p) => (
+                                <li key={p.name} className="flex justify-between items-center text-sm">
                                     <span>{p.name}</span>
                                     <span className="font-bold text-lg">{p.score}</span>
                                 </li>
@@ -156,8 +156,8 @@ export const CorporatePlanAnalysisReport: React.FC<ReportProps> = ({ data, onClo
                                     <table className="w-full text-left text-xs">
                                         <thead className="bg-red-100 dark:bg-red-900/30 sticky top-0"><tr><th className="p-2">Name</th><th className="p-2">Division</th><th className="p-2 text-center">Score</th></tr></thead>
                                         <tbody className="bg-white dark:bg-blue-950/50">
-                                            {lowUnderstandingOfficers.map((o, i) => (
-                                                <tr key={i} className="border-t border-red-200 dark:border-red-800"><td className="p-2">{o.name}</td><td className="p-2">{o.division}</td><td className="p-2 text-center font-bold">{o.score}</td></tr>
+                                            {lowUnderstandingOfficers.map((o) => (
+                                                <tr key={o.name} className="border-t border-red-200 dark:border-red-800"><td className="p-2">{o.name}</td><td className="p-2">{o.division}</td><td className="p-2 text-center font-bold">{o.score}</td></tr>
                                             ))}
                                         </tbody>
                                     </table>
@@ -171,7 +171,7 @@ export const CorporatePlanAnalysisReport: React.FC<ReportProps> = ({ data, onClo
     }
     
     return (
-        <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-start p-4 pt-12 animate-fade-in" aria-modal="true" role="dialog">
+        <dialog className="fixed inset-0 bg-black/60 z-50 flex justify-center items-start p-4 pt-12 animate-fade-in" aria-modal="true">
             <div className="bg-gray-100 dark:bg-blue-950 rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col">
                 <header className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-blue-800 flex-shrink-0">
                      <div className="flex items-center gap-3">
@@ -189,6 +189,6 @@ export const CorporatePlanAnalysisReport: React.FC<ReportProps> = ({ data, onClo
                     <p className="text-xs text-gray-500 dark:text-gray-400">Analysis based on imported data for question code {TARGET_QUESTION_CODE}.</p>
                 </footer>
             </div>
-        </div>
+        </dialog>
     );
 };

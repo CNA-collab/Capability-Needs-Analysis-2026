@@ -1,42 +1,26 @@
 import React, { useState, useMemo } from 'react';
-import { EligibleOfficer } from '../types';
-import { XIcon, ArrowLeftIcon } from './icons';
+import { XIcon, DocumentChartBarIcon, UsersIcon, ClipboardDocumentListIcon, PresentationChartLineIcon } from './icons';
 import { ExportMenu } from './ExportMenu';
-import { exportToPdf, exportToDocx, exportToXlsx, exportToCsv, ReportData } from '../utils/export';
-
-// --- CUSTOM 2026 ICON SUITE ---
-
-const FullPlanIcon = () => (
-    <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-    </svg>
-);
-
-const EligibleIcon = () => (
-    <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M10.125 2.25h-4.5c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125v-9M10.125 2.25h.375a9 9 0 019 9v.375M10.125 2.25A3.375 3.375 0 0113.5 5.625v1.5c0 .621.504 1.125 1.125 1.125h1.5a3.375 3.375 0 013.375 3.375M9 15l2.25 2.25L15 12" />
-    </svg>
-);
-
-const ChecklistIcon = () => (
-    <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H18a2.25 2.25 0 01-2.25-2.25v-2.25z" />
-    </svg>
-);
-
-const TimelineIcon = () => (
-    <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008zM12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008zM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008zm6.75-4.5h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008zm2.25-4.5h.008v.008H16.5v-.008zm0 2.25h.008v.008H16.5V15z" />
-    </svg>
-);
 
 // --- MAIN COMPONENT ---
 
 type ReportType = 'full' | 'eligible' | 'cna' | 'yearly' | 'none';
 
+interface Officer {
+    occupant: string;
+    designation: string;
+    positionNumber: string;
+    status: string;
+    cnaSubmission: string;
+    trainingYear: number[];
+    courseDetails?: string;
+    branch: string;
+    grade: string;
+}
+
 interface ReportProps {
     division: string;
-    officers: EligibleOfficer[];
+    officers: Officer[];
     yearHeaders: number[];
     onClose: () => void;
 }
@@ -47,29 +31,29 @@ export const ReportingSuiteModal: React.FC<ReportProps> = ({ division, officers,
     const reportMetadata = {
         full: {
             title: 'Full Training Plan',
-            description: 'Comprehensive 5-year matrix tracking every officer’s development journey and study history.',
-            icon: FullPlanIcon,
+            description: 'Comprehensive 5-year matrix tracking every officer\'s development journey and study history.',
+            icon: PresentationChartLineIcon,
             color: 'from-blue-600 to-blue-400',
             glow: 'shadow-blue-500/20'
         },
         eligible: {
             title: 'Eligible Officers Summary',
             description: 'Filtered workforce view showing confirmed officers who have cleared CNA compliance.',
-            icon: EligibleIcon,
+            icon: UsersIcon,
             color: 'from-emerald-600 to-emerald-400',
             glow: 'shadow-emerald-500/20'
         },
         cna: {
             title: 'Establishment Checklist',
             description: 'Audit-ready view of the establishment to track submission compliance across all divisions.',
-            icon: ChecklistIcon,
+            icon: ClipboardDocumentListIcon,
             color: 'from-amber-600 to-amber-400',
             glow: 'shadow-amber-500/20'
         },
         yearly: {
             title: 'Yearly Timeline',
             description: 'Chronological breakdown of planned training interventions sorted by implementation year.',
-            icon: TimelineIcon,
+            icon: DocumentChartBarIcon,
             color: 'from-purple-600 to-purple-400',
             glow: 'shadow-purple-500/20'
         }
@@ -116,7 +100,7 @@ export const ReportingSuiteModal: React.FC<ReportProps> = ({ division, officers,
                     <div className="flex items-center gap-6">
                         {currentReport !== 'none' && (
                             <button onClick={() => setCurrentReport('none')} className="group flex items-center justify-center w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 hover:bg-slate-900 hover:text-white transition-all">
-                                <ArrowLeftIcon className="w-5 h-5" />
+                                <span className="text-lg">←</span>
                             </button>
                         )}
                         <div>
@@ -163,7 +147,7 @@ export const ReportingSuiteModal: React.FC<ReportProps> = ({ division, officers,
                         <div className="h-full flex flex-col">
                              {/* Export Bar */}
                              <div className="flex justify-end mb-6">
-                                <ExportMenu onExport={((format: any) => {}) as any} />
+                                <ExportMenu onExport={() => {}} />
                              </div>
                              <div className="flex-1 overflow-auto rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl">
                                 <table className="w-full text-left text-xs">

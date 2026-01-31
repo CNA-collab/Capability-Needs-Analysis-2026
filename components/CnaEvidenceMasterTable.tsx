@@ -1,7 +1,7 @@
 
 import React, { useMemo, useState } from 'react';
-import { OfficerRecord, EstablishmentRecord, QUESTION_TEXT_MAPPING } from '../types';
-import { XIcon, TableCellsIcon, SparklesIcon, CheckCircleIcon, ExclamationTriangleIcon } from './icons';
+import { OfficerRecord, EstablishmentRecord } from '../types';
+import { XIcon, TableCellsIcon } from './icons';
 import { DataAggregator } from '../services/DataAggregator';
 import { ExportMenu } from './ExportMenu';
 import { exportToPdf, exportToDocx, exportToXlsx, ReportData } from '../utils/export';
@@ -84,21 +84,24 @@ export const CnaEvidenceMasterTable: React.FC<EvidenceProps> = ({ data, establis
         return evidenceRows.filter(r => r.category === filterCategory);
     }, [evidenceRows, filterCategory]);
 
-    const handleExport = (format: 'pdf' | 'docx' | 'xlsx') => {
-        const reportData: ReportData = {
-            title: `CNA Evidence Master Registry - ${agencyName}`,
-            sections: [{
-                title: "Evidence Base for Strategic Recommendations",
-                content: [{
-                    type: 'table',
-                    headers: ['Code', 'Category', 'Evidence Description', 'Metric Value', 'Justification / Citation'],
-                    rows: evidenceRows.map(r => [r.code, r.category, r.description, r.metric, r.justification])
+    const handleExport = (format: 'pdf' | 'docx' | 'xlsx' | 'csv' | 'sheets' | 'json' | 'print') => {
+        if (format === 'pdf' || format === 'xlsx' || format === 'docx') {
+            const reportData: ReportData = {
+                title: `CNA Evidence Master Registry - ${agencyName}`,
+                sections: [{
+                    title: "Evidence Base for Strategic Recommendations",
+                    content: [{
+                        type: 'table',
+                        headers: ['Code', 'Category', 'Evidence Description', 'Metric Value', 'Justification / Citation'],
+                        rows: evidenceRows.map(r => [r.code, r.category, r.description, r.metric, r.justification])
+                    }]
                 }]
-            }]
-        };
-        if (format === 'pdf') exportToPdf(reportData);
-        else if (format === 'xlsx') exportToXlsx(reportData);
-        else if (format === 'docx') exportToDocx(reportData);
+            };
+            if (format === 'pdf') exportToPdf(reportData);
+            else if (format === 'xlsx') exportToXlsx(reportData);
+            else if (format === 'docx') exportToDocx(reportData);
+        }
+        // Unsupported formats: csv, sheets, json, print - do nothing
     };
 
     return (
@@ -115,7 +118,7 @@ export const CnaEvidenceMasterTable: React.FC<EvidenceProps> = ({ data, establis
                         </div>
                     </div>
                     <div className="flex items-center gap-4">
-                        <ExportMenu onExport={handleExport as any} />
+                        <ExportMenu onExport={handleExport} />
                         <button onClick={onClose} className="p-3 bg-slate-50 text-slate-400 hover:bg-rose-600 hover:text-white rounded-2xl transition-all shadow-sm">
                             <XIcon className="w-8 h-8" />
                         </button>
@@ -198,7 +201,7 @@ export const CnaEvidenceMasterTable: React.FC<EvidenceProps> = ({ data, establis
                          <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
                          <h3 className="text-xs font-black text-emerald-400 uppercase tracking-[0.4em] mb-4">Official Declaration</h3>
                          <p className="text-sm italic text-blue-50 font-serif leading-relaxed max-w-2xl mx-auto">
-                            "This Evidence Master Table constitutes the audited baseline for the 2025-2029 Strategic Capability Roadmap. Any deviation from these metrics must be justified through a formal re-assessment cycle."
+                            &quot;This Evidence Master Table constitutes the audited baseline for the 2025-2029 Strategic Capability Roadmap. Any deviation from these metrics must be justified through a formal re-assessment cycle.&quot;
                          </p>
                     </div>
                 </main>

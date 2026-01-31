@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { GoogleGenAI, Type } from "@google/genai";
-import { OfficerRecord, EstablishmentRecord, AgencyType } from '../types';
+import { OfficerRecord, EstablishmentRecord, AgencyType, StructuredCorporatePlan } from '../types';
 import { XIcon, SparklesIcon, ArrowDownTrayIcon } from './icons';
 import { ExportMenu } from './ExportMenu';
 import { exportToPdf, exportToDocx, exportToXlsx, ReportData } from '../utils/export';
@@ -51,10 +51,10 @@ const ReportSection: React.FC<{ title: string; children: React.ReactNode; formal
     </div>
 );
 
-export const AutomatedOrganizationalAnalysisReport: React.FC<ReportProps> = ({ data, establishmentData, agencyType, agencyName, corporatePlanContext, onClose }) => {
+export const AutomatedOrganizationalAnalysisReport: React.FC<ReportProps> = ({ data, establishmentData, agencyName, corporatePlanContext, onClose }) => {
     const [aiContent, setAiContent] = useState<AiGeneratedSections | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string | null>(null);
+    const [, setError] = useState<string | null>(null);
     const [showMobileReadMode, setShowMobileReadMode] = useState(false);
 
     const stats = useMemo(() => DataAggregator.process(data, establishmentData), [data, establishmentData]);
@@ -83,6 +83,7 @@ export const AutomatedOrganizationalAnalysisReport: React.FC<ReportProps> = ({ d
                     - PERSONNEL ESTABLISHMENT: ${parsed.personnel_establishment}
                     - TRAINING NEEDS FROM PLAN: ${parsed.training_needs}
                     `;
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 } catch (e) {
                     // Fallback to legacy plain text
                     highFidelityContext = corporatePlanContext || 'PNG National Vision 2050 and MTDP IV Strategic Priorities.';
@@ -198,7 +199,7 @@ export const AutomatedOrganizationalAnalysisReport: React.FC<ReportProps> = ({ d
                     </header>
                     <div className="flex-1 overflow-y-auto p-6 space-y-10">
                         <div>
-                            <h2 className="text-2xl font-black text-[#1A365D] uppercase border-b-2 border-blue-600 pb-2 mb-4">Secretary's Foreword</h2>
+                            <h2 className="text-2xl font-black text-[#1A365D] uppercase border-b-2 border-blue-600 pb-2 mb-4">Secretary&apos;s Foreword</h2>
                             <p className="text-[16px] leading-relaxed text-slate-800 italic whitespace-pre-wrap">{aiContent?.secretarysForeword}</p>
                         </div>
                         <div>
@@ -220,14 +221,4 @@ export const AutomatedOrganizationalAnalysisReport: React.FC<ReportProps> = ({ d
     );
 };
 
-export interface StructuredCorporatePlan {
-    strategic_goals: {
-        vision: string;
-        mission: string;
-        objectives: string[];
-    };
-    financial_context: string;
-    risk_assessment: string;
-    personnel_establishment: string;
-    training_needs: string;
-}
+

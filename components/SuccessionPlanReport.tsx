@@ -11,6 +11,12 @@ import { XIcon, SparklesIcon, UsersIcon } from './icons';
 import { ExportMenu } from './ExportMenu';
 import { exportToPdf, exportToDocx, exportToXlsx, ReportData } from '../utils/export';
 
+interface WindowWithEnv extends Window {
+    ENV?: {
+        API_KEY?: string;
+    };
+}
+
 interface ReportProps {
   data: OfficerRecord[];
   establishmentData: EstablishmentRecord[];
@@ -72,7 +78,7 @@ export const SuccessionPlanReport: React.FC<ReportProps> = ({ data, establishmen
 
     useEffect(() => {
         const generateReport = async () => {
-            const apiKey = process.env.API_KEY || (window as any).ENV?.API_KEY;
+            const apiKey = process.env.API_KEY || (window as WindowWithEnv).ENV?.API_KEY;
             if (!apiKey) {
                 setError("AI Engine Authorization Missing. Please check System Settings.");
                 setLoading(false);

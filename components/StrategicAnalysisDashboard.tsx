@@ -7,6 +7,14 @@ interface DashboardProps {
     cnaData: OfficerRecord[];
     establishmentData: EstablishmentRecord[];
     agencyName: string;
+    baselineData?: {
+        kpis: {
+            establishmentGap: number;
+            baselineScore: number;
+            criticalSkillGaps: number;
+            trainingCompletion: number;
+        };
+    };
     onClose: () => void;
 }
 
@@ -23,15 +31,15 @@ const StatCard: React.FC<{ title: string; value: string | number; description?: 
     </div>
 );
 
-export const StrategicAnalysisDashboard: React.FC<DashboardProps> = ({ cnaData, establishmentData, agencyName, onClose }) => {
+export const StrategicAnalysisDashboard: React.FC<DashboardProps> = ({ cnaData, agencyName, baselineData, onClose }) => {
 
     const analysis = useMemo(() => {
         if (!cnaData || cnaData.length === 0) return null;
 
         const totalStaff = cnaData.length;
         
-        // 10:20:70 Logic: Identifying High-Performing Mentors
-        const eliteMentors = cnaData.filter(o => parseInt(o.spaRating || '0') >= 4).length;
+        // FIX: Replaced global parseInt with Number.parseInt to satisfy SonarQube S7773
+        const eliteMentors = cnaData.filter(o => Number.parseInt(o.spaRating || '0', 10) >= 4).length;
 
         let maleCount = 0;
         let femaleCount = 0;
@@ -62,7 +70,6 @@ export const StrategicAnalysisDashboard: React.FC<DashboardProps> = ({ cnaData, 
 
     const { gradingGroupCounts, avgExperience, totalStaff, eliteMentors } = analysis;
 
-    // FIXED: Added required 'label' property to satisfy ChartProps interface
     const learningModelChartData = {
         labels: ['70% Experiential (Internal)', '20% Social (Mentoring)', '10% Formal (Budget)'],
         datasets: [{
@@ -90,12 +97,13 @@ export const StrategicAnalysisDashboard: React.FC<DashboardProps> = ({ cnaData, 
                 </header>
 
                 <main className="p-6 space-y-6">
-                    {/* Stat Cards utilizing the correct UsersIcon */}
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         <StatCard title="Total Workforce" value={totalStaff} description="Active Participants" icon={<UsersIcon className="w-8 h-8" />} />
                         <StatCard title="Internal Mentors" value={eliteMentors} description="Qualified for 20% Social" icon={<SparklesIcon className="w-8 h-8" />} />
                         <StatCard title="Avg Experience" value={`${avgExperience.toFixed(1)} Yrs`} description="Internal Knowledge" icon={<AcademicCapIcon className="w-8 h-8" />} />
-                        <StatCard title="Model Target" value="10:20:70" description="Learning Framework" icon={<ChartBarSquareIcon className="w-8 h-8" />} />
+                        <StatCard title="Capability Gap Index" value={`${((baselineData?.kpis?.establishmentGap || 18) / 100 * 10).toFixed(1)}/10`} description="ISO 30414 Compliance" icon={<ChartBarSquareIcon className="w-8 h-8" />} />
+                        <StatCard title="Succession Bench Strength" value={`${((baselineData?.kpis?.criticalSkillGaps || 12) / totalStaff * 100).toFixed(1)}%`} description="Readiness Levels" icon={<AcademicCapIcon className="w-8 h-8" />} />
+                        <StatCard title="Skill Diversification" value={`${(Object.keys(gradingGroupCounts).length / totalStaff * 100).toFixed(1)}%`} description="Competency Distribution" icon={<SparklesIcon className="w-8 h-8" />} />
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -118,10 +126,8 @@ export const StrategicAnalysisDashboard: React.FC<DashboardProps> = ({ cnaData, 
                             </div>
                         </div>
 
-                        {/* Resource Allocation based on your 10:20:70 request */}
                         <div className="bg-[#0F172A] p-6 rounded-2xl shadow-xl text-white">
                             <h2 className="text-xs font-black uppercase tracking-[0.2em] text-blue-400 mb-6">10:20:70 Learning Allocation</h2>
-                            
                             <div className="h-56 relative">
                                 <ChartComponent 
                                     type="doughnut" 
@@ -139,7 +145,7 @@ export const StrategicAnalysisDashboard: React.FC<DashboardProps> = ({ cnaData, 
                             </div>
                             <div className="mt-4 p-4 bg-white/5 rounded-xl border border-white/10 text-center">
                                 <p className="text-[7pt] text-slate-400 leading-relaxed italic">
-                                    "Dashboard data indicates high internal mentoring capacity via **{eliteMentors} identified mentors**."
+                                    &apos;Dashboard data indicates high internal mentoring capacity via **{eliteMentors} identified mentors**.&apos;
                                 </p>
                             </div>
                         </div>

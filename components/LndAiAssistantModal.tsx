@@ -270,7 +270,7 @@ export const LndAiAssistantModal: React.FC<ModalProps> = ({ onClose }) => {
 
                 <main className="flex-1 overflow-y-auto p-4 space-y-4">
                     {messages.map((msg, index) => (
-                        <div key={index} className={`flex items-start gap-3 ${msg.sender === 'user' ? 'justify-end' : ''}`}>
+                        <div key={`${msg.sender}-${index}`} className={`flex items-start gap-3 ${msg.sender === 'user' ? 'justify-end' : ''}`}>
                             {msg.sender === 'ai' && <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center flex-shrink-0"><SparklesIcon className="w-5 h-5 text-amber-600 dark:text-amber-400" /></div>}
                             <div className={`max-w-md p-3 rounded-lg ${msg.sender === 'ai' ? 'bg-white dark:bg-slate-800' : 'bg-amber-600 text-white'}`}>
                                 <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap">{msg.content}</div>

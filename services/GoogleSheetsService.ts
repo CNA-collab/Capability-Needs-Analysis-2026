@@ -30,7 +30,7 @@ export class GoogleSheetsService {
             }
 
             return result.data;
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("GoogleSheetsService Error:", error);
             throw error;
         }

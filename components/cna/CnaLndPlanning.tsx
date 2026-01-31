@@ -55,7 +55,7 @@ export const CnaLndPlanning: React.FC = () => {
 
             <div className="p-6 bg-indigo-50/50 border border-indigo-100 rounded-2xl">
                  <h4 className="font-bold text-indigo-900 text-sm mb-2">Automated Planning Integration</h4>
-                 <p className="text-xs text-indigo-800 leading-relaxed">This application's AI-powered reports, such as the 'Automated L&D Recommendations', automatically suggest 70:20:10 interventions for identified gaps, providing a strong starting point for your strategic L&D plan.</p>
+                 <p className="text-xs text-indigo-800 leading-relaxed">This application&apos;s AI-powered reports, such as the &apos;Automated L&D Recommendations&apos;, automatically suggest 70:20:10 interventions for identified gaps, providing a strong starting point for your strategic L&D plan.</p>
             </div>
         </div>
     );

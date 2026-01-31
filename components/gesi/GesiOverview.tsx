@@ -16,7 +16,7 @@ const StandardCard: React.FC<{ title: string; children: React.ReactNode }> = ({ 
 const Blockquote: React.FC<{ source: string; children: React.ReactNode }> = ({ source, children }) => (
     <div className="bg-slate-50 border-l-[6px] border-indigo-600 p-8 rounded-r-xl shadow-inner mb-6 relative overflow-hidden">
         <p className="text-lg italic text-slate-700 leading-relaxed font-serif relative z-10">
-            "{children}"
+            &quot;{children}&quot;
         </p>
         <p className="mt-4 text-[11px] font-black text-indigo-600 uppercase tracking-widest">— {source}</p>
     </div>

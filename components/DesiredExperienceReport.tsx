@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { DesiredExperienceRecord, JobGroupType, FundingSourceType } from '../types';
+import { DesiredExperienceRecord } from '../types';
 import { XIcon, AcademicCapIcon, PencilIcon, TrashIcon, SaveIcon } from './icons';
 import { ExportMenu } from './ExportMenu';
 import { exportToCsv, copyForSheets, ReportData } from '../utils/export';
@@ -50,7 +50,7 @@ const NextStepsPanel: React.FC<{
 
 export const DesiredExperienceReport: React.FC<ReportProps> = ({ onClose }) => {
     const [experiences, setExperiences] = useState<DesiredExperienceRecord[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
+    const [, setLoading] = useState<boolean>(true);
     const [filter, setFilter] = useState('');
     const [experienceToEdit, setExperienceToEdit] = useState<DesiredExperienceRecord | null>(null);
     const [statusMessage, setStatusMessage] = useState<{type: 'success' | 'info' | 'error', text: string} | null>(null);
@@ -165,14 +165,18 @@ export const DesiredExperienceReport: React.FC<ReportProps> = ({ onClose }) => {
         };
     };
 
-    const handleExport = (format: 'csv' | 'sheets') => {
-       try {
-            const reportData = getReportDataForExport();
-            if (format === 'csv') exportToCsv(reportData);
-            if (format === 'sheets') copyForSheets(reportData).then(msg => showStatus(msg, 'success')).catch(err => showStatus(err.toString(), 'error'));
-        } catch (e) {
-            console.error("Export failed:", e);
-            showStatus("Could not export report.", 'error');
+    const handleExport = (format: 'pdf' | 'docx' | 'xlsx' | 'csv' | 'sheets' | 'json' | 'print') => {
+        if (format === 'csv' || format === 'sheets') {
+            try {
+                const reportData = getReportDataForExport();
+                if (format === 'csv') exportToCsv(reportData);
+                if (format === 'sheets') copyForSheets(reportData).then(msg => showStatus(msg, 'success')).catch(err => showStatus(err.toString(), 'error'));
+            } catch (e) {
+                console.error("Export failed:", e);
+                showStatus("Could not export report.", 'error');
+            }
+        } else {
+            showStatus(`Export to ${format} is not supported for this report.`, 'error');
         }
     };
 
@@ -229,7 +233,7 @@ export const DesiredExperienceReport: React.FC<ReportProps> = ({ onClose }) => {
                                 />
                                 <button onClick={handleSaveDraft} className="flex items-center gap-2 px-3 py-1.5 text-sm bg-slate-200 hover:bg-slate-300 rounded-md"><SaveIcon className="w-4 h-4" /> Save</button>
                                 <button onClick={handleClearDraft} className="flex items-center gap-2 px-3 py-1.5 text-sm bg-red-100 hover:bg-red-200 text-red-700 font-semibold rounded-md"><TrashIcon className="w-4 h-4" /> Clear</button>
-                                <ExportMenu onExport={handleExport as any} />
+                                <ExportMenu onExport={handleExport} />
                             </div>
                         </div>
                         <div className="overflow-x-auto">

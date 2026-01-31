@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { SuccessionCandidate, GapTag } from '../types';
+import { SuccessionCandidate } from '../types';
 
 interface SuccessionPlanningTableProps {
     candidates: SuccessionCandidate[];

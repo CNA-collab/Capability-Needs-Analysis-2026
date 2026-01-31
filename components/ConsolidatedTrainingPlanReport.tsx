@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { GoogleGenAI, Type } from "@google/genai";
 import { OfficerRecord, AgencyType, QUESTION_TEXT_MAPPING } from '../types';
 import { AI_CONSOLIDATED_STRATEGIC_PLAN_PROMPT_INSTRUCTIONS } from '../constants';
@@ -45,17 +45,6 @@ const CoverPage: React.FC<{ agencyName: string }> = ({ agencyName }) => (
     </div>
 );
 
-const TableOfContents: React.FC<{ sections: { id: string, title: string }[] }> = ({ sections }) => (
-    <ReportSection title="Table of Contents" anchorId="toc">
-        <ul className="list-none p-0 space-y-2">
-            {sections.map(section => (
-                <li key={section.id}>
-                    <a href={`#${section.id}`} className="text-blue-600 hover:underline">{section.title}</a>
-                </li>
-            ))}
-        </ul>
-    </ReportSection>
-);
 
 // --- Main Component ---
 export const ConsolidatedTrainingPlanReport: React.FC<ReportProps> = ({ data, agencyType, agencyName, onClose }) => {
@@ -113,7 +102,8 @@ export const ConsolidatedTrainingPlanReport: React.FC<ReportProps> = ({ data, ag
         generateReport();
     }, [data, organizationalAverages, agencyName, agencyType]);
 
-    const handleExport = (format: 'pdf' | 'docx') => {
+    const handleExport = (format: 'pdf' | 'docx' | 'xlsx' | 'csv' | 'sheets' | 'json' | 'print') => {
+        if (format !== 'pdf' && format !== 'docx') return;
         if(!aiContent) return;
         const reportData: ReportData = {
             title: `Consolidated Strategic Plan - ${agencyName}`,
@@ -165,7 +155,7 @@ export const ConsolidatedTrainingPlanReport: React.FC<ReportProps> = ({ data, ag
                         <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Consolidated Strategic Plan</h1>
                     </div>
                      <div className="flex items-center gap-4">
-                        <ExportMenu onExport={handleExport as any} />
+                        <ExportMenu onExport={handleExport} />
                         <button onClick={onClose} className="p-1 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700">
                             <XIcon className="w-6 h-6 text-slate-600 dark:text-slate-300" />
                         </button>

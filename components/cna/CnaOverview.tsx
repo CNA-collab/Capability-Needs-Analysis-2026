@@ -25,7 +25,7 @@ export const CnaOverview: React.FC = () => {
                 </h2>
                 <div className="prose prose-slate max-w-none">
                     <p className="text-lg text-slate-700 leading-relaxed font-medium">
-                        A Capability Needs Analysis (CNA) is a systematic process to determine the gap between an organization's current workforce capabilities and the capabilities it needs to achieve its strategic objectives.
+                        A Capability Needs Analysis (CNA) is a systematic process to determine the gap between an organization&apos;s current workforce capabilities and the capabilities it needs to achieve its strategic objectives.
                     </p>
                     <p className="text-sm text-slate-600 mt-4 leading-relaxed">
                         It serves as a critical diagnostic tool for effective Human Resource Development (HRD) and Learning & Development (L&D) planning. Instead of guessing what training is needed, a CNA provides evidence-based insights into specific skill and knowledge gaps at individual, team, and organizational levels.
@@ -38,7 +38,7 @@ export const CnaOverview: React.FC = () => {
                 <h2 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6">Strategic Purpose & Benefits</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <BenefitCard title="Strategic Alignment" icon={ChartBarSquareIcon}>
-                        Ensures training investments directly support the organization's corporate plan and national MTDP IV priorities.
+                        Ensures training investments directly support the organization&apos;s corporate plan and national MTDP IV priorities.
                     </BenefitCard>
                     <BenefitCard title="Targeted Investment" icon={SparklesIcon}>
                         Optimizes the L&D budget by focusing on the most critical skill gaps, maximizing return on institutional investment.

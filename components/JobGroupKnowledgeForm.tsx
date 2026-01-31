@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { JobGroupKnowledgeRecord, JobGroupKnowledgeType, DurationType, FundingSourceKnowledgeType } from '../types';
+import { JobGroupKnowledgeRecord, DurationType, FundingSourceKnowledgeType, JobGroupKnowledgeType } from '../types';
 import { XIcon, AcademicCapIcon, TrashIcon, SaveIcon } from './icons';
 import { ExportMenu } from './ExportMenu';
 import { exportToCsv, copyForSheets, ReportData } from '../utils/export';

@@ -1,13 +1,10 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GoogleGenAI, Type } from "@google/genai";
-import { OfficerRecord, EstablishmentRecord, AgencyType, QUESTION_TEXT_MAPPING, StructuredCorporatePlan } from '../types';
+import { OfficerRecord, StructuredCorporatePlan } from '../types';
 import { ReportTemplate } from './ReportTemplate';
-import { AI_LEARNING_INTERPRETATION_GUIDE } from '../constants';
 
 interface ReportProps {
     data: OfficerRecord[];
-    establishmentData: EstablishmentRecord[];
-    agencyType: AgencyType;
     agencyName: string;
     corporatePlanContext: string;
     onClose: () => void;
@@ -38,8 +35,24 @@ const aiSchema = {
     required: ["executiveSummary", "frameworkPlan"]
 };
 
-export const TrainingNeedsAnalysisReport: React.FC<ReportProps> = ({ data, establishmentData, agencyType, agencyName, corporatePlanContext, onClose }) => {
-    const [report, setReport] = useState<any>(null);
+interface FrameworkPlanItem {
+    capabilityCategory: string;
+    alignedStrategicGoal: string;
+    priorityLevel: 'Primary' | 'Secondary';
+    descriptionAndKRA: string;
+    develop70: string;
+    help20: string;
+    formal10: string;
+    when: string;
+}
+
+interface TrainingNeedsAnalysisReportType {
+    executiveSummary: string;
+    frameworkPlan: FrameworkPlanItem[];
+}
+
+export const TrainingNeedsAnalysisReport: React.FC<ReportProps> = ({ data, agencyName, corporatePlanContext, onClose }) => {
+    const [report, setReport] = useState<TrainingNeedsAnalysisReportType | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -57,7 +70,7 @@ export const TrainingNeedsAnalysisReport: React.FC<ReportProps> = ({ data, estab
                 try {
                     const parsed = JSON.parse(corporatePlanContext) as StructuredCorporatePlan;
                     strategicEvidence = `VISION: ${parsed.strategic_goals.vision}. MISSION: ${parsed.strategic_goals.mission}. OBJECTIVES: ${parsed.strategic_goals.objectives.join(', ')}.`;
-                } catch (e) {
+                } catch {
                     strategicEvidence = corporatePlanContext || 'MTDP IV Alignment.';
                 }
 
@@ -85,8 +98,8 @@ export const TrainingNeedsAnalysisReport: React.FC<ReportProps> = ({ data, estab
                 });
 
                 setReport(JSON.parse(response.text?.trim() || '{}'));
-            } catch (e) {
-                setError("Consolidation Error: Strategic dataset misalignment.");
+            } catch {
+                console.error("Consolidation Error: Strategic dataset misalignment.");
             } finally {
                 setLoading(false);
             }
@@ -103,6 +116,7 @@ export const TrainingNeedsAnalysisReport: React.FC<ReportProps> = ({ data, estab
             onExport={() => {}} 
             loading={loading}
         >
+            {error && <div className="text-red-500 mb-4">{error}</div>}
             <div className="space-y-8 pb-10">
                 <section className="page-break-avoid">
                     <h3 className="text-[10pt] font-black text-[#1A365D] uppercase tracking-widest mb-2 border-l-4 border-[#2AAA52] pl-3">Strategic Synthesis</h3>
@@ -121,7 +135,7 @@ export const TrainingNeedsAnalysisReport: React.FC<ReportProps> = ({ data, estab
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 bg-white">
-                            {report?.frameworkPlan.map((item: any, idx: number) => (
+                            {report?.frameworkPlan.map((item: FrameworkPlanItem, idx: number) => (
                                 <tr key={idx} className="hover:bg-slate-50 transition-colors">
                                     <td className="p-3 align-top">
                                         <span className={`px-2 py-0.5 rounded text-[7pt] font-black uppercase tracking-widest ${item.priorityLevel === 'Primary' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-slate-100 text-slate-500 border border-slate-200'}`}>

@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { IndividualLndPlanRecord, OfficerStatusType, LndTrainingNeed, LndFormFundingSource, AgeGroupType, PerfLevelType, PromotionPotentialType, TrainingNeedStatus, TaskPriority } from '../types';
-import { XIcon, IdentificationIcon, TrashIcon, SaveIcon, ChevronDownIcon, PencilIcon, DocumentIcon, CheckCircleIcon } from './icons';
+import { XIcon, IdentificationIcon, TrashIcon, SaveIcon, ChevronDownIcon, PencilIcon, CheckCircleIcon } from './icons';
 import { ExportMenu } from './ExportMenu';
 import { exportToCsv, copyForSheets, ReportData, exportToPdf, exportToDocx, exportToXlsx } from '../utils/export';
 import { PriorityBadge } from './Badges';
@@ -241,8 +241,8 @@ export const IndividualLndPlanForm: React.FC<ReportProps> = ({ onClose }) => {
         try {
             const savedDraft = localStorage.getItem(DRAFT_STORAGE_KEY);
             if (savedDraft) {
-                const parsed = JSON.parse(savedDraft);
-                const sanitized = parsed.map((p: any) => ({
+                const parsed = JSON.parse(savedDraft) as IndividualLndPlanRecord[];
+                const sanitized = parsed.map((p) => ({
                     ...initialFormState,
                     ...p,
                     trainingNeeds: p.trainingNeeds || { longTerm: [], shortTerm: [] },
@@ -620,7 +620,8 @@ export const IndividualLndPlanForm: React.FC<ReportProps> = ({ onClose }) => {
                                         </div></td>
                                     </tr>
                                 ))}
-                                {editingNeed?.category === category && <TrainingNeedInlineForm onSave={(data) => handleSaveNeed(category, data)} onCancel={() => setEditingNeed(null)} initialData={editingNeed.need ? (({ id, ...rest }) => rest)(editingNeed.need) : undefined} />}
+                                {/* eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-unused-vars */}
+                                {editingNeed?.category === category && <TrainingNeedInlineForm onSave={(data) => handleSaveNeed(category, data)} onCancel={() => setEditingNeed(null)} initialData={editingNeed.need ? (({ id: _id, ...rest }) => rest)(editingNeed.need) : undefined} />}
                             </tbody>
                         </table>
                     </div>
@@ -767,7 +768,7 @@ export const IndividualLndPlanForm: React.FC<ReportProps> = ({ onClose }) => {
                                                 <div className="flex items-center gap-2">
                                                     <button onClick={() => handleEdit(rec)} className="p-1 text-slate-500 hover:text-blue-600" aria-label={`Edit plan for ${rec.officerName}`}><PencilIcon className="w-4 h-4" /></button>
                                                     <button onClick={() => handleDeleteRecord(rec.id)} className="p-1 text-slate-500 hover:text-red-600" aria-label={`Delete plan for ${rec.officerName}`}><TrashIcon className="w-4 h-4" /></button>
-                                                    <ExportMenu onExport={(format) => handleSingleExport(rec, format as any)} />
+                                                    <ExportMenu onExport={(format) => handleSingleExport(rec, format as 'pdf' | 'docx' | 'xlsx' | 'csv' | 'sheets')} />
                                                 </div>
                                             </td>
                                         </tr>

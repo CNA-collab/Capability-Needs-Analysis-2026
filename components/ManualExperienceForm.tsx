@@ -146,7 +146,7 @@ export const ManualExperienceForm: React.FC<FormProps> = ({ onConfirmAndAdd }) =
                     <div className="p-3 my-2 bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-300 rounded-lg">
                         <p className="font-bold mb-1">Please fix the following issues:</p>
                         <ul className="list-disc list-inside text-sm space-y-1">
-                            {errors.map((err, index) => <li key={index}>{err}</li>)}
+                            {errors.map((err) => <li key={err}>{err}</li>)}
                         </ul>
                     </div>
                 )}

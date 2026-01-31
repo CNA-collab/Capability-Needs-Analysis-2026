@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { GoogleGenAI, Type } from "@google/genai";
-import { OfficerRecord, EstablishmentRecord, AgencyType, QUESTION_TEXT_MAPPING } from '../types';
+import { OfficerRecord, EstablishmentRecord, AgencyType, AiCompetencyDomainReport } from '../types';
 import { AI_COMPETENCY_REPORT_PROMPT_INSTRUCTIONS } from '../constants';
 import { DataAggregator } from '../services/DataAggregator';
 import { ReportTemplate } from './ReportTemplate';
@@ -73,7 +72,7 @@ const ProficiencyGauge: React.FC<{ current: number; desired: number }> = ({ curr
 };
 
 export const CompetencyDomainReport: React.FC<ReportProps> = ({ data, establishmentData, agencyType, agencyName, onClose }) => {
-    const [report, setReport] = useState<any>(null);
+    const [report, setReport] = useState<AiCompetencyDomainReport | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -91,8 +90,8 @@ export const CompetencyDomainReport: React.FC<ReportProps> = ({ data, establishm
             try {
                 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
                 const prompt = `
-                Perform a Competency Domain Analysis for ${agencyName}.
-                
+                Perform a Competency Domain Analysis for ${agencyName} (${agencyType}).
+
                 **INTELLIGENCE MAPPING:**
                 - Strategic Domain: Analyze alignment with MTDP IV and Corporate Plan understanding (Section A).
                 - Operational Domain: Analyze effectiveness in daily tasks (Section B).
@@ -101,7 +100,7 @@ export const CompetencyDomainReport: React.FC<ReportProps> = ({ data, establishm
 
                 **GAP SPECIFICITY:**
                 Distinguish between 'Skill Gaps' (require workshops/mentoring) and 'Qualification Gaps' (require formal SILAG diplomas/degrees).
-                
+
                 Workforce Stats: ${JSON.stringify(stats)}
                 `;
                 
@@ -136,7 +135,7 @@ export const CompetencyDomainReport: React.FC<ReportProps> = ({ data, establishm
                     title: "Executive Assessment Summary",
                     content: [report.executiveSummary]
                 },
-                ...report.domains.map((d: any) => ({
+                ...report.domains.map((d) => ({
                     title: `Domain Assessment: ${d.domainName}`,
                     content: [
                         `Context: ${d.description}`,
@@ -151,7 +150,7 @@ export const CompetencyDomainReport: React.FC<ReportProps> = ({ data, establishm
                     content: [{
                         type: 'table',
                         headers: ['Role', 'Candidate(s)', 'Readiness', 'Development Needs', 'Timeline'],
-                        rows: report.successionPlan.map((s: any) => [
+                        rows: report.successionPlan.map((s) => [
                             s.roleOrPosition, s.potentialSuccessors.join(', '), s.readinessLevel, s.developmentNeeds, s.estimatedTimeline
                         ])
                     }],
@@ -165,12 +164,36 @@ export const CompetencyDomainReport: React.FC<ReportProps> = ({ data, establishm
         else if (format === 'docx') exportToDocx(reportData);
     };
 
+    if (error) {
+        return (
+            <ReportTemplate
+                title="Competency Domain Analysis"
+                subtitle={agencyName}
+                onClose={onClose}
+                onExport={handleExport}
+                loading={false}
+            >
+                <div className="flex items-center justify-center py-32">
+                    <div className="text-center">
+                        <div className="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mb-6 mx-auto">
+                            <svg className="w-8 h-8 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                            </svg>
+                        </div>
+                        <h3 className="text-lg font-black text-rose-600 uppercase tracking-widest mb-2">Analysis Failed</h3>
+                        <p className="text-slate-600 font-medium">{error}</p>
+                    </div>
+                </div>
+            </ReportTemplate>
+        );
+    }
+
     return (
-        <ReportTemplate 
-            title="Competency Domain Analysis" 
-            subtitle={agencyName} 
-            onClose={onClose} 
-            onExport={handleExport} 
+        <ReportTemplate
+            title="Competency Domain Analysis"
+            subtitle={agencyName}
+            onClose={onClose}
+            onExport={handleExport}
             loading={loading}
         >
             <div className="space-y-12">
@@ -180,7 +203,7 @@ export const CompetencyDomainReport: React.FC<ReportProps> = ({ data, establishm
                 </section>
 
                 <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    {report?.domains.map((domain: any, i: number) => (
+                    {report?.domains.map((domain, i: number) => (
                         <div key={i} className="bg-white rounded-[24px] border border-slate-100 shadow-sm p-8 flex flex-col h-full hover:shadow-md transition-all">
                             <div className="flex items-center justify-between mb-6">
                                 <h4 className="text-lg font-black text-[#1A365D] uppercase tracking-tight">{domain.domainName}</h4>

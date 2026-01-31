@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { OfficerRecord } from '../types';
 import { XIcon, PresentationChartLineIcon } from './icons';
 import { ExportMenu } from './ExportMenu';
-import { exportToPdf, exportToDocx, exportToXlsx, ReportData, copyForSheets, exportToCsv } from '../utils/export';
+import { exportToPdf, exportToDocx, exportToXlsx, ReportData, copyForSheets, exportToCsv, exportToJson } from '../utils/export';
 
 interface ReportProps {
   data: OfficerRecord[];
@@ -49,7 +49,7 @@ export const GradingGroupReport: React.FC<ReportProps> = ({ data, onClose }) => 
         };
     };
 
-    const handleExport = (format: 'pdf' | 'docx' | 'xlsx' | 'csv' | 'sheets') => {
+    const handleExport = (format: 'pdf' | 'docx' | 'xlsx' | 'csv' | 'sheets' | 'json' | 'print') => {
         try {
             const reportData = getReportDataForExport();
              switch (format) {
@@ -58,6 +58,8 @@ export const GradingGroupReport: React.FC<ReportProps> = ({ data, onClose }) => 
                 case 'xlsx': exportToXlsx(reportData); break;
                 case 'csv': exportToCsv(reportData); break;
                 case 'sheets': copyForSheets(reportData).then(msg => alert(msg)).catch(err => alert(err.toString())); break;
+                case 'json': exportToJson({ title: reportData.title, data: filteredData }); break;
+                case 'print': window.print(); break;
             }
         } catch(e) {
             console.error("Export failed:", e);
@@ -74,7 +76,7 @@ export const GradingGroupReport: React.FC<ReportProps> = ({ data, onClose }) => 
                         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Officer Grading Report</h1>
                     </div>
                      <div className="flex items-center gap-4">
-                        <ExportMenu onExport={handleExport as any} />
+                        <ExportMenu onExport={handleExport} />
                         <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-blue-800" aria-label="Close report">
                             <XIcon className="w-6 h-6 text-gray-600 dark:text-gray-300" />
                         </button>

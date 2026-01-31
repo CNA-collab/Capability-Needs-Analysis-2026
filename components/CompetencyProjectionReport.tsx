@@ -4,7 +4,7 @@ import { OfficerRecord, CompetencyProjection, QUESTION_TEXT_MAPPING, LearningInt
 import { XIcon, ChartBarSquareIcon, ChevronDownIcon } from './icons';
 import { ChartComponent } from './charts';
 import { ExportMenu } from './ExportMenu';
-import { exportToPdf, exportToDocx, exportToXlsx, ReportData } from '../utils/export';
+import { exportToPdf, exportToDocx, exportToXlsx, exportToCsv, ReportData } from '../utils/export';
 
 interface ReportProps {
   data: OfficerRecord[];
@@ -52,29 +52,6 @@ export const CompetencyProjectionReport: React.FC<ReportProps> = ({ data, onClos
     const analysis: CompetencyProjection | null = useMemo(() => {
         if (!data || data.length === 0) return null;
 
-        const generateInterventions = (questionText: string, averageScore: number): LearningInterventions => {
-            const topic = questionText.replace(/Rate out of 10 –|The organisation has a|The organization|I know|I have a clear understanding of/gi, '').trim().toLowerCase();
-            
-            if (averageScore < 7) { // Low score -> foundational training
-                return {
-                    formal10: `Enroll the officer(s) with low proficiency in formal training on ${topic} (e.g., workshops, online courses).`,
-                    social20: `Establish peer-support groups for officers to share challenges and solutions regarding ${topic}.`,
-                    experiential70: `Assign structured, supervised tasks that involve applying principles of ${topic}.`
-                };
-            } else if (averageScore < 9) { // Fair score -> enhancement
-                return {
-                    formal10: `Provide access to advanced online courses or specialized seminars on ${topic}.`,
-                    social20: `Assign the officer(s) with fair proficiency to a mentoring program with high-performing peers or managers.`,
-                    experiential70: `Delegate tasks with increased responsibility related to ${topic} to solidify skills.`
-                };
-            } else { // High score -> leverage expertise
-                return {
-                    formal10: `Sponsor top performers for expert certifications or 'train-the-trainer' programs in ${topic}.`,
-                    social20: `Designate high-performers as Subject Matter Experts (SMEs) to coach colleagues and lead discussions on ${topic}.`,
-                    experiential70: `Leverage the high-performing officer(s) as peer coaches or mentors to reinforce on-the-job learning for all.`
-                };
-            }
-        };
 
 
         const ratingsByCode: Record<string, number[]> = {};
@@ -292,12 +269,33 @@ export const CompetencyProjectionReport: React.FC<ReportProps> = ({ data, onClos
         };
     };
 
-    const handleExport = (format: 'pdf' | 'docx' | 'xlsx') => {
+    const handleExport = (format: 'pdf' | 'docx' | 'xlsx' | 'csv' | 'sheets' | 'json' | 'print') => {
         try {
             const reportData = getReportDataForExport();
             if (format === 'pdf') exportToPdf(reportData);
             else if (format === 'xlsx') exportToXlsx(reportData);
             else if (format === 'docx') exportToDocx(reportData);
+            else if (format === 'csv') {
+                exportToCsv(reportData);
+            }
+            else if (format === 'sheets') {
+                // For Google Sheets, we can use the XLSX export
+                exportToXlsx(reportData);
+            }
+            else if (format === 'json') {
+                // For JSON, export the raw data
+                const dataStr = JSON.stringify(reportData, null, 2);
+                const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                const exportFileDefaultName = 'competency-projection-report.json';
+                const linkElement = document.createElement('a');
+                linkElement.setAttribute('href', dataUri);
+                linkElement.setAttribute('download', exportFileDefaultName);
+                linkElement.click();
+            }
+            else if (format === 'print') {
+                // For print, trigger browser print
+                window.print();
+            }
         } catch(e) {
              console.error("Export failed:", e);
              alert("Could not export report.");
@@ -313,7 +311,7 @@ export const CompetencyProjectionReport: React.FC<ReportProps> = ({ data, onClos
                         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Competency Projection Report</h1>
                     </div>
                      <div className="flex items-center gap-4">
-                        <ExportMenu onExport={handleExport as any} />
+                        <ExportMenu onExport={handleExport} />
                         <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-blue-800" aria-label="Close report">
                             <XIcon className="w-6 h-6 text-gray-600 dark:text-gray-300" />
                         </button>

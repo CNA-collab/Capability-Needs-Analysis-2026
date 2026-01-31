@@ -34,7 +34,7 @@ export const VisualDashboardSummary: React.FC<ReportProps> = ({ data, onClose })
         const calculateAvgGap = (officers: OfficerRecord[]): number => {
             const allRatings = officers.flatMap(o => o.capabilityRatings);
             if (allRatings.length === 0) return 0;
-            const totalGap = allRatings.reduce((sum, r) => sum + r.gapScore, 0);
+            const totalGap = allRatings.reduce((sum, r) => sum + r.averageGapScore, 0);
             return totalGap / allRatings.length;
         };
 
@@ -138,7 +138,7 @@ export const VisualDashboardSummary: React.FC<ReportProps> = ({ data, onClose })
                         <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Visual Dashboard: Capability Gap Analysis</h1>
                     </div>
                      <div className="flex items-center gap-4">
-                        <ExportMenu onExport={(format) => handleExport(format as any)} />
+                        <ExportMenu onExport={(format) => handleExport(format as 'pdf' | 'docx' | 'xlsx')} />
                         <button onClick={onClose} className="p-1 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700" aria-label="Close dashboard">
                             <XIcon className="w-6 h-6 text-slate-600 dark:text-slate-300" />
                         </button>

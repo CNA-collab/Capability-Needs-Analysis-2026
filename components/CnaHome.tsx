@@ -1,6 +1,5 @@
 import React from 'react';
 // Note: If FrameworkGraphic or icons cause errors, ensure those files exist
-import { FrameworkGraphic } from './FrameworkGraphic'; 
 import { ShieldCheckIcon, UsersIcon, ChartBarSquareIcon, AcademicCapIcon } from './icons';
 
 // THIS WAS MISSING OR UNRESOLVED - defining the interface here

@@ -376,8 +376,8 @@ Please analyze the following Capability Needs Analysis (CNA) survey data and gen
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {report.successionPlan.map((plan, index) => (
-                                            <tr key={index} className="border-b border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                                        {report.successionPlan.map((plan) => (
+                                            <tr key={plan.roleOrPosition} className="border-b border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50">
                                                 <td className="p-2 font-semibold">{plan.roleOrPosition}</td>
                                                 <td className="p-2">{plan.potentialSuccessors.join(', ')}</td>
                                                 <td className="p-2">{plan.readinessLevel}</td>

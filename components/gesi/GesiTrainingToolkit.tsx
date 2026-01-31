@@ -1,5 +1,5 @@
 import React from 'react';
-import { DocumentArrowUpIcon } from '../icons';
+import { ArrowDownTrayIcon } from '../icons';
 
 const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
     <div className="mb-6">
@@ -21,7 +21,7 @@ const DownloadableItem: React.FC<{ title: string, description: string }> = ({ ti
             title="Download functionality is not yet implemented."
             className="flex items-center gap-2 px-3 py-1.5 text-xs bg-blue-600 text-white font-semibold rounded-md transition-colors disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed"
         >
-            <DocumentArrowUpIcon className="w-4 h-4" />
+            <ArrowDownTrayIcon className="w-4 h-4" />
             <span>Download</span>
         </button>
     </div>

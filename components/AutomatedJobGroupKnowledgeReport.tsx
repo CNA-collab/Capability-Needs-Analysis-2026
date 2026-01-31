@@ -1,7 +1,7 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GoogleGenAI, Type } from "@google/genai";
-import { OfficerRecord, JobGroupKnowledgeRecord, QUESTION_TEXT_MAPPING } from '../types';
+import { OfficerRecord, JobGroupKnowledgeRecord, QUESTION_TEXT_MAPPING } from '../types.tsx';
 import { AI_AUTOMATED_JOB_GROUP_KNOWLEDGE_PROMPT_INSTRUCTIONS } from '../constants';
 import { XIcon, SparklesIcon, AcademicCapIcon } from './icons';
 import { ExportMenu } from './ExportMenu';

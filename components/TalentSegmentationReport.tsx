@@ -3,9 +3,9 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { GoogleGenAI, Type } from "@google/genai";
 import { OfficerRecord, AiTalentSegmentationReport, AgencyType, PrescriptiveAction } from '../types';
 import { AI_TALENT_SEGMENTATION_REPORT_PROMPT_INSTRUCTIONS } from '../constants';
-import { XIcon, SparklesIcon, PresentationChartLineIcon, CheckCircleIcon, ExclamationTriangleIcon, ArrowRightIcon, DocumentIcon } from './icons';
+import { XIcon, SparklesIcon, PresentationChartLineIcon, ArrowRightIcon, DocumentIcon } from './icons';
 import { ExportMenu } from './ExportMenu';
-import { exportToDocx, exportToXlsx, ReportData } from '../utils/export';
+import { exportToDocx, exportToXlsx, exportToCsv, copyForSheets, exportToJson, ReportData } from '../utils/export';
 import { exportOfficialReport } from '../utils/pdfExport';
 
 interface ReportProps {
@@ -148,14 +148,14 @@ export const TalentActionPlan = ({ actions }: { actions: PrescriptiveAction[] })
       <div className="mt-10 bg-slate-100 p-4 text-[10px] italic text-slate-500 border border-slate-200 rounded-lg flex items-center gap-3">
         <div className="w-1.5 h-1.5 rounded-full bg-slate-400"></div>
         <p>
-          Note: Eligibility for Formal/Overseas training is gated by the strict 24-month permanent service rule. AI suggestions have been downgraded to 'In-House Coaching' where tenure requirements were not met.
+          Note: Eligibility for Formal/Overseas training is gated by the strict 24-month permanent service rule. AI suggestions have been downgraded to &apos;In-House Coaching&apos; where tenure requirements were not met.
         </p>
       </div>
     </div>
   );
 };
 
-export const TalentSegmentationReport: React.FC<ReportProps> = ({ data, agencyType, agencyName, onClose }) => {
+export const TalentSegmentationReport: React.FC<ReportProps> = ({ data, agencyName, onClose }) => {
     const [report, setReport] = useState<AiTalentSegmentationReport | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
@@ -300,49 +300,83 @@ export const TalentSegmentationReport: React.FC<ReportProps> = ({ data, agencyTy
         await exportOfficialReport('talent-report-content', filename);
     };
 
-    const handleExport = (format: 'pdf' | 'docx' | 'xlsx') => {
+    const handleExport = (format: 'pdf' | 'docx' | 'xlsx' | 'csv' | 'sheets' | 'json' | 'print') => {
         if (!report) return;
-        
-        if (format === 'pdf') {
-            handleOfficialExport();
-        } else {
-            const reportData: ReportData = {
-                title: `Talent Segmentation Audit - ${agencyName}`,
-                sections: [
-                    { title: "Executive Talent Summary", content: [report.executiveSummary] },
-                    { title: "Strategic 9-Box Insights", content: [report.strategicInsight] },
-                    { 
-                        title: "9-Box Grid Distribution", 
-                        content: [{
-                            type: 'table',
-                            headers: ['Segment', 'Personnel Count'],
-                            rows: [
-                                ['Top Talent (Stars)', analytics.stars],
-                                ['Future Leaders', analytics.futureLeaders],
-                                ['High Achievers', analytics.achievers],
-                                ['Key Contributors', analytics.key],
-                                ['Specialist Experts', analytics.experts],
-                                ['Solid Performers', analytics.solid],
-                                ['Unrealized Potential', analytics.unrealized],
-                                ['Inconsistent', analytics.inconsistent],
-                                ['Risk / Low Performers', analytics.risk]
-                            ]
-                        }]
-                    },
-                    {
-                        title: "Prescriptive Action Plan",
-                        content: [{
-                            type: 'table',
-                            headers: ['Officer', 'Segment', 'Primary Action', 'Target Succession Role', 'Rationale'],
-                            rows: report.prescriptiveActions.map(a => [a.officerName, a.segment, a.primaryAction, a.successionTarget || 'N/A', a.rationale])
-                        }]
-                    }
-                ]
-            };
-            if (format === 'xlsx') exportToXlsx(reportData);
-            else if (format === 'docx') exportToDocx(reportData);
+
+        const reportData: ReportData = {
+            title: `Talent Segmentation Audit - ${agencyName}`,
+            sections: [
+                { title: "Executive Talent Summary", content: [report.executiveSummary] },
+                { title: "Strategic 9-Box Insights", content: [report.strategicInsight] },
+                {
+                    title: "9-Box Grid Distribution",
+                    content: [{
+                        type: 'table',
+                        headers: ['Segment', 'Personnel Count'],
+                        rows: [
+                            ['Top Talent (Stars)', analytics.stars],
+                            ['Future Leaders', analytics.futureLeaders],
+                            ['High Achievers', analytics.achievers],
+                            ['Key Contributors', analytics.key],
+                            ['Specialist Experts', analytics.experts],
+                            ['Solid Performers', analytics.solid],
+                            ['Unrealized Potential', analytics.unrealized],
+                            ['Inconsistent', analytics.inconsistent],
+                            ['Risk / Low Performers', analytics.risk]
+                        ]
+                    }]
+                },
+                {
+                    title: "Prescriptive Action Plan",
+                    content: [{
+                        type: 'table',
+                        headers: ['Officer', 'Segment', 'Primary Action', 'Target Succession Role', 'Rationale'],
+                        rows: report.prescriptiveActions.map(a => [a.officerName, a.segment, a.primaryAction, a.successionTarget || 'N/A', a.rationale])
+                    }]
+                }
+            ]
+        };
+
+        switch (format) {
+            case 'pdf':
+                handleOfficialExport();
+                break;
+            case 'docx':
+                exportToDocx(reportData);
+                break;
+            case 'xlsx':
+                exportToXlsx(reportData);
+                break;
+            case 'csv':
+                exportToCsv(reportData);
+                break;
+            case 'sheets':
+                copyForSheets(reportData).then(() => alert('Data copied to clipboard for Google Sheets'));
+                break;
+            case 'json':
+                exportToJson({ ...report, analytics });
+                break;
+            case 'print':
+                handleOfficialExport(); // Assuming print uses the same as PDF
+                break;
         }
     };
+
+    if (error) {
+        return (
+            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center">
+                <div className="text-center">
+                    <div className="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mb-6 mx-auto">
+                        <svg className="w-8 h-8 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                        </svg>
+                    </div>
+                    <h2 className="text-2xl font-black text-white uppercase tracking-tighter mb-2">Segmentation Failed</h2>
+                    <p className="text-slate-400 font-medium">{error}</p>
+                </div>
+            </div>
+        );
+    }
 
     if (loading) return (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center">
@@ -374,7 +408,7 @@ export const TalentSegmentationReport: React.FC<ReportProps> = ({ data, agencyTy
                                 <DocumentIcon className="w-4 h-4" />
                                 <span>Export Official Board Report</span>
                             </button>
-                            <ExportMenu onExport={handleExport as any} />
+                            <ExportMenu onExport={handleExport} />
                             <button onClick={onClose} className="p-2 bg-white hover:bg-rose-600 hover:text-white rounded-xl transition-all shadow-sm border border-slate-200">
                                 <XIcon className="w-6 h-6" />
                             </button>
@@ -420,7 +454,7 @@ export const TalentSegmentationReport: React.FC<ReportProps> = ({ data, agencyTy
                                     <SparklesIcon className="w-4 h-4" /> Strategic Insight
                                 </h4>
                                 <p className="text-sm leading-relaxed font-medium text-slate-300 italic">
-                                    "{report?.strategicInsight}"
+                                    &quot;{report?.strategicInsight}&quot;
                                 </p>
                             </div>
 

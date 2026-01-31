@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { GoogleGenAI, Type } from "@google/genai";
-import { OfficerRecord, AiTrainingPlan, TrainingPlanItem, QUESTION_TEXT_MAPPING, AgencyType, TaskPriority } from '../types';
+import { OfficerRecord, AiTrainingPlan, QUESTION_TEXT_MAPPING, AgencyType, TaskPriority } from '../types';
 import { AI_TRAINING_PLAN_PROMPT_INSTRUCTIONS } from '../constants';
 import { XIcon, SparklesIcon, DocumentChartBarIcon } from './icons';
 import { ExportMenu } from './ExportMenu';
@@ -124,19 +124,23 @@ export const TrainingPlanReport: React.FC<ReportProps> = ({ data, agencyType, ag
         };
     };
     
-    const handleExport = (format: 'pdf' | 'xlsx' | 'docx') => {
-        try {
-            const reportData = getReportDataForExport();
-            if(format === 'pdf') {
-                 exportToPdf(reportData);
-            } else if (format === 'xlsx') {
-                 exportToXlsx(reportData);
-            } else if (format === 'docx') {
-                 exportToDocx(reportData);
+    const handleExport = (format: 'pdf' | 'docx' | 'xlsx' | 'csv' | 'sheets' | 'json' | 'print') => {
+        if (format === 'pdf' || format === 'xlsx' || format === 'docx') {
+            try {
+                const reportData = getReportDataForExport();
+                if(format === 'pdf') {
+                     exportToPdf(reportData);
+                } else if (format === 'xlsx') {
+                     exportToXlsx(reportData);
+                } else if (format === 'docx') {
+                     exportToDocx(reportData);
+                }
+            } catch(e) {
+                 console.error("Export failed:", e);
+                 alert("Could not export report.");
             }
-        } catch(e) {
-             console.error("Export failed:", e);
-             alert("Could not export report.");
+        } else {
+            console.warn(`Export format '${format}' is not supported for this report.`);
         }
     };
 
@@ -211,7 +215,7 @@ export const TrainingPlanReport: React.FC<ReportProps> = ({ data, agencyType, ag
                         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Consolidated Training Plan</h1>
                     </div>
                      <div className="flex items-center gap-4">
-                        <ExportMenu onExport={handleExport as any} />
+                        <ExportMenu onExport={handleExport} />
                         <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700" aria-label="Close report">
                             <XIcon className="w-6 h-6 text-gray-600 dark:text-gray-300" />
                         </button>

@@ -64,10 +64,10 @@ export const GesiComplianceTool: React.FC = () => {
                 <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200 mb-2">GESI Compliance Self-Assessment</h2>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">Use this checklist to reflect on your personal application of GESI principles.</p>
                 <ul className="space-y-3">
-                    {checklistItems.map((item, index) => (
-                        <li key={index} className="flex items-start">
-                            <input id={`self-check-${index}`} type="checkbox" className="h-4 w-4 mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-                            <label htmlFor={`self-check-${index}`} className="ml-3 block text-sm text-gray-700 dark:text-gray-300">{item}</label>
+                    {checklistItems.map((item) => (
+                        <li key={item} className="flex items-start">
+                            <input id={`self-check-${item}`} type="checkbox" className="h-4 w-4 mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                            <label htmlFor={`self-check-${item}`} className="ml-3 block text-sm text-gray-700 dark:text-gray-300">{item}</label>
                         </li>
                     ))}
                 </ul>

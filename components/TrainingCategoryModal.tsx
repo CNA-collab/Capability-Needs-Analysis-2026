@@ -117,7 +117,7 @@ export const TrainingCategoryModal: React.FC<ModalProps> = ({ data, categoryName
                 <div className="flex flex-col items-center justify-center h-full text-center p-8 min-h-[400px]">
                     <SparklesIcon className="w-16 h-16 text-purple-500 animate-pulse" />
                     <h2 className="mt-4 text-2xl font-bold text-gray-800 dark:text-gray-100">Building Training Pathway...</h2>
-                    <p className="mt-2 text-gray-600 dark:text-gray-400">Gemini is analyzing CNA data for "{categoryName}".</p>
+                    <p className="mt-2 text-gray-600 dark:text-gray-400">Gemini is analyzing CNA data for &quot;{categoryName}&quot;.</p>
                 </div>
             );
         }

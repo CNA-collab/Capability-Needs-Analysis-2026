@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GoogleGenAI, Type } from "@google/genai";
 import { OfficerRecord, DesiredExperienceRecord, QUESTION_TEXT_MAPPING } from '../types';
 import { AI_AUTOMATED_DESIRED_EXPERIENCE_PROMPT_INSTRUCTIONS } from '../constants';

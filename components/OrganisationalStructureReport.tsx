@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GoogleGenAI, Type } from "@google/genai";
 import { OfficerRecord, EstablishmentRecord, AiOrganisationalStructureReport, HierarchyNode } from '../types';
 import { AI_ORGANISATIONAL_STRUCTURE_REPORT_PROMPT_INSTRUCTIONS } from '../constants';
 import { XIcon, SparklesIcon, PresentationChartLineIcon, ExclamationTriangleIcon } from './icons';
 import { ExportMenu } from './ExportMenu';
-import { exportToPdf, exportToDocx, exportToXlsx, ReportData } from '../utils/export';
+import { } from '../utils/export';
 
 interface ReportProps {
   data: OfficerRecord[];
@@ -181,8 +181,8 @@ export const OrganisationalStructureReport: React.FC<ReportProps> = ({ data, est
 
                     <ReportSection title="Functional Duplication Analysis">
                         <div className="space-y-4">
-                            {report.functionalDuplications.map((item, index) => (
-                                <div key={index} className="p-4 bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-500 rounded-r-lg">
+                            {report.functionalDuplications.map((item) => (
+                                <div key={item.area} className="p-4 bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-500 rounded-r-lg">
                                     <h4 className="font-bold text-amber-800 dark:text-amber-200">{item.area}</h4>
                                     <p className="text-xs"><strong>Units Involved:</strong> {item.unitsInvolved.join(', ')}</p>
                                     <p className="mt-2 text-sm">{item.observation}</p>
@@ -194,8 +194,8 @@ export const OrganisationalStructureReport: React.FC<ReportProps> = ({ data, est
 
                      <ReportSection title="Structural Gaps Analysis">
                         <div className="space-y-4">
-                            {report.structuralGaps.map((item, index) => (
-                                <div key={index} className="p-4 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 rounded-r-lg">
+                            {report.structuralGaps.map((item) => (
+                                <div key={item.gapType} className="p-4 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 rounded-r-lg">
                                     <h4 className="font-bold text-red-800 dark:text-red-200 flex items-center gap-2"><ExclamationTriangleIcon className="w-5 h-5"/> {item.gapType}</h4>
                                     <p className="mt-2 text-sm">{item.description}</p>
                                     <p className="mt-2 text-sm"><strong>Implication:</strong> {item.implication}</p>
@@ -207,7 +207,7 @@ export const OrganisationalStructureReport: React.FC<ReportProps> = ({ data, est
 
                     <ReportSection title="Strategic Recommendations">
                         <ul className="list-decimal list-inside space-y-2">
-                            {report.recommendations.map((rec, index) => <li key={index}>{rec}</li>)}
+                            {report.recommendations.map((rec) => <li key={rec}>{rec}</li>)}
                         </ul>
                     </ReportSection>
                 </div>
@@ -218,7 +218,7 @@ export const OrganisationalStructureReport: React.FC<ReportProps> = ({ data, est
     };
 
     return (
-        <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-start p-4 pt-12 animate-fade-in" aria-modal="true" role="dialog">
+        <dialog className="fixed inset-0 bg-black/60 z-50 flex justify-center items-start p-4 pt-12 animate-fade-in" aria-modal="true">
             <div className="bg-slate-100 dark:bg-slate-900 rounded-xl shadow-2xl max-w-5xl w-full max-h-[90vh] flex flex-col">
                 <header className="flex justify-between items-center p-4 border-b border-slate-200 dark:border-slate-700 flex-shrink-0">
                     <div className="flex items-center gap-3">
@@ -226,7 +226,7 @@ export const OrganisationalStructureReport: React.FC<ReportProps> = ({ data, est
                         <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Organisational Structure Analysis</h1>
                     </div>
                     <div className="flex items-center gap-4">
-                        <ExportMenu onExport={handleExport as any} />
+                        <ExportMenu onExport={handleExport as (format: 'pdf' | 'docx' | 'xlsx') => void} />
                         <button onClick={onClose} className="p-1 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700" aria-label="Close report">
                             <XIcon className="w-6 h-6 text-slate-600 dark:text-slate-300" />
                         </button>
@@ -237,6 +237,6 @@ export const OrganisationalStructureReport: React.FC<ReportProps> = ({ data, est
                     <p className="text-xs text-slate-500 dark:text-slate-400">Analysis generated by Google Gemini.</p>
                 </footer>
             </div>
-        </div>
+        </dialog>
     );
 };

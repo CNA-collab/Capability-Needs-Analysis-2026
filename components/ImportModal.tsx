@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { XIcon, DocumentArrowUpIcon, SpinnerIcon, CheckCircleIcon, ArrowRightIcon, GlobeAltIcon, ClipboardIcon, SparklesIcon, ExclamationTriangleIcon } from './icons';
+import React, { useState } from 'react';
+import { XIcon, DocumentArrowUpIcon, SpinnerIcon, CheckCircleIcon, ArrowRightIcon, GlobeAltIcon, ExclamationTriangleIcon } from './icons';
 import { OfficerRecord, AgencyType, EstablishmentRecord } from '../types';
 import { parseCnaFile, parsePastedData, parseEstablishmentFile } from '../utils/import';
 import { GoogleGenAI, Type } from "@google/genai";
@@ -16,7 +16,6 @@ interface ImportModalProps {
     onClose: () => void;
 }
 
-const SERVICE_ACCOUNT_EMAIL = 'cna-survey-reader@gen-lang-client-0479675963.iam.gserviceaccount.com';
 
 const fileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -122,7 +121,7 @@ export const ImportModal: React.FC<ImportModalProps> = ({ onImport, onClose }) =
 
             /* Accessing .text property directly instead of text() method */
             setCorporatePlanSummary(response.text?.trim() || '');
-        } catch (e: any) {
+        } catch (e: unknown) {
             console.error("PDF Scan Error:", e);
             setError("Document Analysis Failure. This usually happens with complex PDFs or network timeouts. Try a smaller version.");
             setCorporatePlanFile(null);
@@ -162,8 +161,8 @@ export const ImportModal: React.FC<ImportModalProps> = ({ onImport, onClose }) =
         setError(null);
 
         try {
-            let processedCna: any = null;
-            let processedEst: any = null;
+            let processedCna: { data: OfficerRecord[], preview: unknown[], headers: string[] } | null = null;
+            let processedEst: { data: EstablishmentRecord[] } | null = null;
 
             if (activeTab === 'file' && cnaFile) {
                 processedCna = await parseCnaFile(cnaFile, agencyType);
@@ -178,7 +177,7 @@ export const ImportModal: React.FC<ImportModalProps> = ({ onImport, onClose }) =
                 }
                 
                 const headers = Object.keys(sheetData[0]);
-                const tsvString = `${headers.join('\t')}\n${sheetData.map((r: any) => Object.values(r).join('\t')).join('\n')}`;
+                const tsvString = `${headers.join('\t')}\n${sheetData.map((r: unknown) => Object.values(r).join('\t')).join('\n')}`;
                 processedCna = await parsePastedData(tsvString, agencyType);
             } else {
                 throw new Error("No source data provided.");
@@ -192,9 +191,9 @@ export const ImportModal: React.FC<ImportModalProps> = ({ onImport, onClose }) =
             setImportedEstablishmentResult(processedEst);
             setStep('mapping');
 
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("Ingestion Error:", err);
-            setError(err.message || "Failed to process data sources.");
+            setError(err instanceof Error ? err.message : "Failed to process data sources.");
         } finally {
             setIsProcessing(false);
         }

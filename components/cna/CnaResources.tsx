@@ -1,5 +1,5 @@
 import React from 'react';
-import { DocumentIcon, DocumentArrowUpIcon } from '../icons';
+import { DocumentIcon } from '../icons';
 
 const ResourceItem: React.FC<{ title: string, description: string }> = ({ title, description }) => (
     <div className="group flex items-center justify-between p-6 bg-white rounded-2xl border border-slate-100 shadow-sm hover:border-indigo-200 transition-all">

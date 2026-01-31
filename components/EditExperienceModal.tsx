@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { DesiredExperienceRecord, JobGroupType, FundingSourceType } from '../types';
+import { DesiredExperienceRecord, FundingSourceType, JobGroupType } from '../types';
 import { XIcon } from './icons';
 
 interface ModalProps {
@@ -10,6 +10,7 @@ interface ModalProps {
 
 const yearOptions = [2025, 2026, 2027, 2028, 2029];
 const jobGroupOptions: JobGroupType[] = ['1️⃣ Senior Executive Managers', '2️⃣ Middle Managers', '3️⃣ All Line Staff'];
+ 
 const fundingSourceOptions: FundingSourceType[] = ['TBD', 'Internal Budget', 'External', 'Donor', 'Other'];
 
 const EXPERIENCE_MAPPING: Record<JobGroupType, string> = {
@@ -104,6 +105,7 @@ export const EditExperienceModal: React.FC<ModalProps> = ({ experience, onUpdate
             return;
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { yearsCheckboxes, ...experienceData } = formState;
 
         const updatedExperience: DesiredExperienceRecord = {

@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { GoogleGenAI, Type } from "@google/genai";
-import { OfficerRecord, AiWorkforceSnapshotReport, AgencyType, QUESTION_TEXT_MAPPING } from '../types';
+import { OfficerRecord, AiWorkforceSnapshotReport, AgencyType, EstablishmentRecord } from '../types';
 import { AI_WORKFORCE_SNAPSHOT_PROMPT_INSTRUCTIONS } from '../constants';
 import { DataAggregator } from '../services/DataAggregator';
 import { ReportTemplate } from './ReportTemplate';
 
 interface ReportProps {
   data: OfficerRecord[];
-  establishmentData: any[];
+  establishmentData: EstablishmentRecord[];
   agencyType: AgencyType;
   agencyName: string;
   onClose: () => void;
@@ -30,10 +30,10 @@ const aiWorkforceSnapshotSchema = {
     required: ["executiveSummary", "strategicAlignmentInsights"]
 };
 
-export const WorkforceSnapshotReport: React.FC<ReportProps> = ({ data, establishmentData, agencyType, agencyName, onClose }) => {
-    const [aiContent, setAiContent] = useState<any>(null);
+export const WorkforceSnapshotReport: React.FC<ReportProps> = ({ data, establishmentData, agencyName, onClose }) => {
+    const [aiContent, setAiContent] = useState<AiWorkforceSnapshotReport | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string | null>(null);
+    const [, setError] = useState<string | null>(null);
 
     const stats = useMemo(() => DataAggregator.process(data, establishmentData), [data, establishmentData]);
 
@@ -54,7 +54,7 @@ export const WorkforceSnapshotReport: React.FC<ReportProps> = ({ data, establish
                     },
                 });
                 setAiContent(JSON.parse(response.text.trim()));
-            } catch (e) {
+            } catch {
                 setError("AI Generation Failed.");
             } finally {
                 setLoading(false);
@@ -63,7 +63,7 @@ export const WorkforceSnapshotReport: React.FC<ReportProps> = ({ data, establish
         generateReport();
     }, [stats, agencyName]);
 
-    const handleExport = (format: 'pdf' | 'docx' | 'xlsx') => {
+    const handleExport = () => {
         // Handled by ReportTemplate internal listener if using official utility
     };
 

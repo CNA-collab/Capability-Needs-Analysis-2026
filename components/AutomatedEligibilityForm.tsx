@@ -134,7 +134,7 @@ export const AutomatedEligibilityForm: React.FC<ReportProps> = ({ data, establis
             o.beenSentForStudies,
             o.institution,
             o.course,
-            ...yearHeaders.map(year => (o as any)[`year${year}`] ? '✓' : '')
+            ...yearHeaders.map(year => (o as unknown)[`year${year}`] ? '✓' : '')
         ]);
 
         return {
@@ -195,7 +195,7 @@ export const AutomatedEligibilityForm: React.FC<ReportProps> = ({ data, establis
                 <div className="flex items-start gap-3 p-3 mb-4 text-sm text-blue-800 dark:text-blue-200 bg-blue-100 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-700">
                     <InformationCircleIcon className="w-5 h-5 mt-0.5 flex-shrink-0" />
                     <div>
-                        <strong>AI-Generated Content:</strong> This list is automatically generated. Fields such as <strong>'Institution'</strong>, <strong>'Course'</strong>, and the proposed <strong>'Training Years'</strong> are AI recommendations based on the CNA data provided. If information was missing in the source file, these fields may be generic or require your input. Please review each record. You can make corrections and add missing details using the <strong>'Eligible Officers (Manual Form)'</strong> found in the 'Planning & Forms' menu.
+                        <strong>AI-Generated Content:</strong> This list is automatically generated. Fields such as <strong>&apos;Institution&apos;</strong>, <strong>&apos;Course&apos;</strong>, and the proposed <strong>&apos;Training Years&apos;</strong> are AI recommendations based on the CNA data provided. If information was missing in the source file, these fields may be generic or require your input. Please review each record. You can make corrections and add missing details using the <strong>&apos;Eligible Officers (Manual Form)'</strong> found in the &apos;Planning & Forms' menu.
                     </div>
                 </div>
                 <div className="overflow-x-auto">
@@ -208,8 +208,8 @@ export const AutomatedEligibilityForm: React.FC<ReportProps> = ({ data, establis
                             </tr>
                         </thead>
                         <tbody>
-                            {eligibleOfficers.map((officer, index) => (
-                                <tr key={index} className="border-b border-gray-200 dark:border-blue-800 hover:bg-gray-50 dark:hover:bg-blue-900/20">
+                            {eligibleOfficers.map((officer) => (
+                                <tr key={officer.positionNumber} className="border-b border-gray-200 dark:border-blue-800 hover:bg-gray-50 dark:hover:bg-blue-900/20">
                                     <td className="p-2">{officer.branchDivision}</td>
                                     <td className="p-2">{officer.positionNumber}</td>
                                     <td className="p-2">{officer.grade}</td>
@@ -222,7 +222,7 @@ export const AutomatedEligibilityForm: React.FC<ReportProps> = ({ data, establis
                                     <td className="p-2">{officer.course}</td>
                                     {yearHeaders.map(year => (
                                         <td key={year} className="p-2 text-center">
-                                            <input type="checkbox" checked={(officer as any)[`year${year}`]} readOnly className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-default" />
+                                            <input type="checkbox" checked={(officer as any)[`year${year}`]} readOnly className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-default" aria-label={`Training year ${year}`} />
                                         </td>
                                     ))}
                                 </tr>

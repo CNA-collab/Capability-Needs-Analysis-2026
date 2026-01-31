@@ -22,7 +22,7 @@ export const CnaProcessGuide: React.FC = () => {
 
             <div className="space-y-4">
                 <Step number={1} title="Define Strategic Objectives">
-                    <p>Start with the end in mind. Review your organization's Corporate Plan, divisional work plans, and strategic goals. What capabilities are essential to achieve these goals in the next 1-3 years?</p>
+                    <p>Start with the end in mind. Review your organization&apos;s Corporate Plan, divisional work plans, and strategic goals. What capabilities are essential to achieve these goals in the next 1-3 years?</p>
                 </Step>
                 <Step number={2} title="Identify Required Capabilities">
                     <p>For each objective, list the specific knowledge, skills, and behaviors required from your workforce. This can be done through workshops with managers and subject matter experts.</p>
@@ -31,7 +31,7 @@ export const CnaProcessGuide: React.FC = () => {
                     <p>This is where the CNA survey comes in. Use a structured questionnaire to allow staff to self-assess their current proficiency against the required capabilities. This can be supplemented with manager assessments and performance data (e.g., SPA ratings).</p>
                 </Step>
                 <Step number={4} title="Analyze the Gaps">
-                    <p>Compare the 'required' capability levels with the 'current' levels to identify gaps. The formula is: <strong>Gap = Required Level - Current Level</strong>. Analyze this data to find trends: What are the most common gaps? Are there specific gaps in certain divisions or job levels?</p>
+                    <p>Compare the &apos;required&apos; capability levels with the &apos;current&apos; levels to identify gaps. The formula is: <strong>Gap = Required Level - Current Level</strong>. Analyze this data to find trends: What are the most common gaps? Are there specific gaps in certain divisions or job levels?</p>
                 </Step>
                 <Step number={5} title="Prioritize Needs & Develop Solutions">
                     <p>Prioritize the identified gaps based on their impact on strategic goals. For each priority gap, develop a learning solution using the 70:20:10 model (on-the-job, social, formal learning). This forms the basis of your L&D plan.</p>

@@ -1,10 +1,10 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { KraRecord, JobGroupType, KraPlanningRecord } from '../types';
+import { JobGroupType, KraPlanningRecord } from '../types';
 import { KRA_DATA } from '../data/kra';
 import { XIcon, PresentationChartLineIcon, PencilIcon, TrashIcon, SaveIcon } from './icons';
 import { EditKraPlanningModal } from './EditKraPlanningModal';
 import { ExportMenu } from './ExportMenu';
-import { exportToCsv, copyForSheets, ReportData, exportToPdf, exportToXlsx, exportToJson } from '../utils/export';
+import { exportToCsv, copyForSheets, ReportData, exportToPdf, exportToXlsx, exportToJson, exportToDocx } from '../utils/export';
 
 
 interface ReportProps {
@@ -217,7 +217,7 @@ export const KraMatrixReport: React.FC<ReportProps> = ({ agencyName, onClose }) 
         };
     };
 
-    const handleExport = (format: 'pdf' | 'xlsx' | 'json' | 'csv' | 'sheets') => {
+    const handleExport = (format: 'pdf' | 'xlsx' | 'json' | 'csv' | 'sheets' | 'docx' | 'print') => {
         try {
             const reportData = getReportDataForExport();
             switch (format) {
@@ -225,7 +225,9 @@ export const KraMatrixReport: React.FC<ReportProps> = ({ agencyName, onClose }) 
                 case 'sheets': copyForSheets(reportData).then(msg => showStatus(msg, 'success')).catch(err => showStatus(err, 'error')); break;
                 case 'pdf': exportToPdf(reportData); break;
                 case 'xlsx': exportToXlsx(reportData); break;
-                case 'json': exportToJson(reportData); break;
+                case 'json': exportToJson(reportData as unknown as Record<string, unknown>); break;
+                case 'docx': exportToDocx(reportData); break;
+                case 'print': window.print(); break;
             }
         } catch (e) {
             console.error("Export failed:", e);
@@ -264,7 +266,7 @@ export const KraMatrixReport: React.FC<ReportProps> = ({ agencyName, onClose }) 
                     )}
                     <div className="bg-white dark:bg-slate-800/50 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-4 mb-6">
                         <p className="text-sm text-slate-600 dark:text-slate-300">
-                            Use this matrix to align staff planning with the {agencyName}'s Key Result Areas (KRAs). Filter by Division, Job Group, or KRA to identify strategic priorities. Select a KRA and Division to begin adding to the staffing plan below.
+                            Use this matrix to align staff planning with the {agencyName}&apos;s Key Result Areas (KRAs). Filter by Division, Job Group, or KRA to identify strategic priorities. Select a KRA and Division to begin adding to the staffing plan below.
                         </p>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                             <div>
@@ -334,7 +336,7 @@ export const KraMatrixReport: React.FC<ReportProps> = ({ agencyName, onClose }) 
                                     <div className="flex gap-2">
                                         <button onClick={handleSaveDraft} className="flex items-center gap-2 px-3 py-1.5 text-sm bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold rounded-md hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"><SaveIcon className="w-4 h-4"/> Save Draft</button>
                                         <button onClick={handleClearPlan} className="px-3 py-1.5 text-sm bg-red-600/80 text-white font-semibold rounded-md hover:bg-red-700 transition-colors">Clear Plan</button>
-                                        <ExportMenu onExport={handleExport as any} />
+                                        <ExportMenu onExport={handleExport} />
                                     </div>
                                 </div>
                                 <div className="overflow-x-auto"><table className="w-full text-left text-sm">

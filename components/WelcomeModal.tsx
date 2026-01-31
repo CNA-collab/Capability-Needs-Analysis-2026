@@ -1,5 +1,5 @@
 import React from 'react';
-import { XIcon, BookOpenIcon, PresentationChartLineIcon } from './icons';
+import { BookOpenIcon, PresentationChartLineIcon } from './icons';
 
 interface WelcomeModalProps {
     onClose: () => void;
@@ -61,7 +61,7 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({ onClose, onViewPolic
 
                         <div className="py-4 px-6 bg-white/50 rounded-2xl border border-slate-100 shadow-inner backdrop-blur-sm">
                             <p className="text-[13px] text-slate-500 leading-relaxed italic font-serif">
-                                "Empowering the public service through data-driven human capital realignment and strategic workforce planning."
+                                &quot;Empowering the public service through data-driven human capital realignment and strategic workforce planning.&quot;
                             </p>
                         </div>
                     </div>

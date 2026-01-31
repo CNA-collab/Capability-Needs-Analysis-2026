@@ -1,11 +1,11 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { GoogleGenAI, Type } from "@google/genai";
-import { OfficerRecord, AgencyType, QUESTION_TEXT_MAPPING, EstablishmentRecord } from '../types';
+import { OfficerRecord, AgencyType, EstablishmentRecord } from '../types';
 import { AI_AUTOMATED_ESTABLISHMENT_SUMMARY_PROMPT_INSTRUCTIONS } from '../constants';
-import { XIcon, SparklesIcon, BuildingOfficeIcon, InformationCircleIcon } from './icons';
+import { XIcon, SparklesIcon, BuildingOfficeIcon } from './icons';
 import { ExportMenu } from './ExportMenu';
-import { exportToPdf, exportToDocx, exportToXlsx, ReportData, exportToCsv, copyForSheets } from '../utils/export';
+import { exportToPdf, exportToDocx, exportToXlsx, ReportData, exportToCsv } from '../utils/export';
 
 interface ReportProps {
   data: OfficerRecord[];
@@ -137,6 +137,7 @@ export const AutomatedEstablishmentSummary: React.FC<ReportProps> = ({ data, est
 
                 const result = JSON.parse(response.text.trim()) as AiEstablishmentSummaryReport;
                 setReport(result);
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             } catch (e) {
                 setError("Failed to aggregate register data.");
             } finally {

@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { GoogleGenAI, Type } from "@google/genai";
-import { OfficerRecord, AiEligibleOfficersReport, AgencyType, AiReportSummary, QUESTION_TEXT_MAPPING } from '../types';
+import { OfficerRecord, AiEligibleOfficersReport, AgencyType, QUESTION_TEXT_MAPPING } from '../types';
 import { AI_ELIGIBLE_OFFICERS_REPORT_PROMPT_INSTRUCTIONS } from '../constants';
 import { XIcon, SparklesIcon, ClipboardDocumentListIcon } from './icons';
 import { ExportMenu } from './ExportMenu';
@@ -166,7 +166,7 @@ export const TrainingEligibilitySummaryReport: React.FC<ReportProps> = ({ data, 
         };
     };
     
-    const handleExport = (format: 'pdf' | 'docx' | 'xlsx' | 'csv' | 'sheets') => {
+    const handleExport = (format: 'pdf' | 'docx' | 'xlsx' | 'csv' | 'sheets' | 'json' | 'print') => {
         try {
             const reportData = getReportDataForExport();
             switch (format) {
@@ -175,6 +175,13 @@ export const TrainingEligibilitySummaryReport: React.FC<ReportProps> = ({ data, 
                 case 'xlsx': exportToXlsx(reportData); break;
                 case 'csv': exportToCsv(reportData); break;
                 case 'sheets': copyForSheets(reportData).then(msg => alert(msg)).catch(err => alert(err.toString())); break;
+                case 'json': {
+                    const jsonData = JSON.stringify(reportData, null, 2);
+                    navigator.clipboard.writeText(jsonData).then(() => alert('JSON data copied to clipboard')).catch(() => alert('Failed to copy JSON'));
+                    break;
+                }
+                case 'print': window.print(); break;
+                default: alert('Export format not supported'); break;
             }
         } catch(e) {
             console.error("Export failed:", e);
@@ -266,7 +273,7 @@ export const TrainingEligibilitySummaryReport: React.FC<ReportProps> = ({ data, 
                         <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Training Eligibility Summary</h1>
                     </div>
                      <div className="flex items-center gap-4">
-                        <ExportMenu onExport={handleExport as any} />
+                        <ExportMenu onExport={handleExport} />
                         <button onClick={onClose} className="p-1 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700" aria-label="Close report">
                             <XIcon className="w-6 h-6 text-slate-600 dark:text-slate-300" />
                         </button>

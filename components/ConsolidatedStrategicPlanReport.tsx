@@ -1,11 +1,30 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { GoogleGenAI, Type } from "@google/genai";
-import { OfficerRecord, AgencyType, EstablishmentRecord, StructuredCorporatePlan } from '../types';
+import { OfficerRecord, AgencyType, EstablishmentRecord } from '../types';
 import { AI_CONSOLIDATED_STRATEGIC_PLAN_PROMPT_INSTRUCTIONS } from '../constants';
-import { XIcon, SparklesIcon, DocumentChartBarIcon, ArrowPathIcon, HomeIcon, BriefcaseIcon, AcademicCapIcon, ScaleIcon, CalendarDaysIcon, ChartBarSquareIcon, CheckCircleIcon, IdentificationIcon } from './icons';
+import { XIcon, SparklesIcon, HomeIcon, ChartBarSquareIcon, IdentificationIcon } from './icons';
 import { DataAggregator } from '../services/DataAggregator';
 import { ExportMenu } from './ExportMenu';
 import { exportToPdf, exportToDocx, exportToXlsx, ReportData } from '../utils/export';
+
+interface GanttItem {
+    task: string;
+    phase: 'Stabilization' | 'Mentoring' | 'Elite Track' | 'Onboarding';
+    startYear: number;
+    durationYears: number;
+}
+
+interface AiConsolidatedStrategicPlan {
+    executiveNarrative: string;
+    section1_Foreword: string;
+    section2_Framework: string;
+    section3_Diagnostic: string;
+    section4_Predictive: string;
+    section5_Fiscal: string;
+    section6_Pathways: string;
+    section7_Execution: string;
+    ganttData: GanttItem[];
+}
 
 interface ReportProps {
   data: OfficerRecord[];
@@ -43,7 +62,7 @@ const aiConsolidatedStrategicPlanSchema = {
     required: ["executiveNarrative", "section1_Foreword", "section2_Framework", "section3_Diagnostic", "section4_Predictive", "section5_Fiscal", "section6_Pathways", "section7_Execution", "ganttData"]
 };
 
-const RoadmapGantt: React.FC<{ data: any[] }> = ({ data }) => {
+const RoadmapGantt: React.FC<{ data: GanttItem[] }> = ({ data }) => {
     const years = [2025, 2026, 2027, 2028, 2029];
     const colors = {
         'Stabilization': 'bg-blue-600',
@@ -96,14 +115,14 @@ export const ConsolidatedStrategicPlanReport: React.FC<ReportProps> = ({
     agencyName, 
     onClose 
 }) => {
-    const [report, setReport] = useState<any>(null);
+    const [report, setReport] = useState<AiConsolidatedStrategicPlan | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [showAnnex, setShowAnnex] = useState(false);
 
     // Dynamic Title Logic
     const leadershipTitle = useMemo(() => {
-        if (agencyType === 'Provincial Health Authority') return 'Chief Executive Officer';
+        if (agencyType === 'Provincial Administration') return 'Chief Executive Officer';
         return 'Secretary';
     }, [agencyType]);
 
@@ -189,15 +208,15 @@ export const ConsolidatedStrategicPlanReport: React.FC<ReportProps> = ({
         generateReport();
     }, [agencyName]);
 
-    const handleExport = (format: 'pdf' | 'docx' | 'xlsx') => {
+    const handleExport = (format: 'pdf' | 'docx' | 'xlsx' | 'csv' | 'sheets' | 'json' | 'print') => {
         if (!report) return;
         const reportData: ReportData = {
             title: `Consolidated Strategic Plan - ${agencyName}`,
             sections: [
                 { title: `Executive Foreword - ${leadershipTitle}`, content: [report.section1_Foreword] },
                 { title: "Diagnostic Summary", content: [report.section3_Diagnostic] },
-                { 
-                    title: "Annex A: Elite Succession Cohort (Restricted)", 
+                {
+                    title: "Annex A: Elite Succession Cohort (Restricted)",
                     content: [{
                         type: 'table',
                         headers: ['Rank', 'Officer Name', 'Current Position', 'Proficiency (Normalized)'],
@@ -209,7 +228,27 @@ export const ConsolidatedStrategicPlanReport: React.FC<ReportProps> = ({
         if (format === 'pdf') exportToPdf(reportData);
         else if (format === 'xlsx') exportToXlsx(reportData);
         else if (format === 'docx') exportToDocx(reportData);
+        // For other formats, we could implement them later or show a message
+        else {
+            console.log(`Export format ${format} not yet implemented`);
+        }
     };
+
+    if (error) {
+        return (
+            <div className="fixed inset-0 bg-[#0F172A]/90 backdrop-blur-xl z-[100] flex items-center justify-center p-6">
+                <div className="text-center">
+                    <div className="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mb-6 mx-auto">
+                        <svg className="w-8 h-8 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                        </svg>
+                    </div>
+                    <h2 className="text-2xl font-black text-white uppercase tracking-tighter mb-2">Synthesis Failed</h2>
+                    <p className="text-slate-400 font-medium">{error}</p>
+                </div>
+            </div>
+        );
+    }
 
     if (loading) return (
         <div className="fixed inset-0 bg-[#0F172A]/90 backdrop-blur-xl z-[100] flex items-center justify-center p-6 font-['Inter']">
@@ -233,11 +272,11 @@ export const ConsolidatedStrategicPlanReport: React.FC<ReportProps> = ({
                         </div>
                         <div>
                             <h1 className="text-3xl font-black text-slate-900 uppercase tracking-tighter leading-none">Strategic Plan 2025-2029</h1>
-                            <p className="text-[10px] font-bold text-[#2AAA52] uppercase tracking-widest mt-2">{leadershipTitle}'s Capability Instrument</p>
+                            <p className="text-[10px] font-bold text-[#2AAA52] uppercase tracking-widest mt-2">{leadershipTitle}&apos;s Capability Instrument</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-4">
-                        <ExportMenu onExport={handleExport as any} />
+                        <ExportMenu onExport={handleExport} />
                         <button onClick={onClose} className="p-3 bg-slate-50 text-slate-400 hover:bg-rose-600 hover:text-white rounded-2xl transition-all shadow-sm">
                             <XIcon className="w-8 h-8" />
                         </button>
@@ -312,7 +351,7 @@ export const ConsolidatedStrategicPlanReport: React.FC<ReportProps> = ({
                         {showAnnex && (
                             <div className="animate-fade-in space-y-6">
                                 <p className="text-sm text-slate-400 font-medium italic">
-                                    "The following officers have been identified through the CNA Matrix as the highest-performing assets for succession planning. Formal educational investments are strictly limited to this cohort to maintain institutional excellence."
+                                    &quot;The following officers have been identified through the CNA Matrix as the highest-performing assets for succession planning. Formal educational investments are strictly limited to this cohort to maintain institutional excellence.&quot;
                                 </p>
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                                     {eliteCohort.map((c, i) => (

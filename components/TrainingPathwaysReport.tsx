@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GoogleGenAI, Type } from "@google/genai";
-import { OfficerRecord, AiTrainingPathwayReport, QUESTION_TEXT_MAPPING } from '../types';
-import { XIcon, SparklesIcon, AcademicCapIcon, CheckCircleIcon, IdentificationIcon, ArrowDownTrayIcon } from './icons';
+import { OfficerRecord, AiIndividualTrainingPathwayReport } from '../types';
+import { XIcon, SparklesIcon, ArrowDownTrayIcon } from './icons';
 import { ExportMenu } from './ExportMenu';
-import { exportToPdf, exportToDocx, ReportData } from '../utils/export';
+import { exportToDocx, ReportData } from '../utils/export';
 import { exportOfficialReport } from '../utils/pdfExport';
 
 interface ReportProps {
@@ -61,10 +61,10 @@ const PNGNationalCrest = () => (
     </div>
 );
 
-export const TrainingPathwaysReport: React.FC<ReportProps> = ({ officer, agencyName, onClose }) => {
-    const [report, setReport] = useState<AiTrainingPathwayReport | null>(null);
+export const TrainingPathwaysReport: React.FC<ReportProps> = ({ officer, onClose }) => {
+    const [report, setReport] = useState<AiIndividualTrainingPathwayReport | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string | null>(null);
+    const [, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const generatePathway = async () => {
@@ -81,16 +81,17 @@ export const TrainingPathwaysReport: React.FC<ReportProps> = ({ officer, agencyN
                         responseSchema: aiSchema,
                     },
                 });
-                setReport(JSON.parse(response.text?.trim() || '{}'));
+                setReport(JSON.parse(response.text?.trim() || '{}') as AiIndividualTrainingPathwayReport);
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             } catch (e) { setError("Engine failure during pathway mapping."); } finally { setLoading(false); }
         };
         generatePathway();
     }, [officer]);
 
-    const handleExport = async (format: string) => {
+    const handleExport = (format: 'pdf' | 'docx' | 'xlsx' | 'csv' | 'sheets' | 'json' | 'print') => {
         if (!report) return;
         if (format === 'pdf') {
-            await exportOfficialReport('pathway-report-a4', `Training_Pathway_${officer.name}`);
+            exportOfficialReport('pathway-report-a4', `Training_Pathway_${officer.name}`);
         } else {
             const reportData: ReportData = {
                 title: `Training Pathway Report - ${officer.name}`,
@@ -109,7 +110,7 @@ export const TrainingPathwaysReport: React.FC<ReportProps> = ({ officer, agencyN
                         <button onClick={() => handleExport('pdf')} className="flex items-center gap-2 px-6 py-3 bg-[#2AAA52] hover:bg-[#238C44] text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-xl transition-all">
                             <ArrowDownTrayIcon className="w-4 h-4" /> High-Fidelity Export
                         </button>
-                        <ExportMenu onExport={handleExport as any} />
+                        <ExportMenu onExport={handleExport} />
                         <button onClick={onClose} className="p-3 bg-white/10 hover:bg-rose-600 text-white rounded-2xl transition-all shadow-sm"><XIcon className="w-8 h-8" /></button>
                     </div>
                 </header>
@@ -120,15 +121,13 @@ export const TrainingPathwaysReport: React.FC<ReportProps> = ({ officer, agencyN
                             <SparklesIcon className="w-20 h-20 text-emerald-400 animate-pulse mx-auto mb-6" />
                             <h2 className="text-2xl font-black text-slate-800 uppercase tracking-tighter">Synthesizing Pathway...</h2>
                         </div>
-                    ) : error ? (
-                        <div className="p-12 text-center text-red-600 font-bold">{error}</div>
                     ) : report && (
                         <div className="animate-fade-in space-y-12">
                             <PNGNationalCrest />
                             <div className="grid grid-cols-3 gap-8 p-10 bg-slate-50 rounded-[24px] border border-slate-100">
                                 <div className="col-span-2">
                                      <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.4em] mb-4">Executive Rationale</h3>
-                                     <p className="text-lg leading-relaxed text-slate-700 font-serif font-medium italic">"{report.executiveRationale}"</p>
+                                     <p className="text-lg leading-relaxed text-slate-700 font-serif font-medium italic">&quot;{report.executiveRationale}&quot;</p>
                                 </div>
                                 <div className="bg-white p-6 rounded-2xl border border-slate-200 flex flex-col justify-center">
                                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Target Personnel</p>
@@ -138,7 +137,7 @@ export const TrainingPathwaysReport: React.FC<ReportProps> = ({ officer, agencyN
                             </div>
 
                             <div className="space-y-6">
-                                {report.pathwayTimeline.map((milestone: any, idx: number) => (
+                                {report.pathwayTimeline.map((milestone, idx: number) => (
                                     <div key={idx} className="flex gap-10 items-start">
                                         <div className="w-20 pt-1 flex flex-col items-center shrink-0">
                                             <span className="text-2xl font-black text-[#1A365D]">{milestone.year}</span>

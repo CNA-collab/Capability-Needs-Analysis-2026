@@ -50,9 +50,9 @@ export const SystemSettings: React.FC<SystemSettingsProps> = () => {
         try {
             await GoogleSheetsService.fetchSurveyData(id);
             setConnectionStatus('connected');
-        } catch (err: any) {
+        } catch (err) {
             setConnectionStatus('error');
-            setErrorMessage(err.message || 'Access denied or invalid ID.');
+            setErrorMessage(err instanceof Error ? err.message : 'Access denied or invalid ID.');
         }
     };
 
@@ -148,17 +148,17 @@ export const SystemSettings: React.FC<SystemSettingsProps> = () => {
 
                         {errorMessage && (
                             <p className="text-xs text-rose-600 font-semibold bg-rose-50 p-4 rounded-xl border border-rose-100 italic">
-                                "{errorMessage}"
+                                &quot;{errorMessage}&quot;
                             </p>
                         )}
 
                         <div className="p-6 bg-blue-50/50 rounded-2xl border border-blue-100">
                             <h3 className="text-[10px] font-black text-blue-800 uppercase tracking-[0.2em] mb-2">Setup Instructions</h3>
                             <ul className="text-xs text-blue-700 leading-relaxed space-y-1 font-medium list-disc list-inside">
-                                <li><strong>Step 1:</strong> Copy the "Official Reader Account" email shown above.</li>
-                                <li><strong>Step 2:</strong> In your Google Sheet, click <strong>"Share"</strong>.</li>
-                                <li><strong>Step 3:</strong> Paste the email and set role to <strong>"Viewer"</strong>.</li>
-                                <li><strong>Step 4:</strong> Paste the URL of your sheet into the input above and click "Save".</li>
+                                <li><strong>Step 1:</strong> Copy the &quot;Official Reader Account&quot; email shown above.</li>
+                                <li><strong>Step 2:</strong> In your Google Sheet, click <strong>&quot;Share&quot;</strong>.</li>
+                                <li><strong>Step 3:</strong> Paste the email and set role to <strong>&quot;Viewer&quot;</strong>.</li>
+                                <li><strong>Step 4:</strong> Paste the URL of your sheet into the input above and click &quot;Save&quot;.</li>
                             </ul>
                         </div>
                     </div>

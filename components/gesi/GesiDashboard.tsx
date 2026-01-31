@@ -11,11 +11,11 @@ const ChecklistCard: React.FC<{ title: string; items: string[] }> = ({ title, it
         <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest mb-6 pb-4 border-b border-slate-50">{title}</h3>
         <ul className="space-y-4">
             {items.map((item, index) => (
-                <li key={index} className="flex items-start gap-4 group">
+                <li key={item} className="flex items-start gap-4 group">
                     <div className="mt-0.5">
-                        <input id={`check-${title}-${index}`} type="checkbox" className="h-5 w-5 rounded-lg border-slate-200 text-[#059669] focus:ring-[#059669] transition-all cursor-pointer" />
+                        <input id={`check-${title}-${item}`} type="checkbox" className="h-5 w-5 rounded-lg border-slate-200 text-[#059669] focus:ring-[#059669] transition-all cursor-pointer" />
                     </div>
-                    <label htmlFor={`check-${title}-${index}`} className="text-sm text-slate-600 leading-tight font-medium cursor-pointer group-hover:text-slate-900 transition-colors">{item}</label>
+                    <label htmlFor={`check-${title}-${item}`} className="text-sm text-slate-600 leading-tight font-medium cursor-pointer group-hover:text-slate-900 transition-colors">{item}</label>
                 </li>
             ))}
         </ul>

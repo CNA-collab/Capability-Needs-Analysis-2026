@@ -14,7 +14,7 @@ export const CnaAnalysisGuide: React.FC = () => {
         <div className="max-w-[1000px] mx-auto">
             <Section title="Data Interpretation Standards">
                 <p className="text-sm text-slate-600 leading-relaxed font-medium mb-8">
-                    Once you import your data, the diagnostic system automates the synthesis. Here's a guide to interpreting the key metrics used across all national reports:
+                    Once you import your data, the diagnostic system automates the synthesis. Here&apos;s a guide to interpreting the key metrics used across all national reports:
                 </p>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -64,7 +64,7 @@ export const CnaAnalysisGuide: React.FC = () => {
                         </li>
                         <li className="flex items-start gap-3">
                             <div className="mt-1 w-4 h-4 rounded-full bg-white/20 flex items-center justify-center text-[10px]">✓</div>
-                            <span>Identify 'SMEs' (High Scorers) to act as mentors for low-scoring peers.</span>
+                            <span>Identify &apos;SMEs&apos; (High Scorers) to act as mentors for low-scoring peers.</span>
                         </li>
                     </ul>
                 </div>

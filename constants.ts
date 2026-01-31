@@ -1,5 +1,5 @@
 
-export const INITIAL_CNA_DATASET: any[] = [];
+export const INITIAL_CNA_DATASET: never[] = [];
 export const STRATEGIC_CONTEXT_DEFAULT = "To be updated with organization specific context.";
 
 export const AI_TALENT_SEGMENTATION_REPORT_PROMPT_INSTRUCTIONS = `

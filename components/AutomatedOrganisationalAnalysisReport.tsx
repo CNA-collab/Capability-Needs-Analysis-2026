@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { GoogleGenAI, Type } from "@google/genai";
-import { OfficerRecord, EstablishmentRecord, AgencyType, QUESTION_TEXT_MAPPING, GradingGroup } from '../types';
-import { XIcon, SparklesIcon, DocumentChartBarIcon } from './icons';
+import { OfficerRecord, EstablishmentRecord, AgencyType, QUESTION_TEXT_MAPPING } from '../types';
+import { XIcon, SparklesIcon } from './icons';
 import { ExportMenu } from './ExportMenu';
 import { exportToPdf, exportToDocx, exportToXlsx, ReportData } from '../utils/export';
 import { ChartComponent } from './charts';

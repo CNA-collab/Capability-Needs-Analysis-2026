@@ -1,0 +1,35 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "words": [
+    "autotable",
+    "clevel",
+    "colour",
+    "concl",
+    "exceljs",
+    "gantt",
+    "HAUS",
+    "importmap",
+    "Inclusivity",
+    "Kras",
+    "MTDP",
+    "officedocument",
+    "openxmlformats",
+    "operationalize",
+    "overqualification",
+    "PFMA",
+    "PSMA",
+    "secretarys",
+    "shrm",
+    "SILAG",
+    "Somare",
+    "spreadsheetml",
+    "textnodes",
+    "UDHR"
+  ],
+  "ignorePaths": [
+    "node_modules/**",
+    "dist/**",
+    ".git/**"
+  ]
+}

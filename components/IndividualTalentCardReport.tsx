@@ -1,11 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { GoogleGenAI, Type } from "@google/genai";
-import { OfficerRecord, EstablishmentRecord, AiTalentCardReport, AiLearningSolution, PerformanceRatingLevel, AiReportSummary, SpaSummary, CapabilityAnalysisItem, QUESTION_TEXT_MAPPING, AiProgressionAnalysis } from '../types';
+import { OfficerRecord, EstablishmentRecord, AiTalentCardReport, QUESTION_TEXT_MAPPING } from '../types';
 import { AI_TALENT_CARD_REPORT_PROMPT_INSTRUCTIONS } from '../constants';
-import { XIcon, SparklesIcon, UserCircleIcon, GlobeAltIcon, CheckCircleIcon, ExclamationTriangleIcon, PresentationChartLineIcon, AcademicCapIcon, ArrowRightIcon } from './icons';
+import { XIcon, SparklesIcon, UserCircleIcon, CheckCircleIcon, ExclamationTriangleIcon, PresentationChartLineIcon, ArrowRightIcon } from './icons';
 import { ExportMenu } from './ExportMenu';
-import { exportToPdf, exportToDocx, exportToXlsx, ReportData, copyForSheets, exportToCsv, exportToJson } from '../utils/export';
 
 interface ProfileProps {
   officer: OfficerRecord;
@@ -286,7 +285,7 @@ export const IndividualTalentCardReport: React.FC<ProfileProps> = ({ officer, es
                         <div className="bg-[#0f172a] text-white p-8 rounded-[32px] shadow-xl relative overflow-hidden">
                             <div className="absolute top-0 right-0 w-48 h-48 bg-blue-500/10 rounded-full -mr-24 -mt-24"></div>
                             <div className="relative z-10">
-                                <p className="text-sm font-light leading-relaxed mb-8 opacity-80 italic">"{report.progressionAnalysis.progressionSummary}"</p>
+                                <p className="text-sm font-light leading-relaxed mb-8 opacity-80 italic">&quot;{report.progressionAnalysis.progressionSummary}&quot;</p>
                                 
                                 {/* Universal Career Stepper */}
                                 <div className="flex items-center gap-4">

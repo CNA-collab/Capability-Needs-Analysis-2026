@@ -132,11 +132,11 @@ export const UserGuideModal: React.FC<ModalProps> = ({ onClose }) => {
                     </GuideSection>
                     
                     <GuideSection title="Key Reports & Tools">
-                        <p>This dashboard uses advanced analytics to analyze your Capability Needs Analysis (CNA) data and generate several insightful reports. Here's a quick rundown:</p>
+                        <p>This dashboard uses advanced analytics to analyze your Capability Needs Analysis (CNA) data and generate several insightful reports. Here&apos;s a quick rundown:</p>
                         <ul>
                             <li><strong>L&D Report:</strong> Provides a comprehensive plan based on identified gaps, including intervention plans and ROI projections.</li>
                             <li><strong>5-Year Plan:</strong> Offers a long-term strategic roadmap for capability development.</li>
-                            <li><strong>Competency Report:</strong> Maps your workforce's skills against key PNG public sector competency domains.</li>
+                            <li><strong>Competency Report:</strong> Maps your workforce&apos;s skills against key PNG public sector competency domains.</li>
                             <li><strong>Gap Analysis:</strong> Pinpoints the most urgent skill gaps and recommends PNG-contextual solutions.</li>
                             <li><strong>Talent Segmentation:</strong> Clusters your staff into performance-based groups to inform talent management.</li>
                             <li><strong>Strategic Recommendations:</strong> Gives high-level advice on L&D investment, systems integration, and HR alignment.</li>
@@ -148,9 +148,9 @@ export const UserGuideModal: React.FC<ModalProps> = ({ onClose }) => {
                         
                         <h4 className="font-bold">The 70:20:10 Model in Practice</h4>
                         <ul>
-                            <li><strong>70% On-the-Job Learning:</strong> This is the most critical part. It involves learning through doing. Encourage managers to create opportunities for staff to take on 'stretch assignments' or assist in tasks slightly above their current skill level. This is a cost-effective way to build capability, especially in provincial and remote settings.</li>
-                            <li><strong>20% Social Learning:</strong> Learning from others is key. Facilitate mentorship programs between senior and junior officers. Create 'Communities of Practice' or informal working groups where staff from different divisions can share knowledge on common challenges.</li>
-                            <li><strong>10% Formal Learning:</strong> This includes workshops, courses, and certifications. While important, it should be targeted. Use the report's findings to select relevant courses from institutions like the Somare Institute of Leadership & Governance (SILAG) or reputable online providers.</li>
+                            <li><strong>70% On-the-Job Learning:</strong> This is the most critical part. It involves learning through doing. Encourage managers to create opportunities for staff to take on &apos;stretch assignments&apos; or assist in tasks slightly above their current skill level. This is a cost-effective way to build capability, especially in provincial and remote settings.</li>
+                            <li><strong>20% Social Learning:</strong> Learning from others is key. Facilitate mentorship programs between senior and junior officers. Create &apos;Communities of Practice&apos; or informal working groups where staff from different divisions can share knowledge on common challenges.</li>
+                            <li><strong>10% Formal Learning:</strong> This includes workshops, courses, and certifications. While important, it should be targeted. Use the report&apos;s findings to select relevant courses from institutions like the Somare Institute of Leadership & Governance (SILAG) or reputable online providers.</li>
                         </ul>
                         
                         <h4 className="font-bold mt-4">Creating Individual Learning Plans (ILPs)</h4>
@@ -199,11 +199,11 @@ export const UserGuideModal: React.FC<ModalProps> = ({ onClose }) => {
                             The <strong>Staff Performance Appraisal (SPA) Rating</strong> is used to assess overall employee performance. The application automatically classifies this 1-5 score into a descriptive level:
                         </p>
                         <ul>
-                            <li><span className="font-semibold text-green-700 dark:text-green-400">Rating 5:</span> Classified as <span className="font-bold">'Well Above Required'</span>.</li>
-                            <li><span className="font-semibold text-teal-700 dark:text-teal-400">Rating 4:</span> Classified as <span className="font-bold">'Above Required'</span>.</li>
-                             <li><span className="font-semibold text-amber-700 dark:text-amber-400">Rating 3:</span> Classified as <span className="font-bold">'At Required Level'</span>.</li>
-                            <li><span className="font-semibold text-orange-700 dark:text-orange-400">Rating 2:</span> Classified as <span className="font-bold">'Below Required Level'</span>.</li>
-                            <li><span className="font-semibold text-red-700 dark:text-red-400">Rating 1:</span> Classified as <span className="font-bold">'Well Below Required Level'</span>.</li>
+                            <li><span className="font-semibold text-green-700 dark:text-green-400">Rating 5:</span> Classified as <span className="font-bold">&apos;Well Above Required&apos;</span>.</li>
+                            <li><span className="font-semibold text-teal-700 dark:text-teal-400">Rating 4:</span> Classified as <span className="font-bold">&apos;Above Required&apos;</span>.</li>
+                             <li><span className="font-semibold text-amber-700 dark:text-amber-400">Rating 3:</span> Classified as <span className="font-bold">&apos;At Required Level&apos;</span>.</li>
+                            <li><span className="font-semibold text-orange-700 dark:text-orange-400">Rating 2:</span> Classified as <span className="font-bold">&apos;Below Required Level&apos;</span>.</li>
+                            <li><span className="font-semibold text-red-700 dark:text-red-400">Rating 1:</span> Classified as <span className="font-bold">&apos;Well Below Required Level&apos;</span>.</li>
                         </ul>
                         <p>This performance rating is used for dashboards and reports but is separate from capability gap analysis.</p>
 
@@ -215,9 +215,9 @@ export const UserGuideModal: React.FC<ModalProps> = ({ onClose }) => {
                         <h5 className="font-semibold mt-2">1. Rating Interpretation (Proficiency Level)</h5>
                         <p>This describes the absolute level of capability based on the score provided:</p>
                         <ul>
-                            <li><span className="font-semibold">Score 1-4:</span> Classified as <span className="font-bold">'Low'</span> capability.</li>
-                            <li><span className="font-semibold">Score 5-7:</span> Classified as <span className="font-bold">'Moderate'</span> capability.</li>
-                             <li><span className="font-semibold">Score 8-10:</span> Classified as <span className="font-bold">'High'</span> capability.</li>
+                            <li><span className="font-semibold">Score 1-4:</span> Classified as <span className="font-bold">&apos;Low&apos;</span> capability.</li>
+                            <li><span className="font-semibold">Score 5-7:</span> Classified as <span className="font-bold">&apos;Moderate&apos;</span> capability.</li>
+                             <li><span className="font-semibold">Score 8-10:</span> Classified as <span className="font-bold">&apos;High&apos;</span> capability.</li>
                         </ul>
 
                         <h5 className="font-semibold mt-2">2. Gap Analysis (Learning Priority)</h5>

@@ -1,8 +1,25 @@
 
-// Declare global variables for external libraries
-declare const docx: any;
-declare const jspdf: any;
-declare const XLSX: any;
+import { jsPDF } from 'jspdf';
+import 'jspdf-autotable';
+import ExcelJS from 'exceljs';
+import { Document, Packer, Paragraph, TextRun, AlignmentType, Table, TableRow, TableCell, WidthType, Header, Footer, PageNumber } from 'docx';
+
+// Extend jsPDF interface to include autoTable method
+declare module 'jspdf' {
+  interface jsPDF {
+    autoTable(options: {
+      startY: number;
+      head: string[][];
+      body: (string | number)[][];
+      theme?: string;
+      styles?: Record<string, unknown>;
+      headStyles?: Record<string, unknown>;
+      margin?: { left?: number; right?: number };
+      rowPageBreak?: string;
+    }): void;
+    lastAutoTable: { finalY: number };
+  }
+}
 
 interface TableData {
   type: 'table';
@@ -39,14 +56,9 @@ const createFileName = (title: string, extension: string) => {
 
 // --- PDF EXPORT (Succession Plan Standard) ---
 export const exportToPdf = (reportData: ReportData) => {
-    const { jsPDF } = jspdf;
-    const doc = new jsPDF({
-        orientation: reportData.sections[0]?.orientation || 'portrait',
-        unit: 'mm',
-        format: 'a4'
-    });
+    const doc = new jsPDF(reportData.sections[0]?.orientation || 'portrait', 'mm');
 
-    const addOfficialHeader = (d: any, pageTitle: string) => {
+    const addOfficialHeader = (d: jsPDF, pageTitle: string) => {
         const pageWidth = d.internal.pageSize.getWidth();
         // National Crest Placeholder
         d.setDrawColor(26, 54, 93).setLineWidth(0.5);
@@ -60,8 +72,8 @@ export const exportToPdf = (reportData: ReportData) => {
         return 55; // Y content start
     };
 
-    const addFooter = (d: any) => {
-        const totalPages = d.internal.getNumberOfPages();
+    const addFooter = (d: jsPDF) => {
+        const totalPages = d.getNumberOfPages();
         for (let i = 1; i <= totalPages; i++) {
             d.setPage(i);
             const pageWidth = d.internal.pageSize.getWidth();
@@ -76,9 +88,9 @@ export const exportToPdf = (reportData: ReportData) => {
     let y = addOfficialHeader(doc, reportData.title);
 
     reportData.sections.forEach((section, sIndex) => {
-        if (sIndex > 0) { 
-            doc.addPage(undefined, section.orientation || 'portrait'); 
-            y = addOfficialHeader(doc, reportData.title); 
+        if (sIndex > 0) {
+            doc.addPage(section.orientation || 'portrait');
+            y = addOfficialHeader(doc, reportData.title);
         }
 
         doc.setFont("helvetica", "bold").setFontSize(13).setTextColor(26, 54, 93).text(section.title.toUpperCase(), 15, y);
@@ -88,14 +100,14 @@ export const exportToPdf = (reportData: ReportData) => {
             if (typeof item === 'string') {
                 doc.setFont("helvetica", "normal").setFontSize(10).setTextColor(50);
                 const lines = doc.splitTextToSize(item, doc.internal.pageSize.getWidth() - 30);
-                if (y + (lines.length * 5) > doc.internal.pageSize.getHeight() - 25) { 
-                    doc.addPage(undefined, section.orientation || 'portrait'); 
-                    y = addOfficialHeader(doc, reportData.title); 
+                if (y + (lines.length * 5) > doc.internal.pageSize.getHeight() - 25) {
+                    doc.addPage(section.orientation || 'portrait');
+                    y = addOfficialHeader(doc, reportData.title);
                 }
                 doc.text(lines, 15, y);
                 y += (lines.length * 5) + 10;
             } else if (item.type === 'table') {
-                (doc as any).autoTable({
+                doc.autoTable({
                     startY: y,
                     head: [item.headers],
                     body: item.rows,
@@ -105,11 +117,11 @@ export const exportToPdf = (reportData: ReportData) => {
                     margin: { left: 15, right: 15 },
                     rowPageBreak: 'auto'
                 });
-                y = (doc as any).lastAutoTable.finalY + 12;
+                y = doc.lastAutoTable.finalY + 12;
             } else if (item.type === 'image') {
                 if (y + item.height > doc.internal.pageSize.getHeight() - 25) {
-                    doc.addPage(undefined, section.orientation || 'portrait'); 
-                    y = addOfficialHeader(doc, reportData.title); 
+                    doc.addPage(section.orientation || 'portrait');
+                    y = addOfficialHeader(doc, reportData.title);
                 }
                 doc.addImage(item.dataUrl, 'PNG', 15, y, item.width, item.height);
                 y += item.height + 10;
@@ -123,8 +135,6 @@ export const exportToPdf = (reportData: ReportData) => {
 
 // --- DOCX EXPORT (Government Template Alignment) ---
 export const exportToDocx = (reportData: ReportData) => {
-    if (typeof docx === 'undefined') return;
-    const { Document, Packer, Paragraph, TextRun, AlignmentType, Table, TableRow, TableCell, WidthType, Header, Footer, PageNumber } = docx;
 
     const docSections = reportData.sections.map((section) => {
         const content = section.content.flatMap(item => {
@@ -150,23 +160,29 @@ export const exportToDocx = (reportData: ReportData) => {
         };
     });
 
-    Packer.toBlob(new Document({ sections: docSections })).then((blob: any) => {
+    Packer.toBlob(new Document({ sections: docSections })).then((blob: Blob) => {
         const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = createFileName(reportData.title, 'docx'); a.click();
     });
 };
 
 // --- XLSX EXPORT (Full Integrity) ---
-export const exportToXlsx = (reportData: ReportData) => {
-    const wb = XLSX.utils.book_new();
+export const exportToXlsx = async (reportData: ReportData) => {
+    const wb = new ExcelJS.Workbook();
     reportData.sections.forEach(section => {
         const table = section.content.find(c => typeof c !== 'string' && c.type === 'table') as TableData | undefined;
         if (table) {
-            const ws = XLSX.utils.aoa_to_sheet([table.headers, ...table.rows]);
-            ws['!cols'] = table.headers.map((_, i) => ({ wch: i === table.headers.length - 1 ? 60 : 25 }));
-            XLSX.utils.book_append_sheet(wb, ws, section.title.substring(0, 31));
+            const ws = wb.addWorksheet(section.title.substring(0, 31));
+            ws.addRow(table.headers);
+            table.rows.forEach(row => ws.addRow(row));
+            ws.columns = table.headers.map((_, i) => ({ width: i === table.headers.length - 1 ? 60 : 25 }));
         }
     });
-    XLSX.writeFile(wb, createFileName(reportData.title, 'xlsx'));
+    const buffer = await wb.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = createFileName(reportData.title, 'xlsx');
+    a.click();
 };
 
 export const exportToCsv = (reportData: ReportData) => {
@@ -183,6 +199,6 @@ export const copyForSheets = (reportData: ReportData): Promise<string> => {
     return navigator.clipboard.writeText(tsv).then(() => "Official Table copied to clipboard.");
 }
 
-export const exportToJson = (data: any) => {
-    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })); a.download = createFileName(data.title || 'export', 'json'); a.click();
+export const exportToJson = (data: Record<string, unknown>) => {
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })); a.download = createFileName((data.title as string) || 'export', 'json'); a.click();
 };

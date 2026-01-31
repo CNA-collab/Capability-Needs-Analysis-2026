@@ -1,13 +1,23 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { GoogleGenAI, Type } from "@google/genai";
 import { OfficerRecord } from '../types';
-import { SparklesIcon } from './icons';
 import { ReportTemplate } from './ReportTemplate';
 
 interface ReportProps {
   data: OfficerRecord[];
   agencyName: string;
   onClose: () => void;
+}
+
+interface ReportData {
+    pathwayAnalysis: string;
+    individualAssignments: {
+        officerName: string;
+        grade: string;
+        formalProgram: string;
+        staggeredYear: number;
+        successionRationale: string;
+    }[];
 }
 
 const aiSchema = {
@@ -33,7 +43,7 @@ const aiSchema = {
 };
 
 export const DevelopmentPathwaysReport: React.FC<ReportProps> = ({ data, agencyName, onClose }) => {
-    const [report, setReport] = useState<any>(null);
+    const [report, setReport] = useState<ReportData | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -88,7 +98,7 @@ export const DevelopmentPathwaysReport: React.FC<ReportProps> = ({ data, agencyN
                 });
 
                 setReport(JSON.parse(response.text?.trim() || '{}'));
-            } catch (e) {
+            } catch {
                 setError("AI Engine failure during report reconstruction.");
             } finally {
                 setLoading(false);
@@ -98,13 +108,38 @@ export const DevelopmentPathwaysReport: React.FC<ReportProps> = ({ data, agencyN
         generateReport();
     }, [hiPoCandidates, agencyName]);
 
+    if (error) {
+        return (
+            <ReportTemplate
+                title="SECTION 6: DEVELOPMENT PATHWAYS"
+                subtitle={`Strategic Alignment with ${agencyName} Corporate Plan`}
+                agencyName={agencyName}
+                onClose={onClose}
+                onExport={() => {}}
+                loading={false}
+            >
+                <div className="flex items-center justify-center py-32">
+                    <div className="text-center">
+                        <div className="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mb-6 mx-auto">
+                            <svg className="w-8 h-8 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                            </svg>
+                        </div>
+                        <h3 className="text-lg font-black text-rose-600 uppercase tracking-widest mb-2">Pathways Analysis Failed</h3>
+                        <p className="text-slate-600 font-medium">{error}</p>
+                    </div>
+                </div>
+            </ReportTemplate>
+        );
+    }
+
     return (
         <ReportTemplate
             title="SECTION 6: DEVELOPMENT PATHWAYS"
             subtitle={`Strategic Alignment with ${agencyName} Corporate Plan`}
             agencyName={agencyName}
             onClose={onClose}
-            onExport={() => {}} 
+            onExport={() => {}}
             loading={loading}
         >
             <div className="space-y-16">
@@ -125,7 +160,7 @@ export const DevelopmentPathwaysReport: React.FC<ReportProps> = ({ data, agencyN
                     </h3>
                     
                     <div className="space-y-20">
-                        {report?.individualAssignments.map((item: any, idx: number) => (
+                        {report?.individualAssignments.map((item, idx: number) => (
                             <div key={idx} className="page-break-avoid">
                                 <div className="flex justify-between items-baseline mb-6 border-b-2 border-slate-900 pb-2">
                                     <div className="flex items-baseline gap-5">
@@ -160,7 +195,7 @@ export const DevelopmentPathwaysReport: React.FC<ReportProps> = ({ data, agencyN
                 <div className="mt-24 pt-12 border-t-2 border-slate-100 text-center page-break-avoid">
                     <h3 className="text-[10px] font-black text-[#1A365D] uppercase tracking-[0.5em] mb-6">Official Strategic Directive</h3>
                     <div className="report-justified-text text-[10.5pt] italic text-slate-500 font-serif leading-relaxed max-w-2xl mx-auto text-center">
-                        "The development pathways identified for this cohort represent the mandatory leadership pipeline for {agencyName}. This strategic intervention is designed to mitigate transition risks and professionalize service delivery across the national network through 2029."
+                        &ldquo;The development pathways identified for this cohort represent the mandatory leadership pipeline for {agencyName}. This strategic intervention is designed to mitigate transition risks and professionalize service delivery across the national network through 2029.&rdquo;
                     </div>
                 </div>
             </div>

@@ -3,8 +3,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { GoogleGenAI, Type } from "@google/genai";
 import { OfficerRecord, AgencyType, QUESTION_TEXT_MAPPING } from '../types';
 import { XIcon, SparklesIcon, ChevronDownIcon, ChartBarSquareIcon } from './icons';
-import { ExportMenu } from './ExportMenu';
-import { exportToPdf, exportToDocx, exportToXlsx, ReportData } from '../utils/export';
 import { ChartComponent } from './charts';
 
 // --- Types for this Report ---
@@ -123,7 +121,7 @@ const QuestionDetailAccordion: React.FC<{ stat: QuestionStats }> = ({ stat }) =>
 
 
 // --- Main Component ---
-export const ItemLevelAnalysisReport: React.FC<ReportProps> = ({ data, agencyType, agencyName, onClose }) => {
+export const ItemLevelAnalysisReport: React.FC<ReportProps> = ({ data, onClose }) => {
     const [aiContent, setAiContent] = useState<AiNarrativeContent | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);

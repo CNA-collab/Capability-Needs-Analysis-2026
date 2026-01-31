@@ -1,12 +1,23 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GoogleGenAI, Type } from "@google/genai";
-import { OfficerRecord, AiGapAnalysisReport, AgencyType, AiLearningSolution, AiReportSummary, QUESTION_TEXT_MAPPING } from '../types';
+import { OfficerRecord, AgencyType, SuccessionCandidate } from '../types';
 import { AI_GAP_ANALYSIS_REPORT_PROMPT_INSTRUCTIONS } from '../constants';
-import { DataAggregator } from '../services/DataAggregator';
 import { ReportTemplate } from './ReportTemplate';
 import { SuccessionPlanningTable } from './SuccessionPlanningTable';
 import { exportToPdf, exportToDocx, exportToXlsx, ReportData } from '../utils/export';
+
+interface GapAnalysisReport {
+    executiveSummary: string;
+    prioritizedGaps: Array<{
+        gapName: string;
+        type: string;
+        impact: string;
+        context: string;
+        actionableIntervention: string;
+    }>;
+    successionPlan: SuccessionCandidate[];
+}
 
 interface ReportProps {
   data: OfficerRecord[];
@@ -51,8 +62,8 @@ const aiGapAnalysisReportSchema = {
     required: ["executiveSummary", "prioritizedGaps", "successionPlan"]
 };
 
-export const CapabilityGapAnalysisReport: React.FC<ReportProps> = ({ data, agencyType, agencyName, onClose }) => {
-    const [report, setReport] = useState<any>(null);
+export const CapabilityGapAnalysisReport: React.FC<ReportProps> = ({ data, agencyName, onClose }) => {
+    const [report, setReport] = useState<GapAnalysisReport | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -116,7 +127,7 @@ export const CapabilityGapAnalysisReport: React.FC<ReportProps> = ({ data, agenc
                     content: [{
                         type: 'table',
                         headers: ['Capability Area', 'Gap Classification', 'Impact', 'Strategic Context', 'Recommended Intervention'],
-                        rows: report.prioritizedGaps.map((g: any) => [
+                        rows: report.prioritizedGaps.map((g) => [
                             g.gapName, g.type, g.impact, g.context, g.actionableIntervention
                         ])
                     }],
@@ -127,7 +138,7 @@ export const CapabilityGapAnalysisReport: React.FC<ReportProps> = ({ data, agenc
                     content: [{
                         type: 'table',
                         headers: ['Role', 'Candidates', 'Readiness', 'Development Plan', 'Estimated Time'],
-                        rows: report.successionPlan.map((s: any) => [
+                        rows: report.successionPlan.map((s: SuccessionCandidate) => [
                             s.roleOrPosition, s.potentialSuccessors.join(', '), s.readinessLevel, s.developmentNeeds, s.estimatedTimeline
                         ])
                     }],
@@ -140,6 +151,30 @@ export const CapabilityGapAnalysisReport: React.FC<ReportProps> = ({ data, agenc
         else if (format === 'xlsx') exportToXlsx(reportData);
         else if (format === 'docx') exportToDocx(reportData);
     };
+
+    if (error) {
+        return (
+            <ReportTemplate 
+                title="Capability Gap Analysis" 
+                subtitle={agencyName} 
+                onClose={onClose} 
+                onExport={handleExport} 
+                loading={false}
+            >
+                <div className="flex items-center justify-center py-32">
+                    <div className="text-center">
+                        <div className="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mb-6 mx-auto">
+                            <svg className="w-8 h-8 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                            </svg>
+                        </div>
+                        <h3 className="text-lg font-black text-rose-600 uppercase tracking-widest mb-2">Analysis Failed</h3>
+                        <p className="text-slate-600 font-medium">{error}</p>
+                    </div>
+                </div>
+            </ReportTemplate>
+        );
+    }
 
     return (
         <ReportTemplate 
@@ -173,7 +208,7 @@ export const CapabilityGapAnalysisReport: React.FC<ReportProps> = ({ data, agenc
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
-                                {report?.prioritizedGaps.map((gap: any, i: number) => (
+                                {report?.prioritizedGaps.map((gap, i: number) => (
                                     <tr key={i} className="hover:bg-slate-50 transition-colors group">
                                         <td className="p-5">
                                             <p className="font-black text-[#1A365D] text-[12px] group-hover:text-blue-600 transition-colors">{gap.gapName}</p>

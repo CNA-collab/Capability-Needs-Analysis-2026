@@ -1,9 +1,25 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { GoogleGenAI, Type } from "@google/genai";
 import { OfficerRecord, AgencyType, EstablishmentRecord, StructuredCorporatePlan } from '../types';
-import { XIcon, SparklesIcon, ClipboardDocumentListIcon, CheckCircleIcon, ExclamationTriangleIcon, ScaleIcon, PrinterIcon, BriefcaseIcon, UsersIcon, AcademicCapIcon } from './icons';
+import { XIcon, ClipboardDocumentListIcon, CheckCircleIcon, ExclamationTriangleIcon, ScaleIcon, BriefcaseIcon, UsersIcon, AcademicCapIcon } from './icons';
 import { ExportMenu } from './ExportMenu';
 import { exportToPdf, exportToDocx, exportToXlsx, ReportData } from '../utils/export';
+import { PrinterIcon } from 'lucide-react';
+
+interface EligibleOfficerRecommendation {
+    name: string;
+    path70: string;
+    path20: string;
+    path10: string;
+    formalBudgetPGK: string;
+    strategicRationale: string;
+    locationPreference: string;
+}
+
+interface EligibleOfficersReportData {
+    executiveSummary: string;
+    eligibleOfficers: EligibleOfficerRecommendation[];
+}
 
 interface ReportProps {
   data: OfficerRecord[];
@@ -39,7 +55,7 @@ const aiEligibleOfficersReportSchema = {
 };
 
 export const EligibleOfficersReport: React.FC<ReportProps> = ({ data, agencyName, corporatePlanContext, onClose }) => {
-    const [report, setReport] = useState<any>(null);
+    const [report, setReport] = useState<EligibleOfficersReportData | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -81,12 +97,6 @@ export const EligibleOfficersReport: React.FC<ReportProps> = ({ data, agencyName
         });
     }, [data]);
 
-    const stats = useMemo(() => {
-        const total = complianceResults.length;
-        const eligible = complianceResults.filter(r => r.isEligible).length;
-        const disqualified = total - eligible;
-        return { total, eligible, disqualified };
-    }, [complianceResults]);
 
     useEffect(() => {
         const generateStrategicPlan = async () => {
@@ -123,6 +133,7 @@ export const EligibleOfficersReport: React.FC<ReportProps> = ({ data, agencyName
                 try {
                     const parsed = JSON.parse(corporatePlanContext) as StructuredCorporatePlan;
                     strategicContext = `Strategic Objectives: ${parsed.strategic_goals.objectives.join(', ')}. Priority Needs: ${parsed.training_needs}`;
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 } catch (e) {
                     strategicContext = corporatePlanContext || "Public Service Excellence and MTDP IV Alignment.";
                 }
@@ -171,19 +182,33 @@ export const EligibleOfficersReport: React.FC<ReportProps> = ({ data, agencyName
         generateStrategicPlan();
     }, [complianceResults, agencyName, corporatePlanContext]);
 
-    const handleExport = (format: 'pdf' | 'docx' | 'xlsx') => {
+    const handleExport = (format: 'pdf' | 'docx' | 'xlsx' | 'csv' | 'sheets' | 'json' | 'print') => {
         if (!report) return;
+        if (format === 'print') {
+            window.print();
+            return;
+        }
+        if (format === 'json') {
+            const dataStr = JSON.stringify(report, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            const exportFileDefaultName = `eligible-officers-${agencyName.toLowerCase().replace(/\s+/g, '-')}.json`;
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+            return;
+        }
         const reportData: ReportData = {
             title: `Official Eligibility Report - ${agencyName}`,
             sections: [
                 { title: "Executive Compliance Summary", content: [report.executiveSummary] },
-                { 
-                    title: "70:20:10 Development Matrix", 
+                {
+                    title: "70:20:10 Development Matrix",
                     content: [{
                         type: 'table',
                         headers: ['Officer', 'Position', 'Tenure', 'Formal (10%)', 'Social (20%)', 'Work (70%)', 'Placement'],
                         rows: complianceResults.filter(r => r.isEligible).map(r => {
-                            const rec = report.eligibleOfficers.find((o: any) => o.name === r.name);
+                            const rec = report.eligibleOfficers.find(o => o.name === r.name);
                             return [
                                 r.name, r.position, `${r.tenureYears} Yrs`,
                                 rec?.path10 || 'N/A', rec?.path20 || 'N/A', rec?.path70 || 'N/A', rec?.strategicRationale || 'N/A'
@@ -197,7 +222,24 @@ export const EligibleOfficersReport: React.FC<ReportProps> = ({ data, agencyName
         if (format === 'pdf') exportToPdf(reportData);
         else if (format === 'xlsx') exportToXlsx(reportData);
         else if (format === 'docx') exportToDocx(reportData);
+        // For csv and sheets, we could implement later, but for now just do nothing
     };
+
+    if (error) {
+        return (
+            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center">
+                <div className="text-center">
+                    <div className="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mb-6 mx-auto">
+                        <svg className="w-8 h-8 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                        </svg>
+                    </div>
+                    <h2 className="text-2xl font-black text-white uppercase tracking-tighter mb-2">Eligibility Analysis Failed</h2>
+                    <p className="text-slate-400 font-medium">{error}</p>
+                </div>
+            </div>
+        );
+    }
 
     if (loading) return (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center">
@@ -225,7 +267,7 @@ export const EligibleOfficersReport: React.FC<ReportProps> = ({ data, agencyName
                     <div className="flex flex-col items-end gap-3 no-print">
                         <div className="flex gap-2">
                              <button onClick={() => window.print()} className="p-2 text-slate-400 hover:text-blue-900 transition-all"><PrinterIcon className="w-6 h-6" /></button>
-                             <ExportMenu onExport={handleExport as any} />
+                             <ExportMenu onExport={handleExport} />
                              <button onClick={onClose} className="p-2 bg-slate-100 hover:bg-rose-600 hover:text-white rounded-xl transition-all"><XIcon className="w-6 h-6" /></button>
                         </div>
                         <div className="bg-blue-900 text-white px-5 py-2 text-center rounded-lg shadow-lg">
@@ -262,9 +304,9 @@ export const EligibleOfficersReport: React.FC<ReportProps> = ({ data, agencyName
 
                 {/* Executive Summary */}
                 <div className="bg-slate-50 p-8 rounded-2xl border border-slate-100 italic font-medium text-slate-700 leading-relaxed text-md mb-12 relative font-serif">
-                    <span className="absolute top-2 left-4 text-4xl text-blue-200 opacity-50">"</span>
+                    <span className="absolute top-2 left-4 text-4xl text-blue-200 opacity-50">&quot;</span>
                     {report?.executiveSummary}
-                    <span className="absolute bottom-0 right-4 text-4xl text-blue-200 opacity-50">"</span>
+                    <span className="absolute bottom-0 right-4 text-4xl text-blue-200 opacity-50">&quot;</span>
                 </div>
 
                 {/* Main Personnel Register */}
@@ -280,7 +322,7 @@ export const EligibleOfficersReport: React.FC<ReportProps> = ({ data, agencyName
                         </thead>
                         <tbody className="divide-y-2 divide-slate-50 font-sans">
                             {complianceResults.map((officer, idx) => {
-                                const rec = report?.eligibleOfficers.find((o: any) => o.name === officer.name);
+                                const rec = report?.eligibleOfficers.find(o => o.name === officer.name);
                                 return (
                                     <tr key={idx} className={`hover:bg-slate-50/50 transition-colors ${!officer.isEligible ? 'bg-slate-50/30 grayscale opacity-60' : ''}`}>
                                         <td className="p-6">
