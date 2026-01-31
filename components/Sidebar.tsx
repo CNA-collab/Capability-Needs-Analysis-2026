@@ -44,6 +44,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         { id: 'gesi', label: 'GESI Toolkit', icon: ShieldCheckIcon },
         { id: 'cna', label: 'CNA Policy Toolkit', icon: DocumentIcon },
         { id: 'survey-insights', label: 'Survey Insights', icon: PresentationChartLineIcon },
+        { id: 'expenditure-review', label: 'Expenditure Review', icon: PresentationChartLineIcon },
         { id: 'settings', label: 'Settings', icon: LightBulbIcon },
     ];
 

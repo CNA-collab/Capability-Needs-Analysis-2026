@@ -1,9 +1,12 @@
 import React, { useState, useMemo } from 'react';
-import { View } from '../types';
+import { View, UrgencyLevel, GradingGroup, PerformanceRatingLevel, CapabilityItemAnalysis } from '../types';
 import { Sidebar } from './Sidebar';
 import { ReportingSuiteModal } from './ReportingSuiteModal';
 import { StrategicAnalysisDashboard } from './StrategicAnalysisDashboard';
 import { SurveyInsights } from './SurveyInsights';
+import { ExpenditureReview } from './ExpenditureReview';
+import { CnaPolicyToolkit } from './CnaPolicyToolkit';
+import { GesiPolicyToolkit } from './GesiPolicyToolkit';
 
 
 import { WelcomeModal } from './WelcomeModal';
@@ -24,13 +27,13 @@ interface MainDashboardProps {
 }
 
 export const MainDashboard: React.FC<MainDashboardProps> = ({ onLogout }) => {
-    const [currentView, setCurrentView] = useState<View>('cna');
+    const [currentView, setCurrentView] = useState<View>('dashboard');
     const [showReportingSuite, setShowReportingSuite] = useState(false);
     const [showWelcome, setShowWelcome] = useState(true);
 
     // Demo data for organisational overview
     const demoData = useMemo(() => ({
-        agencyName: "Department of National Planning & Monitoring",
+        agencyName: "Department of Personnel Management",
         totalStaff: 245,
         activeSurveys: 189,
         completionRate: 77,
@@ -46,97 +49,91 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ onLogout }) => {
     // Demo officers data (simplified for demo purposes)
     const demoOfficers = useMemo(() => [
         {
-            id: '1',
+            employmentStatus: 'Confirmed',
+            lifecycleStage: 'Peak Performer',
+            urgency: 'High' as UrgencyLevel,
+            jobQualification: 'Masters Degree',
+            technicalCapabilityGaps: ['Strategic Planning'],
+            yearsOfExperience: 15,
+            gradingGroup: 'Senior Management' as GradingGroup,
+            gender: 'Male',
+            spaRating: 'Outstanding',
+            age: 45,
+            email: 'john.smith@gov.na',
             name: 'John Smith',
             position: 'Senior Planning Officer',
             positionNumber: 'NP-001',
             dateOfBirth: '1979-05-15',
             commencementDate: '2009-01-01',
-            grade: 'Grade 12',
             division: 'Policy & Planning',
-            performanceRating: 'Exceeds Expectations',
-            capabilityGaps: ['Strategic Planning', 'Digital Transformation'],
-            lifecycleStage: 'Peak Performer',
-            urgency: 'High',
-            jobQualification: 'Masters Degree',
-            technicalCapabilityGaps: ['Strategic Planning'],
-            yearsOfExperience: 15,
-            currentSalary: 85000,
-            targetSalary: 95000,
-            trainingNeeds: ['Digital Transformation'],
-            developmentAreas: ['Leadership'],
-            successionReadiness: 'Ready Now',
-            retentionRisk: 'Low',
-            engagementScore: 8.5,
-            gradingGroup: 'Senior Management',
-            gender: 'Male',
-            spaRating: 'Outstanding',
-            age: 45,
-            email: 'john.smith@gov.na',
-            performanceRatingLevel: 'Exceeds Expectations',
-            capabilityRatings: []
+            grade: 'Grade 12',
+            performanceRatingLevel: 'Well Above Required' as PerformanceRatingLevel,
+            capabilityRatings: [] as CapabilityItemAnalysis[],
+            // Additional properties for ReportingSuiteModal
+            occupant: 'John Smith',
+            designation: 'Senior Planning Officer',
+            status: 'Confirmed',
+            cnaSubmission: 'Yes',
+            trainingYear: [2024, 2025],
+            branch: 'Policy & Planning'
         },
         {
-            id: '2',
+            employmentStatus: 'Confirmed',
+            lifecycleStage: 'High Potential',
+            urgency: 'Medium' as UrgencyLevel,
+            jobQualification: 'Bachelors Degree',
+            technicalCapabilityGaps: ['Data Analytics'],
+            yearsOfExperience: 8,
+            gradingGroup: 'Professional' as GradingGroup,
+            gender: 'Female',
+            spaRating: 'Good',
+            age: 35,
+            email: 'mary.johnson@gov.na',
             name: 'Mary Johnson',
             position: 'Monitoring & Evaluation Specialist',
             positionNumber: 'NP-002',
             dateOfBirth: '1989-03-22',
             commencementDate: '2016-07-01',
-            grade: 'Grade 11',
             division: 'M&E Division',
-            performanceRating: 'Meets Expectations',
-            capabilityGaps: ['Data Analytics', 'Impact Assessment'],
-            lifecycleStage: 'High Potential',
-            urgency: 'Medium',
-            jobQualification: 'Bachelors Degree',
-            technicalCapabilityGaps: ['Data Analytics'],
-            yearsOfExperience: 8,
-            currentSalary: 65000,
-            targetSalary: 75000,
-            trainingNeeds: ['Impact Assessment'],
-            developmentAreas: ['Technical Skills'],
-            successionReadiness: '1-2 Years',
-            retentionRisk: 'Medium',
-            engagementScore: 7.2,
-            gradingGroup: 'Professional',
-            gender: 'Female',
-            spaRating: 'Good',
-            age: 35,
-            email: 'mary.johnson@gov.na',
-            performanceRatingLevel: 'Meets Expectations',
-            capabilityRatings: []
+            grade: 'Grade 11',
+            performanceRatingLevel: 'Above Required' as PerformanceRatingLevel,
+            capabilityRatings: [] as CapabilityItemAnalysis[],
+            // Additional properties for ReportingSuiteModal
+            occupant: 'Mary Johnson',
+            designation: 'Monitoring & Evaluation Specialist',
+            status: 'Confirmed',
+            cnaSubmission: 'Yes',
+            trainingYear: [2024],
+            branch: 'M&E Division'
         },
         {
-            id: '3',
+            employmentStatus: 'Confirmed',
+            lifecycleStage: 'Early Career',
+            urgency: 'High' as UrgencyLevel,
+            jobQualification: 'Bachelors Degree',
+            technicalCapabilityGaps: ['Project Management'],
+            yearsOfExperience: 3,
+            gradingGroup: 'Professional' as GradingGroup,
+            gender: 'Male',
+            spaRating: 'Developing',
+            age: 28,
+            email: 'david.wilson@gov.na',
             name: 'David Wilson',
             position: 'Project Manager',
             positionNumber: 'NP-003',
             dateOfBirth: '1996-11-08',
             commencementDate: '2021-09-01',
-            grade: 'Grade 10',
             division: 'Program Implementation',
-            performanceRating: 'Developing',
-            capabilityGaps: ['Project Management', 'Risk Assessment'],
-            lifecycleStage: 'Early Career',
-            urgency: 'High',
-            jobQualification: 'Bachelors Degree',
-            technicalCapabilityGaps: ['Project Management'],
-            yearsOfExperience: 3,
-            currentSalary: 45000,
-            targetSalary: 55000,
-            trainingNeeds: ['Risk Assessment'],
-            developmentAreas: ['Project Management'],
-            successionReadiness: '3-5 Years',
-            retentionRisk: 'High',
-            engagementScore: 6.8,
-            gradingGroup: 'Professional',
-            gender: 'Male',
-            spaRating: 'Developing',
-            age: 28,
-            email: 'david.wilson@gov.na',
-            performanceRatingLevel: 'Developing',
-            capabilityRatings: []
+            grade: 'Grade 10',
+            performanceRatingLevel: 'Below Required Level' as PerformanceRatingLevel,
+            capabilityRatings: [] as CapabilityItemAnalysis[],
+            // Additional properties for ReportingSuiteModal
+            occupant: 'David Wilson',
+            designation: 'Project Manager',
+            status: 'Confirmed',
+            cnaSubmission: 'Yes',
+            trainingYear: [2024, 2025, 2026],
+            branch: 'Program Implementation'
         }
     ], []);
 
@@ -163,7 +160,7 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ onLogout }) => {
 
     const renderView = () => {
         switch (currentView) {
-            case 'cna':
+            case 'dashboard':
                 return (
                     <div className="p-8 space-y-8">
                         {/* Organisational Overview */}
@@ -296,7 +293,7 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ onLogout }) => {
                                 const lifecycleStageClass = getLifecycleStageClass(officer.lifecycleStage);
 
                                 return (
-                                    <div key={officer.id} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:shadow-lg transition-shadow">
+                                    <div key={officer.name} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:shadow-lg transition-shadow">
                                         <div className="flex items-start justify-between mb-4">
                                             <div>
                                                 <h3 className="text-lg font-black text-slate-900">{officer.name}</h3>
@@ -318,8 +315,8 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ onLogout }) => {
                                         </div>
                                         <div className="flex justify-between items-center">
                                             <span className="text-sm font-bold text-slate-500">Performance:</span>
-                                            <span className={`text-sm font-black ${getPerformanceRatingClass(officer.performanceRating)}`}>
-                                                {officer.performanceRating}
+                                            <span className={`text-sm font-black ${getPerformanceRatingClass(officer.performanceRatingLevel)}`}>
+                                                {officer.performanceRatingLevel}
                                             </span>
                                         </div>
                                     </div>
@@ -327,7 +324,7 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ onLogout }) => {
                                     <div className="mb-4">
                                         <p className="text-sm font-bold text-slate-500 mb-2">Capability Gaps:</p>
                                         <div className="flex flex-wrap gap-1">
-                                            {officer.capabilityGaps.map((gap) => (
+                                            {officer.technicalCapabilityGaps.map((gap) => (
                                                 <span key={gap} className="px-2 py-1 bg-red-100 text-red-800 text-xs font-bold rounded-full">
                                                     {gap}
                                                 </span>
@@ -361,6 +358,352 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ onLogout }) => {
                     />
                 );
 
+            case 'expenditure-review':
+                return (
+                    <ExpenditureReview
+                        officers={demoOfficers}
+                        baselineData={{
+                            agencyName: demoData.agencyName,
+                            kpis: demoData.kpis
+                        }}
+                    />
+                );
+
+            case 'cna':
+                return <CnaPolicyToolkit />;
+
+            case 'gesi':
+                return <GesiPolicyToolkit onShowGesiAnalysis={() => {}} />;
+
+            case 'all-components':
+                return (
+                    <div className="p-8 space-y-8">
+                        <div className="mb-6">
+                            <h2 className="text-2xl font-black text-slate-900 uppercase mb-2">All Components Overview</h2>
+                            <p className="text-slate-600">Comprehensive view of all available reports and forms in the system</p>
+                        </div>
+
+                        {/* Reports Section */}
+                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                            <h3 className="text-lg font-black text-slate-900 uppercase mb-4">Reports</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Annual Training Plan Report</h4>
+                                    <p className="text-sm text-slate-600">Yearly training interventions and planning</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Capability Gap Analysis Report</h4>
+                                    <p className="text-sm text-slate-600">Identify and analyze capability gaps</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Competency Domain Report</h4>
+                                    <p className="text-sm text-slate-600">Domain-specific competency analysis</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Consolidated Lifecycle Plan Report</h4>
+                                    <p className="text-sm text-slate-600">Lifecycle planning across the organization</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">GESI Analysis Report</h4>
+                                    <p className="text-sm text-slate-600">Gender equity and social inclusion analysis</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Succession Plan Report</h4>
+                                    <p className="text-sm text-slate-600">Leadership succession planning</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Talent Segmentation Report</h4>
+                                    <p className="text-sm text-slate-600">Talent categorization and analysis</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Workforce Snapshot Report</h4>
+                                    <p className="text-sm text-slate-600">Current workforce overview</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Development Pathways Report</h4>
+                                    <p className="text-sm text-slate-600">Career development pathways</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Eligible Officers Report</h4>
+                                    <p className="text-sm text-slate-600">Training eligibility assessment</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Training Needs Analysis Report</h4>
+                                    <p className="text-sm text-slate-600">Comprehensive training needs assessment</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Training Plan Report</h4>
+                                    <p className="text-sm text-slate-600">Strategic training planning</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Organisational Structure Report</h4>
+                                    <p className="text-sm text-slate-600">Organizational hierarchy analysis</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Organisational Establishment Report</h4>
+                                    <p className="text-sm text-slate-600">Establishment data analysis</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Consolidated Strategic Plan Report</h4>
+                                    <p className="text-sm text-slate-600">Strategic planning consolidation</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Detailed Capability Breakdown Report</h4>
+                                    <p className="text-sm text-slate-600">Detailed capability analysis</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Corporate Plan Analysis Report</h4>
+                                    <p className="text-sm text-slate-600">Corporate plan evaluation</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Competency Projection Report</h4>
+                                    <p className="text-sm text-slate-600">Future competency forecasting</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Consolidated Training Plan Report</h4>
+                                    <p className="text-sm text-slate-600">Training plan consolidation</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Training Pathways Report</h4>
+                                    <p className="text-sm text-slate-600">Training pathway development</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Training Eligibility Summary Report</h4>
+                                    <p className="text-sm text-slate-600">Training eligibility overview</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Training Calendar Report</h4>
+                                    <p className="text-sm text-slate-600">Training schedule management</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Kra Matrix Report</h4>
+                                    <p className="text-sm text-slate-600">Key result area analysis</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Item Level Analysis Report</h4>
+                                    <p className="text-sm text-slate-600">Detailed item analysis</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Grading Group Report</h4>
+                                    <p className="text-sm text-slate-600">Grading group analysis</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Individual Talent Card Report</h4>
+                                    <p className="text-sm text-slate-600">Individual talent assessment</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Bulk Talent Card Report</h4>
+                                    <p className="text-sm text-slate-600">Bulk talent card generation</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Automated Organisational Analysis Report</h4>
+                                    <p className="text-sm text-slate-600">Automated organizational insights</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Automated Job Group Knowledge Report</h4>
+                                    <p className="text-sm text-slate-600">Job group knowledge assessment</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Automated Individual Lnd Plans Report</h4>
+                                    <p className="text-sm text-slate-600">Individual learning plans</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Automated Lnd Recommendations Report</h4>
+                                    <p className="text-sm text-slate-600">Automated learning recommendations</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Automated Desired Experience Report</h4>
+                                    <p className="text-sm text-slate-600">Desired experience analysis</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Five Year Plan Report</h4>
+                                    <p className="text-sm text-slate-600">Long-term planning report</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">AI Analysis Report</h4>
+                                    <p className="text-sm text-slate-600">AI-powered organizational analysis</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Forms Section */}
+                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                            <h3 className="text-lg font-black text-slate-900 uppercase mb-4">Forms</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Individual Lnd Plan Form</h4>
+                                    <p className="text-sm text-slate-600">Personal learning and development planning</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Job Group Knowledge Form</h4>
+                                    <p className="text-sm text-slate-600">Job group knowledge requirements</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Automated Eligibility Form</h4>
+                                    <p className="text-sm text-slate-600">Automated eligibility assessment</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Manual Eligible Officer Form</h4>
+                                    <p className="text-sm text-slate-600">Manual officer eligibility form</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Edit Eligible Officer Modal</h4>
+                                    <p className="text-sm text-slate-600">Edit officer eligibility details</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Edit Experience Modal</h4>
+                                    <p className="text-sm text-slate-600">Edit work experience details</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Training Category Modal</h4>
+                                    <p className="text-sm text-slate-600">Training category management</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Import Modal</h4>
+                                    <p className="text-sm text-slate-600">Data import functionality</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Lnd Ai Assistant Modal</h4>
+                                    <p className="text-sm text-slate-600">AI-powered L&D assistance</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">User Guide Modal</h4>
+                                    <p className="text-sm text-slate-600">System user guide</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Welcome Modal</h4>
+                                    <p className="text-sm text-slate-600">System welcome screen</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Reporting Suite Modal</h4>
+                                    <p className="text-sm text-slate-600">Comprehensive reporting interface</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Toolkits Section */}
+                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                            <h3 className="text-lg font-black text-slate-900 uppercase mb-4">Toolkits</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">CNA Policy Toolkit</h4>
+                                    <p className="text-sm text-slate-600">Capability needs analysis tools</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">GESI Policy Toolkit</h4>
+                                    <p className="text-sm text-slate-600">Gender equity and social inclusion tools</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">CNA Home</h4>
+                                    <p className="text-sm text-slate-600">CNA toolkit homepage</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">CNA Analysis Guide</h4>
+                                    <p className="text-sm text-slate-600">CNA analysis guidelines</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">CNA Lnd Planning</h4>
+                                    <p className="text-sm text-slate-600">CNA learning planning tools</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">CNA Overview</h4>
+                                    <p className="text-sm text-slate-600">CNA process overview</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">CNA Process Guide</h4>
+                                    <p className="text-sm text-slate-600">CNA process guidelines</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">CNA Resources</h4>
+                                    <p className="text-sm text-slate-600">CNA resource library</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">GESI Overview</h4>
+                                    <p className="text-sm text-slate-600">GESI toolkit overview</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">GESI Role Detail</h4>
+                                    <p className="text-sm text-slate-600">GESI role-specific details</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">GESI Training Toolkit</h4>
+                                    <p className="text-sm text-slate-600">GESI training resources</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">GESI Compliance Tool</h4>
+                                    <p className="text-sm text-slate-600">GESI compliance assessment</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Dashboards Section */}
+                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                            <h3 className="text-lg font-black text-slate-900 uppercase mb-4">Dashboards</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Strategic Analysis Dashboard</h4>
+                                    <p className="text-sm text-slate-600">Strategic workforce analytics</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Survey Insights</h4>
+                                    <p className="text-sm text-slate-600">CNA survey data insights</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Expenditure Review</h4>
+                                    <p className="text-sm text-slate-600">Training expenditure analysis</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Visual Dashboard Summary</h4>
+                                    <p className="text-sm text-slate-600">Visual data summaries</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Other Components Section */}
+                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                            <h3 className="text-lg font-black text-slate-900 uppercase mb-4">Other Components</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Staff Card</h4>
+                                    <p className="text-sm text-slate-600">Individual staff information card</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Cna Evidence Master Table</h4>
+                                    <p className="text-sm text-slate-600">CNA evidence management</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Succession Planning Table</h4>
+                                    <p className="text-sm text-slate-600">Succession planning interface</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Framework Graphic</h4>
+                                    <p className="text-sm text-slate-600">10:20:70 framework visualization</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">System Settings</h4>
+                                    <p className="text-sm text-slate-600">System configuration options</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Certificate Of Compliance</h4>
+                                    <p className="text-sm text-slate-600">Compliance certification</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Automated Establishment Summary</h4>
+                                    <p className="text-sm text-slate-600">Automated establishment overview</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Individual Development Profile</h4>
+                                    <p className="text-sm text-slate-600">Personal development profile</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                    <h4 className="font-bold text-slate-900 mb-2">Export Menu</h4>
+                                    <p className="text-sm text-slate-600">Data export options</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+
             default:
                 return (
                     <div className="flex-1 p-20 flex flex-col items-center justify-center text-center">
@@ -382,9 +725,9 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ onLogout }) => {
                 onClose={() => {}}
             />
 
-            <main className="flex-1 overflow-y-auto">
+            <main className="flex-1 overflow-y-auto ml-64 pt-20">
                 {/* Top Header with Reporting Suite */}
-                <header className="bg-white border-b border-slate-200 px-8 py-4 flex justify-between items-center sticky top-0 z-20">
+                <header className="bg-white border-b border-slate-200 px-8 py-4 flex justify-between items-center fixed top-0 left-64 right-0 z-20">
                     <div>
                         <h1 className="text-xl font-black text-slate-900 uppercase">
                             {demoData.agencyName}

@@ -22,7 +22,7 @@ export const SurveyInsights: React.FC<SurveyInsightsProps> = ({ officers, baseli
     const [sheetData, setSheetData] = useState<Record<string, unknown>[]>([]);
     const [columns, setColumns] = useState<string[]>([]);
     const [selectedColumn, setSelectedColumn] = useState<string>('');
-    const [loading, setLoading] = useState(false);
+    const [, setLoading] = useState(true);
     const [, setError] = useState<string | null>(null);
     const [spreadsheetId, setSpreadsheetId] = useState<string | null>(null);
 
@@ -135,6 +135,9 @@ export const SurveyInsights: React.FC<SurveyInsightsProps> = ({ officers, baseli
         };
     }, [reconciledData.surveyData, selectedColumn, learningFramework.gapSeverity]);
 
+    // Force immediate rendering - no loading barriers
+    // All components must display immediately upon page load
+
     if (!spreadsheetId) {
         return (
             <div className="flex-1 p-10 flex flex-col items-center justify-center text-center bg-slate-50">
@@ -149,25 +152,6 @@ export const SurveyInsights: React.FC<SurveyInsightsProps> = ({ officers, baseli
 
     return (
         <div className="flex-1 flex flex-col bg-slate-50 relative overflow-hidden">
-            <header className="p-8 bg-white/80 backdrop-blur-md border-b flex justify-between items-center sticky top-0 z-20">
-                <div>
-                    <h1 className="text-2xl font-black text-slate-900 uppercase flex items-center gap-3">
-                        <ChartBarSquareIcon className="w-7 h-7 text-slate-600" />
-                        {baselineData.agencyName}
-                    </h1>
-                    <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">
-                        System Status: <span className="text-emerald-500 animate-pulse">● Active Analysis</span>
-                    </p>
-                </div>
-                <button
-                    onClick={() => fetchData(spreadsheetId)}
-                    className="px-6 py-2 bg-slate-900 text-white rounded-xl text-xs font-black uppercase flex items-center gap-2 hover:bg-slate-800 transition-colors"
-                >
-                    <div className={`w-4 h-4 border-2 border-white border-t-transparent rounded-full ${loading ? 'animate-spin' : ''}`} />
-                    Refresh Data
-                </button>
-            </header>
-
             <main className="p-10 space-y-8 max-w-7xl mx-auto w-full">
                 {/* ISO 30414 Workforce Planning KPIs */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
