@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: cnas-strategic-portal
+    runtime: static
+    buildCommand: npm run build
+    staticPublishDir: dist
