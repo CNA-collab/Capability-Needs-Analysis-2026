@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { EligibleOfficer, EligibleOfficerStatus } from '../types';
-import { XIcon } from './icons';
+import { XIcon, SparklesIcon } from './icons';
+import { useAppContext } from './AppContext';
 
 interface ModalProps {
     officer: EligibleOfficer;
@@ -37,6 +38,7 @@ type FormState = EligibleOfficer & {
 };
 
 export const EditEligibleOfficerModal: React.FC<ModalProps> = ({ officer, onUpdate, onClose, yearOptions }) => {
+    const { state } = useAppContext();
     // Initialize state with a function to ensure the correct shape from the start
     const [formState, setFormState] = useState<FormState>(() => ({
         ...officer,
@@ -46,6 +48,29 @@ export const EditEligibleOfficerModal: React.FC<ModalProps> = ({ officer, onUpda
         }, {} as Record<number, boolean>),
     }));
     const [errors, setErrors] = useState<string[]>([]);
+
+    // Auto-fill logic using imported data
+    const autoFillFromImportedData = () => {
+        const cnaRecord = state.officers.find(o => o.positionNumber === officer.positionNumber);
+        const establishmentRecord = state.establishmentData.find(e => e.positionNumber === officer.positionNumber);
+
+        if (cnaRecord || establishmentRecord) {
+            setFormState(prev => ({
+                ...prev,
+                status: establishmentRecord?.status as EligibleOfficerStatus || prev.status,
+                cnaSubmission: cnaRecord ? 'Yes' : 'No',
+                beenSentForStudies: cnaRecord?.trainingHistory && cnaRecord.trainingHistory.length > 0 ? 'Yes' : 'No',
+                studiedWhere: cnaRecord?.trainingHistory && cnaRecord.trainingHistory.length > 0 ?
+                    cnaRecord.trainingHistory.map(t => t.courseName).join(', ') : prev.studiedWhere,
+                courseDetails: cnaRecord?.trainingHistory ?
+                    cnaRecord.trainingHistory.map(t => `${t.courseName} (${t.completionDate})`).join('; ') : prev.courseDetails,
+                trainingYears: yearOptions.reduce((acc, year) => ({
+                    ...acc,
+                    [year]: cnaRecord?.trainingPreferences && cnaRecord.trainingPreferences.length > 0
+                }), prev.trainingYears),
+            }));
+        }
+    };
 
     useEffect(() => {
         // When the officer prop changes, reset the form state
@@ -189,13 +214,23 @@ export const EditEligibleOfficerModal: React.FC<ModalProps> = ({ officer, onUpda
                             </ul>
                         </div>
                     )}
-                     <footer className="flex justify-end gap-3 pt-4">
-                        <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 rounded-md border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600">
-                            Cancel
+                     <footer className="flex justify-between items-center pt-4">
+                        <button
+                            type="button"
+                            onClick={autoFillFromImportedData}
+                            className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded-md hover:bg-blue-100 dark:hover:bg-blue-900/40"
+                        >
+                            <SparklesIcon className="w-4 h-4" />
+                            Auto-Fill from Data
                         </button>
-                        <button type="submit" className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700">
-                            Save Changes
-                        </button>
+                        <div className="flex gap-3">
+                            <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 rounded-md border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600">
+                                Cancel
+                            </button>
+                            <button type="submit" className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700">
+                                Save Changes
+                            </button>
+                        </div>
                     </footer>
                 </form>
             </div>

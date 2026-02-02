@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { XIcon, DocumentArrowUpIcon, SpinnerIcon, CheckCircleIcon, ArrowRightIcon, GlobeAltIcon, ExclamationTriangleIcon } from './icons';
-import { OfficerRecord, AgencyType, EstablishmentRecord } from '../types';
+import { OfficerRecord, AgencyType, EstablishmentRecord, StructuredCorporatePlan } from '../types';
 import { parseCnaFile, parsePastedData, parseEstablishmentFile, parseCorporatePlanFile } from '../utils/import';
 import { GoogleSheetsService } from '../services/GoogleSheetsService';
 
@@ -10,7 +10,7 @@ interface ImportModalProps {
         agencyType: AgencyType,
         agencyName: string,
         establishmentData?: EstablishmentRecord[],
-        corporatePlanContext?: unknown
+        corporatePlanContext?: StructuredCorporatePlan
     ) => void;
     onClose: () => void;
 }
@@ -28,7 +28,7 @@ export const ImportModal: React.FC<ImportModalProps> = ({ onImport, onClose }) =
     const [isProcessing, setIsProcessing] = useState(false);
     const [isProcessingCorporatePlan, setIsProcessingCorporatePlan] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [corporatePlanData, setCorporatePlanData] = useState<unknown | null>(null);
+    const [corporatePlanData, setCorporatePlanData] = useState<StructuredCorporatePlan | null>(null);
     
     const [importedCnaResult, setImportedCnaResult] = useState<{ data: OfficerRecord[], headers: string[] } | null>(null);
     const [importedEstablishmentResult, setImportedEstablishmentResult] = useState<{ data: EstablishmentRecord[] } | null>(null);
@@ -59,7 +59,7 @@ export const ImportModal: React.FC<ImportModalProps> = ({ onImport, onClose }) =
 
         try {
             const result = await parseCorporatePlanFile(file);
-            setCorporatePlanData(result.data);
+            setCorporatePlanData(result.data as StructuredCorporatePlan);
         } catch (e: unknown) {
             console.error("Corporate Plan Processing Error:", e);
             setError("Failed to process Corporate Plan file. Please check the file format.");

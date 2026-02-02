@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { DesiredExperienceRecord, FundingSourceType, JobGroupType } from '../types';
-import { XIcon } from './icons';
+import { XIcon, SparklesIcon } from './icons';
+import { useAppContext } from './AppContext';
 
 interface ModalProps {
     experience: DesiredExperienceRecord;
@@ -33,6 +34,7 @@ type FormState = DesiredExperienceRecord & {
 };
 
 export const EditExperienceModal: React.FC<ModalProps> = ({ experience, onUpdate, onClose }) => {
+    const { state } = useAppContext();
     const [formState, setFormState] = useState<FormState>(() => ({
         ...experience,
         yearsCheckboxes: yearOptions.reduce((acc, year) => {
@@ -51,6 +53,31 @@ export const EditExperienceModal: React.FC<ModalProps> = ({ experience, onUpdate
             }, {} as Record<number, boolean>),
         });
     }, [experience]);
+
+    // Auto-fill logic using imported data
+    const autoFillFromImportedData = () => {
+        if (state.corporatePlanData?.training_needs) {
+            // Parse training needs from corporate plan
+            const trainingNeeds = state.corporatePlanData.training_needs.split(',').map(need => need.trim());
+
+            // Update the desired work experience based on job group and training needs
+            const jobGroupTemplate = EXPERIENCE_MAPPING[experience.jobGroup] || '';
+            const enhancedExperience = trainingNeeds.length > 0 ?
+                `${jobGroupTemplate}\n\nAdditional Training Needs from Corporate Plan:\n${trainingNeeds.map(need => `• ${need}`).join('\n')}` :
+                jobGroupTemplate;
+
+            setFormState(prev => ({
+                ...prev,
+                desiredWorkExperience: enhancedExperience,
+                location: state.baselineData?.agencyName || prev.location,
+                fundingSource: 'Internal Budget' as FundingSourceType,
+                yearsCheckboxes: yearOptions.reduce((acc, year) => ({
+                    ...acc,
+                    [year]: trainingNeeds.length > 0 // Auto-select years if there are training needs
+                }), prev.yearsCheckboxes),
+            }));
+        }
+    };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -182,13 +209,23 @@ export const EditExperienceModal: React.FC<ModalProps> = ({ experience, onUpdate
                             </ul>
                         </div>
                     )}
-                    <footer className="flex justify-end gap-3 pt-4">
-                        <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 rounded-md border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600">
-                            Cancel
+                    <footer className="flex justify-between items-center pt-4">
+                        <button
+                            type="button"
+                            onClick={autoFillFromImportedData}
+                            className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded-md hover:bg-blue-100 dark:hover:bg-blue-900/40"
+                        >
+                            <SparklesIcon className="w-4 h-4" />
+                            Auto-Fill from Data
                         </button>
-                        <button type="submit" className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700">
-                            Save Changes
-                        </button>
+                        <div className="flex gap-3">
+                            <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 rounded-md border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600">
+                                Cancel
+                            </button>
+                            <button type="submit" className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700">
+                                Save Changes
+                            </button>
+                        </div>
                     </footer>
                 </form>
             </div>

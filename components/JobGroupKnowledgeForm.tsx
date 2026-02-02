@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { JobGroupKnowledgeRecord, DurationType, FundingSourceKnowledgeType, JobGroupKnowledgeType } from '../types';
 import { XIcon, AcademicCapIcon, TrashIcon, SaveIcon } from './icons';
 import { ExportMenu } from './ExportMenu';
 import { exportToCsv, copyForSheets, ReportData } from '../utils/export';
+import { useAppContext } from './AppContext';
 
 interface ReportProps {
     onClose: () => void;
@@ -34,10 +35,68 @@ const FormField: React.FC<{ label: string, required?: boolean, children: React.R
 );
 
 export const JobGroupKnowledgeForm: React.FC<ReportProps> = ({ onClose }) => {
+    const { state } = useAppContext();
     const [records, setRecords] = useState<JobGroupKnowledgeRecord[]>([]);
     const [formState, setFormState] = useState(initialFormState);
     const [errors, setErrors] = useState<string[]>([]);
     const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'info' | 'error', text: string } | null>(null);
+    const [selectedJobGroup, setSelectedJobGroup] = useState<string>('');
+
+    // Auto-fill logic using imported data
+    const autoFillFromImportedData = (jobGroup: JobGroupKnowledgeType) => {
+        if (state.corporatePlanData?.training_needs) {
+            // Parse training needs from corporate plan
+            const trainingNeeds = state.corporatePlanData.training_needs.split(',').map(need => need.trim());
+
+            // Create programmes based on job group and training needs
+            const programmes = trainingNeeds.map((need, index) => ({
+                id: `${jobGroup}-${index}-${new Date().toISOString()}`,
+                jobGroup,
+                educationalProgramme: need,
+                institution: '',
+                location: state.baselineData?.agencyName || '',
+                duration: '6 to 12 months' as DurationType,
+                fundingSource: 'Department' as FundingSourceKnowledgeType,
+                years: [2024, 2025],
+            }));
+
+            setRecords(prev => [...prev, ...programmes]);
+            showStatus(`Auto-filled ${programmes.length} programmes for ${jobGroup} from corporate plan data!`, 'success');
+        } else {
+            showStatus('No corporate plan data available for auto-fill.', 'info');
+        }
+    };
+
+    // Get available job groups from establishment data
+    const availableJobGroups = useMemo(() => {
+        if (state.establishmentData.length > 0) {
+            const grades = state.establishmentData.map(e => e.grade);
+            const uniqueGrades = [...new Set(grades)];
+
+            // Map grades to job groups
+            const gradeToJobGroup: Record<string, JobGroupKnowledgeType> = {
+                'Grade 17': 'Senior Executive Managers',
+                'Grade 16': 'Senior Executive Managers',
+                'Grade 15': 'Senior Executive Managers',
+                'Grade 14': 'Senior/Middle Managers',
+                'Grade 13': 'Senior/Middle Managers',
+                'Grade 12': 'Senior/Middle Managers',
+                'Grade 11': 'Supervisors',
+                'Grade 10': 'Supervisors',
+                'Grade 9': 'All Line Staff',
+                'Grade 8': 'All Line Staff',
+                'Grade 7': 'All Line Staff',
+                'Grade 6': 'All Line Staff',
+                'Grade 5': 'All Line Staff',
+            };
+
+            return uniqueGrades
+                .map(grade => gradeToJobGroup[grade])
+                .filter(Boolean)
+                .filter((value, index, self) => self.indexOf(value) === index) as JobGroupKnowledgeType[];
+        }
+        return [];
+    }, [state.establishmentData]);
 
     useEffect(() => {
         try {
@@ -164,6 +223,42 @@ export const JobGroupKnowledgeForm: React.FC<ReportProps> = ({ onClose }) => {
                             {statusMessage.text}
                         </div>
                     )}
+                    {/* Auto-fill Section */}
+                    {availableJobGroups.length > 0 && (
+                        <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-700 mb-6">
+                            <h4 className="text-lg font-semibold text-blue-800 dark:text-blue-200 mb-2">Auto-Fill from Imported Data</h4>
+                            <p className="text-sm text-blue-600 dark:text-blue-300 mb-3">Select a job group to automatically populate programmes based on corporate plan training needs.</p>
+                            <div className="flex gap-2">
+                                <select
+                                    value={selectedJobGroup}
+                                    onChange={(e) => {
+                                        setSelectedJobGroup(e.target.value);
+                                        if (e.target.value) {
+                                            autoFillFromImportedData(e.target.value as JobGroupKnowledgeType);
+                                        }
+                                    }}
+                                    className="flex-1 p-2 text-sm border border-blue-300 dark:border-blue-600 bg-white dark:bg-slate-700 rounded-md"
+                                >
+                                    <option value="">Select Job Group to Auto-Fill...</option>
+                                    {availableJobGroups.map(jobGroup => (
+                                        <option key={jobGroup} value={jobGroup}>{jobGroup}</option>
+                                    ))}
+                                </select>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setSelectedJobGroup('');
+                                        setRecords([]);
+                                        showStatus('Programmes cleared.', 'info');
+                                    }}
+                                    className="px-3 py-2 text-sm bg-slate-500 text-white rounded-md hover:bg-slate-600"
+                                >
+                                    Clear All
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <form onSubmit={handleSubmit} className="space-y-4 bg-white dark:bg-slate-800/50 p-6 rounded-lg border border-slate-200 dark:border-slate-700">
                             <h3 className="text-lg font-bold">Add New Programme</h3>

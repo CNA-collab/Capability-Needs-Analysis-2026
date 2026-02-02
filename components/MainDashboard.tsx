@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { View, UrgencyLevel, GradingGroup, PerformanceRatingLevel, CapabilityRating, GapTag, TrainingRecord, OfficerRecord } from '../types';
+import React, { useState, useMemo, useEffect } from 'react';
+import { UrgencyLevel, GradingGroup, PerformanceRatingLevel, CapabilityRating, GapTag, TrainingRecord, OfficerRecord, EligibleOfficer } from '../types';
 import { Sidebar } from './Sidebar';
 import { ReportingSuiteModal } from './ReportingSuiteModal';
 import { StrategicAnalysisDashboard } from './StrategicAnalysisDashboard';
@@ -7,9 +7,12 @@ import { SurveyInsights } from './SurveyInsights';
 import { ExpenditureReview } from './ExpenditureReview';
 import { CnaPolicyToolkit } from './CnaPolicyToolkit';
 import { GesiPolicyToolkit } from './GesiPolicyToolkit';
+import { useAppContext } from './AppContext';
 
 // Individual-focused components
 import { WelcomeModal } from './WelcomeModal';
+import { ImportModal } from './ImportModal';
+import { IndividualTalentCardReport } from './IndividualTalentCardReport';
 import {
     ChartBarSquareIcon,
     UsersIcon,
@@ -19,17 +22,34 @@ import {
     PresentationChartLineIcon,
     UserCircleIcon,
     BuildingOfficeIcon,
-    ChevronDownIcon
-} from './icons';
+    ChevronDownIcon,
+    IdentificationIcon,
+    ArrowRightIcon,
+    ChartPieIcon,
+    CheckCircleIcon,
+    ExclamationTriangleIcon,
+    TableCellsIcon,
+    ArrowDownTrayIcon,
+    InformationCircleIcon,
+    CalendarDaysIcon} from './icons';
 
 interface MainDashboardProps {
     onLogout: () => void;
 }
 
 export const MainDashboard: React.FC<MainDashboardProps> = ({ onLogout }) => {
-    const [currentView, setCurrentView] = useState<View>('dashboard');
+    const { state, setCurrentView } = useAppContext();
     const [showReportingSuite, setShowReportingSuite] = useState(false);
     const [showWelcome, setShowWelcome] = useState(true);
+    const [showImportModal, setShowImportModal] = useState(false);
+    const [selectedItem, setSelectedItem] = useState<string | null>(null);
+
+    // Sync local state with context
+    useEffect(() => {
+        if (state.error) {
+            console.error('Application error:', state.error);
+        }
+    }, [state.error]);
 
     // Demo data for organisational overview
     const demoData = useMemo(() => ({
@@ -204,7 +224,7 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ onLogout }) => {
 
 
     const renderView = () => {
-        switch (currentView) {
+        switch (state.currentView) {
             case 'dashboard':
                 return (
                     <div className="p-8 space-y-8">
@@ -326,6 +346,43 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ onLogout }) => {
                 );
 
             case 'individual':
+                if (selectedItem) {
+                    // Render the selected component
+                    switch (selectedItem) {
+                        case 'individual-talent-card':
+                            return (
+                                <div className="p-8">
+                                    <button
+                                        onClick={() => setSelectedItem(null)}
+                                        className="mb-6 flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors"
+                                    >
+                                        ← Back to Individual Operations
+                                    </button>
+                                    <IndividualTalentCardReport
+                                        officer={demoOfficers[0]}
+                                        establishmentData={demoEstablishmentData}
+                                        onClose={() => setSelectedItem(null)}
+                                    />
+                                </div>
+                            );
+                        default:
+                            return (
+                                <div className="p-8">
+                                    <button
+                                        onClick={() => setSelectedItem(null)}
+                                        className="mb-6 flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors"
+                                    >
+                                        ← Back to Individual Operations
+                                    </button>
+                                    <div className="text-center py-20">
+                                        <h3 className="text-xl font-bold text-slate-900 mb-2">Component Under Development</h3>
+                                        <p className="text-slate-600">This component is currently being implemented.</p>
+                                    </div>
+                                </div>
+                            );
+                    }
+                }
+
                 return (
                     <div className="p-8">
                         <div className="mb-6">
@@ -340,33 +397,54 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ onLogout }) => {
                                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 min-w-[300px]">
                                     <h3 className="text-lg font-black text-slate-900 uppercase mb-4">Reports</h3>
                                     <div className="space-y-3">
-                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
-                                            <h4 className="font-bold text-slate-900 text-sm">Individual Talent Card Report</h4>
-                                            <p className="text-xs text-slate-600">Individual talent assessment</p>
+                                        <button onClick={() => setSelectedItem('individual-talent-card')} className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors flex items-center gap-3">
+                                            <IdentificationIcon className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                                            <div>
+                                                <h4 className="font-bold text-slate-900 text-sm">Individual Talent Card Report</h4>
+                                                <p className="text-xs text-slate-600">Individual talent assessment</p>
+                                            </div>
                                         </button>
-                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
-                                            <h4 className="font-bold text-slate-900 text-sm">Eligible Officers Report</h4>
-                                            <p className="text-xs text-slate-600">Training eligibility assessment</p>
+                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors flex items-center gap-3">
+                                            <CheckCircleIcon className="w-5 h-5 text-green-600 flex-shrink-0" />
+                                            <div>
+                                                <h4 className="font-bold text-slate-900 text-sm">Eligible Officers Report</h4>
+                                                <p className="text-xs text-slate-600">Training eligibility assessment</p>
+                                            </div>
                                         </button>
-                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
-                                            <h4 className="font-bold text-slate-900 text-sm">Training Needs Analysis Report</h4>
-                                            <p className="text-xs text-slate-600">Comprehensive training needs assessment</p>
+                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors flex items-center gap-3">
+                                            <ExclamationTriangleIcon className="w-5 h-5 text-amber-600 flex-shrink-0" />
+                                            <div>
+                                                <h4 className="font-bold text-slate-900 text-sm">Training Needs Analysis Report</h4>
+                                                <p className="text-xs text-slate-600">Comprehensive training needs assessment</p>
+                                            </div>
                                         </button>
-                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
-                                            <h4 className="font-bold text-slate-900 text-sm">Training Plan Report</h4>
-                                            <p className="text-xs text-slate-600">Strategic training planning</p>
+                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors flex items-center gap-3">
+                                            <CalendarDaysIcon className="w-5 h-5 text-purple-600 flex-shrink-0" />
+                                            <div>
+                                                <h4 className="font-bold text-slate-900 text-sm">Training Plan Report</h4>
+                                                <p className="text-xs text-slate-600">Strategic training planning</p>
+                                            </div>
                                         </button>
-                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
-                                            <h4 className="font-bold text-slate-900 text-sm">Succession Plan Report</h4>
-                                            <p className="text-xs text-slate-600">Leadership succession planning</p>
+                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors flex items-center gap-3">
+                                            <ArrowRightIcon className="w-5 h-5 text-indigo-600 flex-shrink-0" />
+                                            <div>
+                                                <h4 className="font-bold text-slate-900 text-sm">Succession Plan Report</h4>
+                                                <p className="text-xs text-slate-600">Leadership succession planning</p>
+                                            </div>
                                         </button>
-                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
-                                            <h4 className="font-bold text-slate-900 text-sm">Talent Segmentation Report</h4>
-                                            <p className="text-xs text-slate-600">Talent categorization and analysis</p>
+                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors flex items-center gap-3">
+                                            <ChartPieIcon className="w-5 h-5 text-pink-600 flex-shrink-0" />
+                                            <div>
+                                                <h4 className="font-bold text-slate-900 text-sm">Talent Segmentation Report</h4>
+                                                <p className="text-xs text-slate-600">Talent categorization and analysis</p>
+                                            </div>
                                         </button>
-                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
-                                            <h4 className="font-bold text-slate-900 text-sm">Individual Development Profile</h4>
-                                            <p className="text-xs text-slate-600">Personal development profile</p>
+                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors flex items-center gap-3">
+                                            <UserCircleIcon className="w-5 h-5 text-teal-600 flex-shrink-0" />
+                                            <div>
+                                                <h4 className="font-bold text-slate-900 text-sm">Individual Development Profile</h4>
+                                                <p className="text-xs text-slate-600">Personal development profile</p>
+                                            </div>
                                         </button>
                                     </div>
                                 </div>
@@ -406,29 +484,47 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ onLogout }) => {
                                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 min-w-[300px]">
                                     <h3 className="text-lg font-black text-slate-900 uppercase mb-4">Tools</h3>
                                     <div className="space-y-3">
-                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
-                                            <h4 className="font-bold text-slate-900 text-sm">Staff Card</h4>
-                                            <p className="text-xs text-slate-600">Individual staff information card</p>
+                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors flex items-center gap-3">
+                                            <UserCircleIcon className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                                            <div>
+                                                <h4 className="font-bold text-slate-900 text-sm">Staff Card</h4>
+                                                <p className="text-xs text-slate-600">Individual staff information card</p>
+                                            </div>
                                         </button>
-                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
-                                            <h4 className="font-bold text-slate-900 text-sm">Succession Planning Table</h4>
-                                            <p className="text-xs text-slate-600">Succession planning interface</p>
+                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors flex items-center gap-3">
+                                            <TableCellsIcon className="w-5 h-5 text-green-600 flex-shrink-0" />
+                                            <div>
+                                                <h4 className="font-bold text-slate-900 text-sm">Succession Planning Table</h4>
+                                                <p className="text-xs text-slate-600">Succession planning interface</p>
+                                            </div>
                                         </button>
-                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
-                                            <h4 className="font-bold text-slate-900 text-sm">Framework Graphic</h4>
-                                            <p className="text-xs text-slate-600">10:20:70 framework visualization</p>
+                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors flex items-center gap-3">
+                                            <ChartPieIcon className="w-5 h-5 text-purple-600 flex-shrink-0" />
+                                            <div>
+                                                <h4 className="font-bold text-slate-900 text-sm">Framework Graphic</h4>
+                                                <p className="text-xs text-slate-600">10:20:70 framework visualization</p>
+                                            </div>
                                         </button>
-                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
-                                            <h4 className="font-bold text-slate-900 text-sm">Export Menu</h4>
-                                            <p className="text-xs text-slate-600">Data export options</p>
+                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors flex items-center gap-3">
+                                            <ArrowDownTrayIcon className="w-5 h-5 text-orange-600 flex-shrink-0" />
+                                            <div>
+                                                <h4 className="font-bold text-slate-900 text-sm">Export Menu</h4>
+                                                <p className="text-xs text-slate-600">Data export options</p>
+                                            </div>
                                         </button>
-                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
-                                            <h4 className="font-bold text-slate-900 text-sm">Lnd Ai Assistant Modal</h4>
-                                            <p className="text-xs text-slate-600">AI-powered L&D assistance</p>
+                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors flex items-center gap-3">
+                                            <SparklesIcon className="w-5 h-5 text-indigo-600 flex-shrink-0" />
+                                            <div>
+                                                <h4 className="font-bold text-slate-900 text-sm">Lnd Ai Assistant Modal</h4>
+                                                <p className="text-xs text-slate-600">AI-powered L&D assistance</p>
+                                            </div>
                                         </button>
-                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
-                                            <h4 className="font-bold text-slate-900 text-sm">User Guide Modal</h4>
-                                            <p className="text-xs text-slate-600">System user guide</p>
+                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors flex items-center gap-3">
+                                            <InformationCircleIcon className="w-5 h-5 text-teal-600 flex-shrink-0" />
+                                            <div>
+                                                <h4 className="font-bold text-slate-900 text-sm">User Guide Modal</h4>
+                                                <p className="text-xs text-slate-600">System user guide</p>
+                                            </div>
                                         </button>
                                     </div>
                                 </div>
@@ -842,8 +938,9 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ onLogout }) => {
     return (
         <div className="flex min-h-screen bg-slate-50">
             <Sidebar
-                currentView={currentView}
+                currentView={state.currentView}
                 setView={setCurrentView}
+                onImportClick={() => setShowImportModal(true)}
                 isOpen={true}
                 onClose={() => {}}
             />
@@ -886,7 +983,7 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ onLogout }) => {
             {showReportingSuite && (
                 <ReportingSuiteModal
                     division={demoData.agencyName}
-                    officers={demoOfficers}
+                    officers={(demoOfficers as unknown) as EligibleOfficer[]}
                     yearHeaders={[2024, 2025, 2026, 2027, 2028]}
                     onClose={() => setShowReportingSuite(false)}
                 />
@@ -896,6 +993,16 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ onLogout }) => {
                 <WelcomeModal
                     onClose={() => setShowWelcome(false)}
                     onViewPolicy={() => {}}
+                />
+            )}
+
+            {showImportModal && (
+                <ImportModal
+                    onImport={(data, agencyType, agencyName, establishmentData, corporatePlanContext) => {
+                        console.log('Import completed:', { data, agencyType, agencyName, establishmentData, corporatePlanContext });
+                        setShowImportModal(false);
+                    }}
+                    onClose={() => setShowImportModal(false)}
                 />
             )}
         </div>

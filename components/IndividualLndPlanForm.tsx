@@ -5,6 +5,7 @@ import { XIcon, IdentificationIcon, TrashIcon, SaveIcon, ChevronDownIcon, Pencil
 import { ExportMenu } from './ExportMenu';
 import { exportToCsv, copyForSheets, ReportData, exportToPdf, exportToDocx, exportToXlsx } from '../utils/export';
 import { PriorityBadge } from './Badges';
+import { useAppContext } from './AppContext';
 
 // --- Autocomplete Input Component ---
 interface AutocompleteInputProps {
@@ -227,6 +228,7 @@ const TrainingNeedInlineForm: React.FC<{
 
 
 export const IndividualLndPlanForm: React.FC<ReportProps> = ({ onClose }) => {
+    const { state } = useAppContext();
     const [records, setRecords] = useState<IndividualLndPlanRecord[]>([]);
     const [formState, setFormState] = useState<Omit<IndividualLndPlanRecord, 'id'>>(initialFormState);
     const [errors, setErrors] = useState<string[]>([]);
@@ -236,6 +238,7 @@ export const IndividualLndPlanForm: React.FC<ReportProps> = ({ onClose }) => {
     const [expandedSections, setExpandedSections] = useState({ longTerm: true, shortTerm: true });
     const [otherKnowledgeText, setOtherKnowledgeText] = useState('');
     const [completedNeedId, setCompletedNeedId] = useState<string | null>(null);
+    const [selectedOfficer, setSelectedOfficer] = useState<string>('');
 
     useEffect(() => {
         try {
@@ -282,6 +285,128 @@ export const IndividualLndPlanForm: React.FC<ReportProps> = ({ onClose }) => {
         }
         return suggestionLists.designations;
     }, [records, formState.division, suggestionLists.designations]);
+
+    // Auto-fill logic using imported data
+    const autoFillFromImportedData = (officerName: string) => {
+        const officer = state.officers.find(o => o.name === officerName);
+        const establishmentRecord = state.establishmentData.find(e => e.occupant === officerName);
+
+        if (officer) {
+            const age = officer.age;
+            let ageGroup: AgeGroupType = '<30'; // Default
+            if (age) {
+                if (age < 30) ageGroup = '<30';
+                else if (age >= 30 && age <= 40) ageGroup = '30–40';
+                else if (age >= 41 && age <= 50) ageGroup = '41–50';
+                else ageGroup = '>50';
+            }
+
+            const performanceLevel = officer.performanceRatingLevel === 'Well Above Required' ? 'Excellent (86–100%)' :
+                                   officer.performanceRatingLevel === 'Above Required' ? 'Satisfactory (70–85%)' :
+                                   officer.performanceRatingLevel === 'At Required Level' ? 'Satisfactory (70–85%)' :
+                                   'Unsatisfactory (0–49%)';
+
+            const promotionPotential = officer.lifecycleStage === 'Early Career' ? 'Needs Development' :
+                                     officer.lifecycleStage === 'High Potential' ? 'Promotion Now' :
+                                     officer.lifecycleStage === 'Peak Performer' ? 'Overdue for Promotion' :
+                                     'Not Promotable';
+
+            // Generate training needs from officer data
+            const longTermNeeds: LndTrainingNeed[] = [];
+            const shortTermNeeds: LndTrainingNeed[] = [];
+
+            // Add technical capability gaps as training needs
+            officer.technicalCapabilityGaps.forEach(gap => {
+                shortTermNeeds.push({
+                    id: crypto.randomUUID(),
+                    perceivedArea: 'Technical Skills',
+                    jobRequirement: `Address technical capability gap in ${gap}`,
+                    proposedCourse: gap,
+                    institution: '',
+                    fundingSource: 'Department',
+                    yearOfCommencement: yearOptions[0],
+                    remarks: `Identified from CNA survey data`,
+                    status: 'Planned',
+                    priority: 'High'
+                });
+            });
+
+            // Add leadership gaps as long-term needs
+            officer.leadershipCapabilityGaps.forEach(gap => {
+                longTermNeeds.push({
+                    id: crypto.randomUUID(),
+                    perceivedArea: 'Leadership Development',
+                    jobRequirement: `Address leadership capability gap in ${gap}`,
+                    proposedCourse: gap,
+                    institution: '',
+                    fundingSource: 'Department',
+                    yearOfCommencement: yearOptions[1],
+                    remarks: `Identified from CNA survey data`,
+                    status: 'Planned',
+                    priority: 'Medium'
+                });
+            });
+
+            // Add training preferences
+            officer.trainingPreferences.forEach(pref => {
+                shortTermNeeds.push({
+                    id: crypto.randomUUID(),
+                    perceivedArea: 'Professional Development',
+                    jobRequirement: `Pursue training preference in ${pref}`,
+                    proposedCourse: pref,
+                    institution: '',
+                    fundingSource: 'Department',
+                    yearOfCommencement: yearOptions[0],
+                    remarks: `Based on officer's training preferences`,
+                    status: 'Planned',
+                    priority: 'Medium'
+                });
+            });
+
+            setFormState({
+                organizationName: state.baselineData?.agencyName || '',
+                division: officer.division || '',
+                officerName: officer.name,
+                positionNumber: officer.positionNumber || establishmentRecord?.positionNumber || '',
+                designation: officer.position,
+                dateOfBirth: officer.dateOfBirth || '',
+                officerStatus: (officer.employmentStatus as OfficerStatusType) || 'Confirmed',
+                highestQualification: officer.jobQualification || '',
+                commencementDate: officer.commencementDate || '',
+                gradeLevel: officer.grade,
+                trainingNeeds: {
+                    longTerm: longTermNeeds,
+                    shortTerm: shortTermNeeds,
+                },
+                knowledgeChecklist: KNOWLEDGE_AREAS.reduce((acc, area) => ({ ...acc, [area]: false }), {}),
+                otherKnowledge: [],
+                ageGroup,
+                performanceLevel: performanceLevel as PerfLevelType,
+                promotionPotential: promotionPotential as PromotionPotentialType,
+            });
+        } else if (establishmentRecord) {
+            // Fill from establishment data only
+            setFormState(prev => ({
+                ...prev,
+                organizationName: state.baselineData?.agencyName || prev.organizationName,
+                division: establishmentRecord.division,
+                officerName: establishmentRecord.occupant,
+                positionNumber: establishmentRecord.positionNumber,
+                designation: establishmentRecord.designation,
+                gradeLevel: establishmentRecord.grade,
+                officerStatus: establishmentRecord.status as OfficerStatusType,
+            }));
+        }
+    };
+
+    // Get available officers from imported data
+    const availableOfficers = useMemo(() => {
+        const cnaOfficers = state.officers.map(o => o.name);
+        const establishmentOccupants = state.establishmentData
+            .filter(e => e.occupant && e.occupant !== 'VACANT')
+            .map(e => e.occupant);
+        return [...new Set([...cnaOfficers, ...establishmentOccupants])].sort();
+    }, [state.officers, state.establishmentData]);
     // --- End Suggestion Lists ---
 
     const showStatus = (text: string, type: 'success' | 'info' | 'error' = 'success') => {
@@ -653,6 +778,43 @@ export const IndividualLndPlanForm: React.FC<ReportProps> = ({ onClose }) => {
                         </div>
                     )}
                     <form onSubmit={handleSubmit} className="space-y-4 bg-white dark:bg-slate-800/50 p-6 rounded-lg border border-slate-200 dark:border-slate-700">
+                        {/* Auto-fill Section */}
+                        {availableOfficers.length > 0 && (
+                            <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-700">
+                                <h4 className="text-lg font-semibold text-blue-800 dark:text-blue-200 mb-2">Auto-Fill from Imported Data</h4>
+                                <p className="text-sm text-blue-600 dark:text-blue-300 mb-3">Select an officer to automatically populate the form with data from CNA survey, Establishment register, and Corporate Plan.</p>
+                                <div className="flex gap-2">
+                                    <select
+                                        value={selectedOfficer}
+                                        onChange={(e) => {
+                                            setSelectedOfficer(e.target.value);
+                                            if (e.target.value) {
+                                                autoFillFromImportedData(e.target.value);
+                                                showStatus('Form auto-filled from imported data!', 'success');
+                                            }
+                                        }}
+                                        className="flex-1 p-2 text-sm border border-blue-300 dark:border-blue-600 bg-white dark:bg-slate-700 rounded-md"
+                                    >
+                                        <option value="">Select Officer to Auto-Fill...</option>
+                                        {availableOfficers.map(officer => (
+                                            <option key={officer} value={officer}>{officer}</option>
+                                        ))}
+                                    </select>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setSelectedOfficer('');
+                                            setFormState(initialFormState);
+                                            showStatus('Form cleared.', 'info');
+                                        }}
+                                        className="px-3 py-2 text-sm bg-slate-500 text-white rounded-md hover:bg-slate-600"
+                                    >
+                                        Clear
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
                         <h3 className="text-xl font-bold border-b pb-2">{editingId ? `Editing Plan for ${formState.officerName}` : "Section 1: Officer Details"}</h3>
                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             <FormField label="🏢 Organization Name"><AutocompleteInput name="organizationName" value={formState.organizationName} onChange={(v) => handleAutocompleteChange('organizationName', v)} suggestions={suggestionLists.organizations} /></FormField>

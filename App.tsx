@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 // Component Imports
 import { LoginPage } from './components/LoginPage';
 import { MainDashboard } from './components/MainDashboard';
+import { AppProvider } from './components/AppContext';
 
 const App: React.FC = () => {
   // Authentication state
@@ -10,6 +11,7 @@ const App: React.FC = () => {
   // Removed unused user state
 
   // Handle login
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleLogin = (_username: string, _password: string) => {
     // Removed setUser as user state is not used
     setIsAuthenticated(true);
@@ -27,7 +29,11 @@ const App: React.FC = () => {
   }
 
   // Show main dashboard if authenticated
-  return <MainDashboard onLogout={handleLogout} />;
+  return (
+    <AppProvider>
+      <MainDashboard onLogout={handleLogout} />
+    </AppProvider>
+  );
 };
 
 export default App;

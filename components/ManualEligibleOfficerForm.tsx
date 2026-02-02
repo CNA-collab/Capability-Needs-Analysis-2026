@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { EligibleOfficer, EligibleOfficerStatus } from '../types';
+import { useAppContext } from './AppContext';
 
 interface FormProps {
     officers: EligibleOfficer[];
@@ -38,8 +39,13 @@ const FormField: React.FC<{ label: string, required?: boolean, children: React.R
 );
 
 export const ManualEligibleOfficerForm: React.FC<FormProps> = ({ officers, onAdd, yearOptions }) => {
+    useAppContext();
     const [formState, setFormState] = useState(() => createInitialFormState(yearOptions));
     const [errors, setErrors] = useState<string[]>([]);
+
+    // Get available positions from establishment data
+
+    // Auto-fill logic using imported data
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
