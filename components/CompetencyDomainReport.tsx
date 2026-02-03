@@ -81,14 +81,14 @@ export const CompetencyDomainReport: React.FC<ReportProps> = ({ data, establishm
 
     useEffect(() => {
         const generateReport = async () => {
-            if (!process.env.API_KEY) {
+            if (!process.env.GEMINI_API_KEY) {
                 setError("System Access Restricted: API key not configured.");
                 setLoading(false);
                 return;
             }
 
             try {
-                const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+                const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
                 const prompt = `
                 Perform a Competency Domain Analysis for ${agencyName} (${agencyType}).
 

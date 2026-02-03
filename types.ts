@@ -2,6 +2,8 @@
 
 // 1. Navigation and Agency Types
 export type View = 'dashboard' | 'organizational' | 'individual' | 'pathways' | 'gesi' | 'cna' | 'settings' | 'survey-insights' | 'expenditure-review' | 'all-components';
+
+export type WorkforceLifecycleStage = 'Recruitment/Entry' | 'Early Career' | 'Career Progression' | 'Leadership Track' | 'Exit/Retirement Prep';
 export type AgencyType = 'National Department' | 'Provincial Administration' | 'District Municipality' | 'Statutory Agency' | 'All Agencies' | 'National Agency' | 'Provincial Health Authority' | 'Local Level Government' | 'Other';
 
 export enum UrgencyLevel {

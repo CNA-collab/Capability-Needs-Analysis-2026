@@ -71,14 +71,14 @@ export const ConsolidatedLifecyclePlanReport: React.FC<ReportProps> = ({ data, a
 
     useEffect(() => {
         const generateReport = async () => {
-            if (!process.env.API_KEY) {
+            if (!process.env.GEMINI_API_KEY) {
                 setError("Security Gate: API key missing.");
                 setLoading(false);
                 return;
             }
 
             try {
-                const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+                const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
                 const prompt = `
                 Act as a Workforce Lifecycle Architect. Consolidate the individual development paths for all personnel into a single Strategic Life Cycle Plan for ${agencyName}.
                 

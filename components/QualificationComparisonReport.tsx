@@ -57,7 +57,7 @@ export const QualificationComparisonReport: React.FC<ReportProps> = ({ cnaData, 
 
     useEffect(() => {
         const generateReport = async () => {
-            if (!process.env.API_KEY) {
+            if (!process.env.GEMINI_API_KEY) {
                 setError("API key is not configured.");
                 setLoading(false);
                 return;
@@ -68,7 +68,7 @@ export const QualificationComparisonReport: React.FC<ReportProps> = ({ cnaData, 
                  return;
             }
             try {
-                const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+                const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
                 const promptText = `Please analyze the following datasets for ${agencyName} to generate the Qualification Comparison Table.\n\nCNA DATA:\n${JSON.stringify(cnaData, null, 2)}\n\nESTABLISHMENT DATA:\n${JSON.stringify(establishmentData, null, 2)}`;
                 
                 /* FIX: Updated model to 'gemini-3-flash-preview' per guidelines */

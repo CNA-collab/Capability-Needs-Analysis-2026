@@ -169,7 +169,7 @@ export const DetailedCapabilityBreakdownReport: React.FC<ReportProps> = ({ data,
 
     useEffect(() => {
         const generateReport = async () => {
-            if (!process.env.API_KEY) {
+            if (!process.env.GEMINI_API_KEY) {
                 setError("API key is not configured.");
                 setLoading(false);
                 return;
@@ -177,7 +177,7 @@ export const DetailedCapabilityBreakdownReport: React.FC<ReportProps> = ({ data,
 
             try {
                 /* Correct initialization as per guidelines */
-                const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+                const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
                 
                 const promptData = {
                     totalOfficers: data.length,

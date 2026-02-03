@@ -98,7 +98,7 @@ export const TrainingCalendarReport: React.FC<ReportProps> = ({ data, agencyType
 
     useEffect(() => {
         const generateReport = async () => {
-            if (!process.env.API_KEY) {
+            if (!process.env.GEMINI_API_KEY) {
                 setError("API key is not configured.");
                 setLoading(false);
                 return;
@@ -106,7 +106,7 @@ export const TrainingCalendarReport: React.FC<ReportProps> = ({ data, agencyType
 
             try {
                 /* Correct initialization as per guidelines */
-                const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+                const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
                 
                 const promptContext = agencyType !== 'All Agencies'
                     ? `The analysis and recommendations should be specifically tailored for a '${agencyType}'.`

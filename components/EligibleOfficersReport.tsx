@@ -100,14 +100,14 @@ export const EligibleOfficersReport: React.FC<ReportProps> = ({ data, agencyName
 
     useEffect(() => {
         const generateStrategicPlan = async () => {
-            if (!process.env.API_KEY) {
+            if (!process.env.GEMINI_API_KEY) {
                 setError("API key not configured.");
                 setLoading(false);
                 return;
             }
 
             try {
-                const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+                const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
                 
                 // Only analyze officers who passed the mandatory gates
                 const eligiblePersonnel = complianceResults

@@ -39,9 +39,9 @@ export const WorkforceSnapshotReport: React.FC<ReportProps> = ({ data, establish
 
     useEffect(() => {
         const generateReport = async () => {
-            if (!process.env.API_KEY) { setError("API Key Missing"); setLoading(false); return; }
+            if (!process.env.GEMINI_API_KEY) { setError("API Key Missing"); setLoading(false); return; }
             try {
-                const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+                const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
                 const prompt = `Perform a Strategic Assessment for ${agencyName}. Pre-calculated Metrics: ${JSON.stringify(stats)}. Contextualize these findings within the MTDP IV framework.`;
                 
                 const response = await ai.models.generateContent({

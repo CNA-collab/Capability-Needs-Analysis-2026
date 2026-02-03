@@ -68,14 +68,14 @@ export const ConsolidatedTrainingPlanReport: React.FC<ReportProps> = ({ data, ag
 
     useEffect(() => {
         const generateReport = async () => {
-             if (!process.env.API_KEY) {
+             if (!process.env.GEMINI_API_KEY) {
                 setError("API key is not configured.");
                 setLoading(false);
                 return;
             }
             try {
                 // FIX: Using named parameter for GoogleGenAI initialization
-                const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+                const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
                 const prompt = `Generate a consolidated strategic plan for ${agencyName} (${agencyType}). Aggregated Averages: ${JSON.stringify(organizationalAverages)}. Total Officers: ${data.length}`;
                 
                 // FIX: Using gemini-3-flash-preview as per task guidelines

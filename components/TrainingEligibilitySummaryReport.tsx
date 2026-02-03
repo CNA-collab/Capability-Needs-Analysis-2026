@@ -104,13 +104,13 @@ export const TrainingEligibilitySummaryReport: React.FC<ReportProps> = ({ data, 
 
     useEffect(() => {
         const generateReport = async () => {
-            if (!process.env.API_KEY) {
+            if (!process.env.GEMINI_API_KEY) {
                 setError("API key is not configured.");
                 setLoading(false);
                 return;
             }
             try {
-                const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+                const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
                 const promptText = `Please analyze the following CNA and Establishment data to generate an Eligible Officers Report.\n\nCONTEXT: ${promptContext}\n\nCNA DATA (for submission status & needs):\n${JSON.stringify(data, null, 2)}\n\nESTABLISHMENT DATA (for officer list):\n${JSON.stringify(ESTABLISHMENT_DATA, null, 2)}`;
                 
                 /* FIX: Updated model to 'gemini-3-flash-preview' per guidelines */

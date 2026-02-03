@@ -78,7 +78,7 @@ export const SuccessionPlanReport: React.FC<ReportProps> = ({ data, establishmen
 
     useEffect(() => {
         const generateReport = async () => {
-            const apiKey = process.env.API_KEY || (window as WindowWithEnv).ENV?.API_KEY;
+            const apiKey = process.env.GEMINI_API_KEY || (window as WindowWithEnv).ENV?.API_KEY;
             if (!apiKey) {
                 setError("AI Engine Authorization Missing. Please check System Settings.");
                 setLoading(false);

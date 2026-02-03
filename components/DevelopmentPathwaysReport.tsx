@@ -63,13 +63,13 @@ export const DevelopmentPathwaysReport: React.FC<ReportProps> = ({ data, agencyN
 
     useEffect(() => {
         const generateReport = async () => {
-            if (!process.env.API_KEY) {
+            if (!process.env.GEMINI_API_KEY) {
                 setError("Security Gate: System API missing.");
                 setLoading(false);
                 return;
             }
             try {
-                const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+                const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
                 const prompt = `
                 Generate Section 6: Development Pathways for ${agencyName}.
                 

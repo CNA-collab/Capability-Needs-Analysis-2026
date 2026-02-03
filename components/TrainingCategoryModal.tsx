@@ -79,13 +79,13 @@ export const TrainingCategoryModal: React.FC<ModalProps> = ({ data, categoryName
 
     useEffect(() => {
         const generateReport = async () => {
-            if (!process.env.API_KEY) {
+            if (!process.env.GEMINI_API_KEY) {
                 setError("API key is not configured.");
                 setLoading(false);
                 return;
             }
             try {
-                const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+                const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
                 
                 const instructions = AI_TRAINING_CATEGORY_PROMPT_INSTRUCTIONS.replace(/{CATEGORY_NAME}/g, categoryName);
                 const promptText = `Please analyze the following CNA data for the training category "${categoryName}".\n\nCONTEXT: ${promptContext}\n\nDATA:\n${JSON.stringify(data, null, 2)}`;

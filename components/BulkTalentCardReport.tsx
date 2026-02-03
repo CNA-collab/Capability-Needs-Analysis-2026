@@ -184,7 +184,7 @@ export const BulkTalentCardReport: React.FC<BulkReportProps> = ({ data, establis
 
     useEffect(() => {
         const generateReports = async () => {
-            if (!process.env.API_KEY) {
+            if (!process.env.GEMINI_API_KEY) {
                 setError("API key is not configured.");
                 setLoading(false);
                 return;
@@ -201,7 +201,7 @@ export const BulkTalentCardReport: React.FC<BulkReportProps> = ({ data, establis
             setProgress({ current: 0, total: officersToProcess.length });
             
             /* Correct initialization using named parameter */
-            const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+            const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
             const generatedReports: ({ report: AiTalentCardReport; officer: OfficerRecord })[] = [];
 
             for (const officer of officersToProcess) {

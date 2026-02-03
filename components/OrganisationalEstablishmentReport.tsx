@@ -92,14 +92,14 @@ export const OrganisationalEstablishmentReport: React.FC<ReportProps> = ({ data,
 
     useEffect(() => {
         const generateReport = async () => {
-            if (!process.env.API_KEY) {
+            if (!process.env.GEMINI_API_KEY) {
                 setError("API key is not configured.");
                 setLoading(false);
                 return;
             }
             try {
                 // FIX: Using named parameter for GoogleGenAI initialization
-                const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+                const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
                 const prompt = `Please generate an Organisational Establishment report for ${agencyName}.
                 
                 **Establishment Data (Primary Source):**

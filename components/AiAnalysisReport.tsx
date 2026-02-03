@@ -61,13 +61,13 @@ export const AutomatedOrganizationalAnalysisReport: React.FC<ReportProps> = ({ d
 
     useEffect(() => {
         const generateReport = async () => {
-            if (!process.env.API_KEY) {
+            if (!process.env.GEMINI_API_KEY) {
                 setError("API key is not configured.");
                 setLoading(false);
                 return;
             }
             try {
-                const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+                const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
                 
                 // Multimodal Logic: Attempt to parse structured context from Master Scanner
                 let highFidelityContext = "";

@@ -112,9 +112,9 @@ export const IndividualDevelopmentProfile: React.FC<SummaryProps> = ({ officer, 
 
     useEffect(() => {
         const generateReport = async () => {
-            if (!process.env.API_KEY) { setError("API key missing."); setLoading(false); return; }
+            if (!process.env.GEMINI_API_KEY) { setError("API key missing."); setLoading(false); return; }
             try {
-                const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+                const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
                 const prompt = `Generate a Workforce Lifecycle Plan for: ${JSON.stringify(officer, null, 2)}`;
                 const response = await ai.models.generateContent({
                     model: 'gemini-3-flash-preview',
