@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { GoogleGenAI, Type } from "@google/genai";
-import { OfficerRecord, AiAutomatedLndReport, QUESTION_TEXT_MAPPING, AgencyType, LearningRecommendation, OfficerAutomatedLndPlan } from '../types';
+import { OfficerRecord, AiAutomatedLndReport, QUESTION_TEXT_MAPPING, AgencyType, LearningRecommendation } from '../types';
 import { AI_AUTOMATED_LND_RECOMMENDATIONS_PROMPT_INSTRUCTIONS } from '../constants';
 import { XIcon, SparklesIcon, ChevronDownIcon, LightBulbIcon } from './icons';
 import { ExportMenu } from './ExportMenu';
@@ -245,7 +245,7 @@ export const AutomatedLndRecommendationsReport: React.FC<ReportProps> = ({ data,
                         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Automated L&D Recommendations</h1>
                     </div>
                      <div className="flex items-center gap-4">
-                        <ExportMenu onExport={handleExport as any} />
+                        <ExportMenu onExport={handleExport} />
                         <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-blue-800" aria-label="Close report">
                             <XIcon className="w-6 h-6 text-gray-600 dark:text-gray-300" />
                         </button>

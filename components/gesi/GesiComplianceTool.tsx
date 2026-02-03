@@ -56,7 +56,7 @@ export const GesiComplianceTool: React.FC = () => {
                         </div>
                     ))}
                      {Object.keys(filteredDefinitions).length === 0 && (
-                        <p className="text-sm text-center text-gray-500">No definitions found for "{searchTerm}".</p>
+                        <p className="text-sm text-center text-gray-500">No definitions found for &quot;{searchTerm}&quot;.</p>
                     )}
                 </div>
             </div>

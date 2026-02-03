@@ -1,51 +1,56 @@
-import React, { useState } from 'react';
-import { UserCircleIcon } from '../icons';
-import { GesiRoleDetail } from './GesiRoleDetail';
-
-type Role = 'Secretary' | 'Executive' | 'HR' | 'Officer' | 'Focal Point';
-
-const ROLES: { id: Role; name: string }[] = [
-    { id: 'Secretary', name: 'Secretary / Department Head' },
-    { id: 'Executive', name: 'Executive Managers' },
-    { id: 'HR', name: 'HR Managers' },
-    { id: 'Officer', name: 'All Public Officers' },
-    { id: 'Focal Point', name: 'GESI Focal Points' },
-];
+import React from 'react';
 
 export const GesiRolesMap: React.FC = () => {
-    const [selectedRole, setSelectedRole] = useState<Role | null>(null);
-
     return (
-        <div className="bg-white dark:bg-gray-800/50 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-             <div className="mb-6">
-                <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200 mb-2">GESI Roles & Responsibilities</h2>
-                <p className="prose prose-sm dark:prose-invert max-w-none text-gray-700 dark:text-gray-300">
-                    Implementing the GESI Policy is a shared responsibility. Every public servant has a role to play in creating an inclusive and equitable workplace. Click on a role below to see specific duties and practical examples.
+        <div className="space-y-8">
+            <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+                <h2 className="text-2xl font-black text-slate-900 uppercase mb-4">Roles & Responsibilities</h2>
+                <p className="text-slate-600 mb-6">
+                    Clear definition of roles and responsibilities for GESI implementation across all levels.
                 </p>
-            </div>
-            
-            <div className="flex flex-col items-center space-y-4">
-                {ROLES.map((role, index) => (
-                    <React.Fragment key={role.id}>
-                        <button 
-                            onClick={() => setSelectedRole(role.id)}
-                            className="group flex items-center w-full max-w-md p-4 bg-gray-100 dark:bg-gray-900/40 rounded-lg shadow-sm hover:shadow-lg border border-gray-200 dark:border-gray-700 hover:bg-amber-100/50 dark:hover:bg-amber-900/20 transition-all duration-300 transform hover:scale-105"
-                            aria-haspopup="true"
-                            aria-expanded={selectedRole === role.id}
-                        >
-                            <UserCircleIcon className="w-8 h-8 mr-4 text-amber-600" />
-                            <span className="text-md font-semibold text-gray-800 dark:text-gray-200">{role.name}</span>
-                        </button>
-                        {index < ROLES.length - 1 && (
-                            <div className="w-0.5 h-8 bg-gray-300 dark:bg-gray-600"></div>
-                        )}
-                    </React.Fragment>
-                ))}
-            </div>
 
-            {selectedRole && (
-                <GesiRoleDetail role={selectedRole} onClose={() => setSelectedRole(null)} />
-            )}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="p-6 bg-slate-50 rounded-xl border border-slate-200">
+                        <h3 className="text-lg font-bold text-slate-900 mb-2">Executive Leadership</h3>
+                        <ul className="list-disc list-inside text-slate-600 space-y-1 text-sm">
+                            <li>Set strategic direction</li>
+                            <li>Ensure resource allocation</li>
+                            <li>Monitor progress</li>
+                            <li>Champion GESI initiatives</li>
+                        </ul>
+                    </div>
+
+                    <div className="p-6 bg-slate-50 rounded-xl border border-slate-200">
+                        <h3 className="text-lg font-bold text-slate-900 mb-2">Middle Management</h3>
+                        <ul className="list-disc list-inside text-slate-600 space-y-1 text-sm">
+                            <li>Implement policies</li>
+                            <li>Support team development</li>
+                            <li>Report progress</li>
+                            <li>Foster inclusive culture</li>
+                        </ul>
+                    </div>
+
+                    <div className="p-6 bg-slate-50 rounded-xl border border-slate-200">
+                        <h3 className="text-lg font-bold text-slate-900 mb-2">HR Department</h3>
+                        <ul className="list-disc list-inside text-slate-600 space-y-1 text-sm">
+                            <li>Develop GESI policies</li>
+                            <li>Provide training</li>
+                            <li>Monitor compliance</li>
+                            <li>Support recruitment</li>
+                        </ul>
+                    </div>
+
+                    <div className="p-6 bg-slate-50 rounded-xl border border-slate-200">
+                        <h3 className="text-lg font-bold text-slate-900 mb-2">All Employees</h3>
+                        <ul className="list-disc list-inside text-slate-600 space-y-1 text-sm">
+                            <li>Understand policies</li>
+                            <li>Participate in training</li>
+                            <li>Report concerns</li>
+                            <li>Promote inclusion</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };

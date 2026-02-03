@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { LoginPage } from './components/LoginPage';
 import { MainDashboard } from './components/MainDashboard';
 import { AppProvider } from './components/AppContext';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 const App: React.FC = () => {
   // Authentication state
@@ -30,9 +31,11 @@ const App: React.FC = () => {
 
   // Show main dashboard if authenticated
   return (
-    <AppProvider>
-      <MainDashboard onLogout={handleLogout} />
-    </AppProvider>
+    <ErrorBoundary>
+      <AppProvider>
+        <MainDashboard onLogout={handleLogout} />
+      </AppProvider>
+    </ErrorBoundary>
   );
 };
 

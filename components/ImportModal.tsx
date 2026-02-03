@@ -228,9 +228,9 @@ export const ImportModal: React.FC<ImportModalProps> = ({ onImport, onClose }) =
                                     <div className={`border border-slate-200 rounded-xl p-4 flex items-center justify-between shadow-sm transition-all ${corporatePlanData ? 'bg-emerald-50 border-emerald-200' : 'bg-white'}`}>
                                         <div className="flex items-center gap-3">
                                             {isProcessingCorporatePlan ? <SpinnerIcon className="w-5 h-5 text-amber-600 animate-spin" /> : corporatePlanData ? <CheckCircleIcon className="w-5 h-5 text-emerald-500" /> : <div className="w-5 h-5 border-2 border-slate-200 rounded-full"></div>}
-                                            <span className="text-xs font-bold text-slate-500 truncate max-w-[150px]">{corporatePlanFile ? corporatePlanFile.name : "Attach Excel Plan"}</span>
+                                            <span className="text-xs font-bold text-slate-500 truncate max-w-[150px]">{corporatePlanFile ? corporatePlanFile.name : "Attach PDF Plan"}</span>
                                         </div>
-                                        <input type="file" accept=".xlsx,.csv" onChange={handleCorporatePlanChange} className="hidden" id="cp-file-upload" disabled={isProcessingCorporatePlan} />
+                                        <input type="file" accept=".pdf" onChange={handleCorporatePlanChange} className="hidden" id="cp-file-upload" disabled={isProcessingCorporatePlan} />
                                         <label htmlFor="cp-file-upload" className={`cursor-pointer px-4 py-2 bg-slate-100 rounded-lg text-[10px] font-black uppercase text-[#1A365D] ${isProcessingCorporatePlan ? 'opacity-50 pointer-events-none' : 'hover:bg-blue-600 hover:text-white transition-all'}`}>Upload</label>
                                     </div>
                                 </div>

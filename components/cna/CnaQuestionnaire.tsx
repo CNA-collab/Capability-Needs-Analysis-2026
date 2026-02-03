@@ -1,29 +1,43 @@
 import React from 'react';
-import { QUESTION_TEXT_MAPPING } from '../../types';
 
 export const CnaQuestionnaire: React.FC = () => {
-    const questions = Object.entries(QUESTION_TEXT_MAPPING);
     return (
-        <div className="bg-white dark:bg-gray-800/50 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-            <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200 mb-2">CNA Questionnaire Items</h2>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">This application is configured to analyze the following questionnaire items. Ensure your imported data uses these codes as column headers for capability ratings.</p>
-            <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm">
-                    <thead className="bg-gray-200 dark:bg-gray-700/50">
-                        <tr>
-                            <th className="p-2 font-semibold">Code</th>
-                            <th className="p-2 font-semibold">Question Text</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {questions.map(([code, text]) => (
-                            <tr key={code} className="border-b border-gray-200 dark:border-gray-700">
-                                <td className="p-2 font-mono font-bold">{code}</td>
-                                <td className="p-2">{text}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+        <div className="space-y-8">
+            <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+                <h2 className="text-2xl font-black text-slate-900 uppercase mb-4">CNA Questionnaire</h2>
+                <p className="text-slate-600 mb-6">
+                    This section contains the Capability Needs Analysis questionnaire that helps assess individual and organizational capabilities.
+                </p>
+
+                <div className="space-y-6">
+                    <div className="p-6 bg-slate-50 rounded-xl border border-slate-200">
+                        <h3 className="text-lg font-bold text-slate-900 mb-2">Questionnaire Overview</h3>
+                        <p className="text-slate-600">
+                            The CNA questionnaire is designed to gather comprehensive data about employee capabilities,
+                            training needs, and organizational requirements. It covers various aspects including technical skills,
+                            leadership capabilities, and strategic alignment.
+                        </p>
+                    </div>
+
+                    <div className="p-6 bg-slate-50 rounded-xl border border-slate-200">
+                        <h3 className="text-lg font-bold text-slate-900 mb-2">Key Components</h3>
+                        <ul className="list-disc list-inside text-slate-600 space-y-2">
+                            <li>Individual capability assessment</li>
+                            <li>Training needs identification</li>
+                            <li>Performance rating evaluation</li>
+                            <li>Gap analysis framework</li>
+                            <li>Strategic alignment mapping</li>
+                        </ul>
+                    </div>
+
+                    <div className="p-6 bg-slate-50 rounded-xl border border-slate-200">
+                        <h3 className="text-lg font-bold text-slate-900 mb-2">Implementation Guide</h3>
+                        <p className="text-slate-600">
+                            The questionnaire should be administered annually or as needed based on organizational changes.
+                            Results should be analyzed to inform training and development strategies.
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
     );

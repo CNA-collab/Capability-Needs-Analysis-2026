@@ -6,6 +6,8 @@ import { getGradingGroup } from './helpers';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare const XLSX: any;
 
+
+
 /**
  * Universal Header Mapping Dictionary
  * Maps standard application fields to possible Excel column names (fuzzy matching).
@@ -383,15 +385,55 @@ export const parsePastedData = (pastedText: string, agencyType: AgencyType): Pro
     });
 };
 
-const CORPORATE_PLAN_HEADER_MAPPING: Record<string, string[]> = {
-    vision: ['vision', 'mission statement', 'organizational vision'],
-    mission: ['mission', 'mission statement', 'organizational mission'],
-    objectives: ['objectives', 'strategic objectives', 'goals', 'key objectives'],
-    training_needs: ['training needs', 'learning needs', 'capacity building'],
-    financial_context: ['financial context', 'budget', 'funding', 'resources'],
-    risk_assessment: ['risk assessment', 'risks', 'challenges'],
-    personnel_establishment: ['personnel establishment', 'staffing', 'workforce'],
-    full_document_context: ['full context', 'summary', 'overview', 'description']
+
+/**
+ * Parse extracted text from PDF to structure corporate plan data
+ */
+const parseCorporatePlanText = (text: string): unknown => {
+    // Clean and normalize the text
+    const cleanText = text.replace(/\s+/g, ' ').trim();
+
+    // Extract sections using regex patterns
+    const extractSection = (pattern: RegExp): string => {
+        const match = cleanText.match(pattern);
+        return match ? match[1].trim() : '';
+    };
+
+    // Common patterns for corporate plan sections
+    const vision = extractSection(/(?:vision|mission statement)[^:]*:?\s*([^.!?]+[.!?])/i) ||
+                   extractSection(/vision[^:]*:?\s*([^.!?]+[.!?])/i);
+
+    const mission = extractSection(/mission[^:]*:?\s*([^.!?]+[.!?])/i) ||
+                    extractSection(/(?:mission|mission statement)[^:]*:?\s*([^.!?]+[.!?])/i);
+
+    // Extract objectives (may be multiple)
+    const objectivesMatch = cleanText.match(/(?:objectives|goals|strategic objectives)[^:]*:?\s*([^.!?]+(?:[.!?][^.!?]*)*)/i);
+    const objectives = objectivesMatch ? objectivesMatch[1].split(/[.!?]/).map(obj => obj.trim()).filter(obj => obj.length > 0) : [];
+
+    const trainingNeeds = extractSection(/(?:training needs|learning needs|capacity building)[^:]*:?\s*([^.!?]+[.!?])/i);
+
+    const financialContext = extractSection(/(?:financial context|budget|funding|resources)[^:]*:?\s*([^.!?]+[.!?])/i);
+
+    const riskAssessment = extractSection(/(?:risk assessment|risks|challenges)[^:]*:?\s*([^.!?]+[.!?])/i);
+
+    const personnelEstablishment = extractSection(/(?:personnel establishment|staffing|workforce)[^:]*:?\s*([^.!?]+[.!?])/i);
+
+    // Use the full text as context if no specific sections found
+    const fullDocumentContext = cleanText.length > 100 ? cleanText.substring(0, 1000) + '...' : cleanText;
+
+    return {
+        strategic_goals: {
+            vision: vision || 'Vision extracted from PDF',
+            mission: mission || 'Mission extracted from PDF',
+            values: [], // Can be extended if values are found
+            objectives: objectives.length > 0 ? objectives : ['Objectives extracted from PDF']
+        },
+        training_needs: trainingNeeds || 'Training needs extracted from PDF',
+        financial_context: financialContext || 'Financial context extracted from PDF',
+        risk_assessment: riskAssessment || 'Risk assessment extracted from PDF',
+        personnel_establishment: personnelEstablishment || 'Personnel establishment extracted from PDF',
+        full_document_context: fullDocumentContext
+    };
 };
 
 export const parseCorporatePlanFile = (file: File): Promise<{ data: unknown }> => {
@@ -400,41 +442,22 @@ export const parseCorporatePlanFile = (file: File): Promise<{ data: unknown }> =
         reader.onload = (e) => {
             try {
                 const data = new Uint8Array(e.target!.result as ArrayBuffer);
-                const workbook = XLSX.read(data, { type: 'array' });
 
-                let corporatePlanData: unknown = {};
+                // Use dynamic import for pdf-parse
+                import('pdf-parse').then((pdfParse: unknown) => {
+                    (pdfParse as { default: (data: Uint8Array) => Promise<{ text: string }> }).default(data).then((pdfData) => {
+                        const text = pdfData.text;
 
-                workbook.SheetNames.forEach((sheetName) => {
-                    const worksheet = workbook.Sheets[sheetName];
-                    const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
-                    const headers = XLSX.utils.sheet_to_json(worksheet, { header: 1 })[0] || [];
+                        // Parse the extracted text to structure corporate plan data
+                        const corporatePlanData = parseCorporatePlanText(text);
 
-                    if (jsonData.length > 0) {
-                        const resolvedHeaders: Partial<Record<string, string>> = {};
-                        for (const key in CORPORATE_PLAN_HEADER_MAPPING) {
-                            const found = findHeader(headers, CORPORATE_PLAN_HEADER_MAPPING[key]);
-                            if (found) resolvedHeaders[key] = found;
-                        }
-
-                        // Extract data from the first row (assuming structured data)
-                        const firstRow = jsonData[0];
-                        corporatePlanData = {
-                            strategic_goals: {
-                                vision: firstRow[resolvedHeaders.vision || ''] || '',
-                                mission: firstRow[resolvedHeaders.mission || ''] || '',
-                                values: [], // Can be extended if values are in separate columns
-                                objectives: String(firstRow[resolvedHeaders.objectives || ''] || '').split(',').map((obj: string) => obj.trim())
-                            },
-                            training_needs: firstRow[resolvedHeaders.training_needs || ''] || '',
-                            financial_context: firstRow[resolvedHeaders.financial_context || ''] || '',
-                            risk_assessment: firstRow[resolvedHeaders.risk_assessment || ''] || '',
-                            personnel_establishment: firstRow[resolvedHeaders.personnel_establishment || ''] || '',
-                            full_document_context: firstRow[resolvedHeaders.full_document_context || ''] || ''
-                        };
-                    }
+                        resolve({ data: corporatePlanData });
+                    }).catch((err: unknown) => {
+                        reject(err);
+                    });
+                }).catch((err: unknown) => {
+                    reject(err);
                 });
-
-                resolve({ data: corporatePlanData });
             } catch (err) { reject(err); }
         };
         reader.readAsArrayBuffer(file);

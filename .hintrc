@@ -33,7 +33,8 @@
           "color-adjust",
           "text-justify",
           "text-justify: inter-word",
-          "scrollbar-width"
+          "scrollbar-width",
+          "scrollbar-width: none"
         ]
       }
     ]
