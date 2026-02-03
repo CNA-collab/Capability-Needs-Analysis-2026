@@ -174,14 +174,14 @@ export const ItemLevelAnalysisReport: React.FC<ReportProps> = ({ data, onClose }
             return;
         }
         const generateNarrative = async () => {
-             if (!process.env.API_KEY) {
+             if (!process.env.GEMINI_API_KEY) {
                 setError("API key is not configured.");
                 setLoading(false);
                 return;
             }
             try {
                 /* Correct initialization as per guidelines */
-                const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+                const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
                 const prompt = `Please generate narrative insights based on the following pre-calculated CNA data analysis.\n\nTop 5 Highest Scoring Questions:\n${JSON.stringify(analysis.top5.map(s=>({code: s.questionCode, text: s.questionText, avg: s.averageScore})))} \n\nTop 5 Lowest Scoring Questions:\n${JSON.stringify(analysis.bottom5.map(s=>({code: s.questionCode, text: s.questionText, avg: s.averageScore})))} \n\nAll Questions Stats:\n${JSON.stringify(analysis.stats.map(s=>({code: s.questionCode, avg: s.averageScore, variance: s.variance})))}`;
                 
                 /* Updated model to gemini-3-flash-preview as per guidelines */

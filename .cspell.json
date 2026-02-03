@@ -10,6 +10,7 @@
     "exceljs",
     "filenumber",
     "gantt",
+    "gtqqu",
     "HAUS",
     "importmap",
     "Inclusivity",
@@ -20,6 +21,7 @@
     "operationalize",
     "overqualification",
     "PFMA",
+    "Prefs",
     "PSMA",
     "secretarys",
     "shrm",
@@ -30,7 +32,8 @@
     "textnodes",
     "Toolkits",
     "UDHR",
-    "upskilling"
+    "upskilling",
+    "VITE"
   ],
   "ignorePaths": [
     "node_modules/**",

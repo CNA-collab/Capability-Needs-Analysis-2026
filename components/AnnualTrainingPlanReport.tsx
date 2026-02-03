@@ -129,14 +129,14 @@ export const AnnualTrainingPlanReport: React.FC<ReportProps> = ({ data, agencyTy
     const generateReport = async () => {
         setLoading(true);
         setError(null);
-        if (!process.env.API_KEY) {
+        if (!process.env.GEMINI_API_KEY) {
             setError("API key is not configured.");
             setLoading(false);
             return;
         }
         try {
             // FIX: Using named parameter for GoogleGenAI initialization
-            const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+            const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
             const promptText = `Please analyze the following CNA data and generate a consolidated training plan.\n\nCONTEXT: ${promptContext}\n\nDATA:\n${JSON.stringify(data, null, 2)}`;
             
             // FIX: Using gemini-3-flash-preview as per task type

@@ -110,7 +110,7 @@ export const AutomatedEstablishmentSummary: React.FC<ReportProps> = ({ data, est
 
     useEffect(() => {
         const generateForm = async () => {
-            if (!process.env.API_KEY) {
+            if (!process.env.GEMINI_API_KEY) {
                 setError("API key is not configured.");
                 setLoading(false);
                 return;
@@ -121,7 +121,7 @@ export const AutomatedEstablishmentSummary: React.FC<ReportProps> = ({ data, est
                  return;
             }
             try {
-                const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+                const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
                 const promptText = `Generate an exhaustive Establishment Summary. Compare the Master Establishment data against the CNA staff records to find 'Staffing on Strength'. Do not skip any rows or sheets.\n\nESTABLISHMENT:\n${JSON.stringify(establishmentData, null, 2)}\n\nCNA STAFF RECORDS:\n${JSON.stringify(data.map(d=>({name: d.name, pos: d.positionNumber})), null, 2)}`;
                 
                 /* FIX: Updated model to 'gemini-3-flash-preview' per guidelines */

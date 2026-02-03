@@ -83,7 +83,7 @@ export const AutomatedEligibilityForm: React.FC<ReportProps> = ({ data, establis
 
     useEffect(() => {
         const generateForm = async () => {
-            if (!process.env.API_KEY) {
+            if (!process.env.GEMINI_API_KEY) {
                 setError("API key is not configured.");
                 setLoading(false);
                 return;
@@ -94,7 +94,7 @@ export const AutomatedEligibilityForm: React.FC<ReportProps> = ({ data, establis
                  return;
             }
             try {
-                const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+                const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
                 const promptText = `Please analyze the following CNA and Establishment data to populate the training eligibility form.\n\nCONTEXT: ${promptContext}\n\nCNA DATA (contains submission status, training history, and capability gaps):\n${JSON.stringify(data, null, 2)}\n\nESTABLISHMENT DATA (master list of all positions and their status):\n${JSON.stringify(establishmentData, null, 2)}`;
                 
                 /* FIX: Updated model to 'gemini-3-flash-preview' per guidelines */

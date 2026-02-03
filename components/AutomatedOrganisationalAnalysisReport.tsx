@@ -187,14 +187,14 @@ export const AutomatedOrganisationalAnalysisReport: React.FC<ReportProps> = ({ d
 
     useEffect(() => {
         const generateReport = async () => {
-            if (!process.env.API_KEY) {
+            if (!process.env.GEMINI_API_KEY) {
                 setError("API key is not configured.");
                 setLoading(false);
                 return;
             }
             try {
                 // Initialize GenAI client using a named parameter
-                const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+                const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
                 
                 const promptText = `
                 Analyze the provided data to generate a comprehensive Organisational Analysis Report.

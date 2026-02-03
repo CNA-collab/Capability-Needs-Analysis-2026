@@ -71,7 +71,7 @@ export const IndividualDevelopmentProfile: React.FC<SummaryProps> = ({ officer, 
 
      useEffect(() => {
         const generateReport = async () => {
-            if (!process.env.API_KEY) {
+            if (!process.env.GEMINI_API_KEY) {
                 setError("API key is not configured.");
                 setLoading(false);
                 return;
@@ -79,7 +79,7 @@ export const IndividualDevelopmentProfile: React.FC<SummaryProps> = ({ officer, 
 
             try {
                 /* Correct initialization as per guidelines */
-                const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+                const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
                 const prompt = `You MUST use this mapping to understand the question codes in the data.
 QUESTION MAPPING:
 ${JSON.stringify(QUESTION_TEXT_MAPPING, null, 2)}

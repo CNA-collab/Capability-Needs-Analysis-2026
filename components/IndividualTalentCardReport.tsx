@@ -127,7 +127,7 @@ export const IndividualTalentCardReport: React.FC<ProfileProps> = ({ officer, es
 
     useEffect(() => {
         const generateReport = async () => {
-            if (!process.env.API_KEY) {
+            if (!process.env.GEMINI_API_KEY) {
                 setError("API key is not configured.");
                 setLoading(false);
                 return;
@@ -135,7 +135,7 @@ export const IndividualTalentCardReport: React.FC<ProfileProps> = ({ officer, es
 
             try {
                 /* Correct initialization as per guidelines */
-                const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+                const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
                 const prompt = `Generate a talent diagnostic card for: ${JSON.stringify(officer, null, 2)}. 
                 Establishment Data: ${JSON.stringify(establishmentData, null, 2)}.
                 Map capability domains to question codes: ${JSON.stringify(QUESTION_TEXT_MAPPING, null, 2)}.`;

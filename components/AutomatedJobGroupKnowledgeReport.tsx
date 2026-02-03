@@ -44,14 +44,14 @@ export const AutomatedJobGroupKnowledgeReport: React.FC<ReportProps> = ({ data, 
 
     useEffect(() => {
         const generateReport = async () => {
-            if (!process.env.API_KEY) {
+            if (!process.env.GEMINI_API_KEY) {
                 setError("API key is not configured.");
                 setLoading(false);
                 return;
             }
             try {
                 // FIX: Using named parameter for GoogleGenAI initialization
-                const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+                const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
                 const promptText = `Please analyze the following CNA data to generate a Job Group Knowledge Improvement plan.\n\nDATA:\n${JSON.stringify(data, null, 2)}`;
                 
                 // FIX: Changed model to 'gemini-3-flash-preview' as per task guidelines

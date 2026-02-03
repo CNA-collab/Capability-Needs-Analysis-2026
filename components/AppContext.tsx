@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
 import { OfficerRecord, View, EstablishmentRecord, StructuredCorporatePlan } from '../types';
+import { DataAggregator, AggregatedData } from '../services/DataAggregator';
 
 // Enhanced types for the context
 export interface BaselineData {
@@ -18,6 +19,7 @@ export interface AppState {
   establishmentData: EstablishmentRecord[];
   corporatePlanData: StructuredCorporatePlan | null;
   baselineData: BaselineData | null;
+  aggregatedData: AggregatedData | null;
 
   // UI state
   currentView: View;
@@ -40,6 +42,7 @@ export type AppAction =
   | { type: 'SET_ESTABLISHMENT_DATA'; payload: EstablishmentRecord[] }
   | { type: 'SET_CORPORATE_PLAN_DATA'; payload: StructuredCorporatePlan | null }
   | { type: 'SET_BASELINE_DATA'; payload: BaselineData | null }
+  | { type: 'SET_AGGREGATED_DATA'; payload: AggregatedData | null }
   | { type: 'SET_CURRENT_VIEW'; payload: View }
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_ERROR'; payload: string | null }
@@ -56,6 +59,7 @@ const initialState: AppState = {
   establishmentData: [],
   corporatePlanData: null,
   baselineData: null,
+  aggregatedData: null,
   currentView: 'dashboard',
   isLoading: false,
   error: null,
@@ -77,6 +81,8 @@ function appReducer(state: AppState, action: AppAction): AppState {
       return { ...state, corporatePlanData: action.payload, lastUpdated: new Date() };
     case 'SET_BASELINE_DATA':
       return { ...state, baselineData: action.payload };
+    case 'SET_AGGREGATED_DATA':
+      return { ...state, aggregatedData: action.payload };
     case 'SET_CURRENT_VIEW':
       return { ...state, currentView: action.payload };
     case 'SET_LOADING':
@@ -179,12 +185,22 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     loadCachedData();
   }, []);
 
+  // Compute aggregated data when source data changes
+  useEffect(() => {
+    if (state.officers.length > 0 && state.establishmentData.length > 0) {
+      const aggregated = DataAggregator.process(state.officers, state.establishmentData, state.corporatePlanData || undefined);
+      dispatch({ type: 'SET_AGGREGATED_DATA', payload: aggregated });
+    } else {
+      dispatch({ type: 'SET_AGGREGATED_DATA', payload: null });
+    }
+  }, [state.officers, state.establishmentData, state.corporatePlanData]);
+
   // Save to cache when data changes
   useEffect(() => {
     if (state.officers.length > 0 || state.establishmentData.length > 0 || state.corporatePlanData) {
       saveToCache();
     }
-  }, [state.officers, state.establishmentData, state.corporatePlanData]);
+  }, [state.officers, state.establishmentData, state.corporatePlanData, state.aggregatedData]);
 
   const value: AppContextType = {
     state,

@@ -1,10 +1,27 @@
-import { OfficerRecord, EstablishmentRecord, WorkforceLifecycleStage, QUESTION_TEXT_MAPPING } from '../types';
+import { OfficerRecord, EstablishmentRecord, WorkforceLifecycleStage, StructuredCorporatePlan } from '../types';
 
 export interface Discrepancy {
     type: 'Gender Mismatch' | 'Data Missing' | 'Name Variation';
     officerName: string;
     positionNumber: string;
     details: string;
+}
+
+export interface DivisionStats {
+    ceiling: number;
+    actual: number;
+    filledByCna: number;
+    skillGaps: number;
+    qualGaps: number;
+}
+
+export interface GenderPillarStats {
+    maleTotal: number;
+    femaleTotal: number;
+    maleCount: number;
+    femaleCount: number;
+    totalScore: number;
+    totalCount: number;
 }
 
 export interface AggregatedData {
@@ -38,6 +55,11 @@ export interface AggregatedData {
         disabilityInclusionCount: number;
         gesiAwarenessScore: number;
     };
+    corporatePlanMetrics: {
+        alignmentScore: number;
+        understandingCount: number;
+        averageUnderstanding: number;
+    };
 }
 
 export class DataAggregator {
@@ -54,9 +76,9 @@ export class DataAggregator {
         return 'Aligned';
     }
 
-    static process(officers: OfficerRecord[], establishment: EstablishmentRecord[], totalRawResponses?: number): AggregatedData {
+    static process(officers: OfficerRecord[], establishment: EstablishmentRecord[], corporatePlan?: StructuredCorporatePlan, totalRawResponses?: number): AggregatedData {
         const totalPositions = establishment.length;
-        const divisionStats: Record<string, any> = {};
+        const divisionStats: Record<string, DivisionStats> = {};
         const establishmentLookup = new Map<string, EstablishmentRecord>();
 
         // GESI Specific Variables
@@ -108,7 +130,7 @@ export class DataAggregator {
 
         const pillars = ['Strategic Alignment', 'Operational Effectiveness', 'Leadership', 'Performance Management', 'ICT Capability', 'Public Finance Management'];
         const pillarCodes = ['A', 'B', 'C', 'D', 'E', 'F'];
-        const genderPillarAnalysis: Record<string, any> = {};
+        const genderPillarAnalysis: Record<string, GenderPillarStats> = {};
         pillars.forEach(p => genderPillarAnalysis[p] = { maleTotal: 0, femaleTotal: 0, maleCount: 0, femaleCount: 0, totalScore: 0, totalCount: 0 });
 
         // 2. Process CNA Survey Data
@@ -171,12 +193,27 @@ export class DataAggregator {
             });
         });
 
-        // 3. Finalize Analytics
+        // 3. Process Corporate Plan Data
+        let corporatePlanAlignmentScore = 0;
+        let corporatePlanUnderstandingCount = 0;
+
+        if (corporatePlan) {
+            // Calculate corporate plan understanding from CNA data (A2 question)
+            officers.forEach(o => {
+                const a2Rating = o.capabilityRatings.find(r => r.questionCode === 'A2');
+                if (a2Rating) {
+                    corporatePlanAlignmentScore += a2Rating.currentScore;
+                    corporatePlanUnderstandingCount++;
+                }
+            });
+        }
+
+        // 4. Finalize Analytics
         const finalizedPillarAnalysis: Record<string, { maleAvg: number; femaleAvg: number; avg: number; maleCount: number; femaleCount: number }> = {};
         let totalCnaAvg = 0;
         let pCount = 0;
 
-        Object.entries(genderPillarAnalysis).forEach(([pillar, stats]: [string, any]) => {
+        Object.entries(genderPillarAnalysis).forEach(([pillar, stats]: [string, GenderPillarStats]) => {
             const avg = stats.totalCount > 0 ? stats.totalScore / stats.totalCount : 0;
             finalizedPillarAnalysis[pillar] = {
                 maleAvg: stats.maleCount > 0 ? stats.maleTotal / stats.maleCount : 0,
@@ -206,6 +243,11 @@ export class DataAggregator {
                 femaleSeniorityRate: seniorTotalCount > 0 ? (seniorFemaleCount / seniorTotalCount) * 100 : 0,
                 disabilityInclusionCount: inclusionMentions,
                 gesiAwarenessScore: gesiAwarenessCount > 0 ? gesiAwarenessTotal / gesiAwarenessCount : 0
+            },
+            corporatePlanMetrics: {
+                alignmentScore: corporatePlanAlignmentScore,
+                understandingCount: corporatePlanUnderstandingCount,
+                averageUnderstanding: corporatePlanUnderstandingCount > 0 ? corporatePlanAlignmentScore / corporatePlanUnderstandingCount : 0
             }
         };
     }

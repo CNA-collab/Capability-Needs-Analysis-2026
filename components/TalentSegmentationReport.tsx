@@ -228,14 +228,14 @@ export const TalentSegmentationReport: React.FC<ReportProps> = ({ data, agencyNa
 
     useEffect(() => {
         const generateNarrative = async () => {
-            if (!process.env.API_KEY) {
+            if (!process.env.GEMINI_API_KEY) {
                 setError("API key is not configured.");
                 setLoading(false);
                 return;
             }
 
             try {
-                const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+                const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
                 
                 // Prepare data for Deep Scan (tenure and eligibility markers)
                 const deepScanInput = data.map(o => {

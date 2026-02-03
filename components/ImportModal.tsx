@@ -3,6 +3,7 @@ import { XIcon, DocumentArrowUpIcon, SpinnerIcon, CheckCircleIcon, ArrowRightIco
 import { OfficerRecord, AgencyType, EstablishmentRecord, StructuredCorporatePlan } from '../types';
 import { parseCnaFile, parsePastedData, parseEstablishmentFile, parseCorporatePlanFile } from '../utils/import';
 import { GoogleSheetsService } from '../services/GoogleSheetsService';
+import { useAppContext } from './AppContext';
 
 interface ImportModalProps {
     onImport: (
@@ -16,6 +17,7 @@ interface ImportModalProps {
 }
 
 export const ImportModal: React.FC<ImportModalProps> = ({ onImport, onClose }) => {
+    const { dispatch } = useAppContext();
     const [step, setStep] = useState<'upload' | 'mapping'>('upload');
     const [activeTab, setActiveTab] = useState<'file' | 'paste' | 'google'>('file');
     const [cnaFile, setCnaFile] = useState<File | null>(null);
@@ -80,6 +82,16 @@ export const ImportModal: React.FC<ImportModalProps> = ({ onImport, onClose }) =
     // Added handleCompleteImport to resolve the missing function name error and finalize the ingestion process.
     const handleCompleteImport = () => {
         if (importedCnaResult) {
+            // Dispatch data to context
+            dispatch({ type: 'SET_OFFICERS', payload: importedCnaResult.data });
+            if (importedEstablishmentResult?.data) {
+                dispatch({ type: 'SET_ESTABLISHMENT_DATA', payload: importedEstablishmentResult.data });
+            }
+            if (corporatePlanData) {
+                dispatch({ type: 'SET_CORPORATE_PLAN_DATA', payload: corporatePlanData });
+            }
+
+            // Call the original onImport for backward compatibility
             onImport(
                 importedCnaResult.data,
                 agencyType,

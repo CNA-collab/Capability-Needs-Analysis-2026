@@ -65,9 +65,9 @@ export const GesiAnalysisReport: React.FC<ReportProps> = ({ data, establishmentD
 
     useEffect(() => {
         const generateReport = async () => {
-            if (!process.env.API_KEY) { setError("API missing"); setLoading(false); return; }
+            if (!process.env.GEMINI_API_KEY) { setError("API missing"); setLoading(false); return; }
             try {
-                const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+                const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
                 const prompt = `Perform GESI Analysis for ${agencyName}. Stats: ${JSON.stringify(stats)}`;
                 const response = await ai.models.generateContent({
                     model: 'gemini-3-flash-preview',

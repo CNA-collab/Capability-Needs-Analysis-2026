@@ -189,12 +189,12 @@ export const LndAiAssistantModal: React.FC<ModalProps> = ({ onClose }) => {
         setIsLoading(true);
 
         try {
-            if (!process.env.API_KEY) {
+            if (!process.env.GEMINI_API_KEY) {
                 throw new Error("API key is not configured.");
             }
 
             /* Correct initialization as per guidelines */
-            const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+            const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
             
             const systemInstruction = `You are the "L&D AI Assistant," an expert on the Capability Needs Analysis System (CNAS) and Learning & Development within the Papua New Guinea (PNG) public service. Your purpose is to help users understand and manage their L&D data.
 

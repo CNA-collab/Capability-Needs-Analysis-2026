@@ -120,14 +120,14 @@ export const AutomatedLndRecommendationsReport: React.FC<ReportProps> = ({ data,
 
     useEffect(() => {
         const generateReport = async () => {
-            if (!process.env.API_KEY) {
+            if (!process.env.GEMINI_API_KEY) {
                 setError("API key is not configured.");
                 setLoading(false);
                 return;
             }
             try {
                 /* Correct initialization as per guidelines */
-                const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+                const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
                 const promptText = `Please analyze the following CNA data and generate automated L&D recommendations for all officers with identified gaps.\n\nCONTEXT: ${promptContext}\n\nDATA:\n${JSON.stringify(data, null, 2)}`;
                 
                 /* Updated model to gemini-3-flash-preview as per guidelines */

@@ -146,14 +146,14 @@ export const ConsolidatedStrategicPlanReport: React.FC<ReportProps> = ({
     const generateReport = async () => {
         setLoading(true);
         setError(null);
-        if (!process.env.API_KEY) {
+        if (!process.env.GEMINI_API_KEY) {
             setError("Security Gate: System API missing.");
             setLoading(false);
             return;
         }
 
         try {
-            const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+            const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
             const prompt = `
             Act as a Strategic Human Capital Planner. Generate a 5-Year Consolidated Strategic Plan for ${agencyName}.
             
