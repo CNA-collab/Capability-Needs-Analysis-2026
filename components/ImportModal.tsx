@@ -59,7 +59,7 @@ export const ImportModal: React.FC<ImportModalProps> = ({ onImport, onClose }) =
 
         try {
             const result = await parseCorporatePlanFile(file);
-            setCorporatePlanData(result.data as StructuredCorporatePlan);
+            setCorporatePlanData(result.data);
         } catch (e: unknown) {
             console.error("Corporate Plan Processing Error:", e);
             setError("Failed to process Corporate Plan file. Please check the file format.");

@@ -7,6 +7,8 @@ import { SurveyInsights } from './SurveyInsights';
 import { ExpenditureReview } from './ExpenditureReview';
 import { CnaPolicyToolkit } from './CnaPolicyToolkit';
 import { GesiPolicyToolkit } from './GesiPolicyToolkit';
+import { BottomPanel } from './BottomPanel';
+import { RightInspector } from './RightInspector';
 import { useAppContext } from './AppContext';
 
 // Individual-focused components

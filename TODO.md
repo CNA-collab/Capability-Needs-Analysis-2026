@@ -1,38 +1,49 @@
-# CNA System Workbench Upgrade TODO
+# CNA Workbench Development Plan
 
-## Phase 1: Setup and Dependencies
-- [ ] Install react-resizable-panels for pane management
-- [ ] Install react-dnd for drag-and-drop functionality
-- [ ] Update package.json with new dependencies
+## Overview
 
-## Phase 2: Core Workbench Architecture
-- [ ] Create components/Workbench.tsx as main workbench component
-- [ ] Implement tiled layout structure:
-  - Draggable Sidebar (organizational hierarchy)
-  - Tabbed Main Center (Survey Insights)
-  - Bottom Terminal (10% Formal Training logs)
-  - Minimized Right Panel (20% Coaching/Mentoring matches)
-- [ ] Add pane resizing and collapsing functionality
+Develop the "CNA Workbench," a single-page, VS Code-inspired IDE for Organizational Development with core logic for data triangulation, 10:20:70 implementation, and specific UI layout.
 
-## Phase 3: Global State Enhancement
-- [ ] Enhance components/AppContext.tsx for real-time updates
-- [ ] Implement data import triggers for automatic content generation
-- [ ] Add state management for pane visibility and sizes
+## Core Requirements
 
-## Phase 4: UI Components and Features
-- [ ] Implement drag-and-drop zones with smart empty states
-- [ ] Add color-coded visual cues for 10:20:70 Learning Model
-- [ ] Create responsive charts that auto-scale on pane resize
-- [ ] Add collapsible panels with one-click toggles
+- **Data Triangulation**: Ingest and cross-reference CNA Survey Data, Establishment Register, and Corporate Plan
+- **10:20:70 Framework**: Categorize interventions as Formal (10%), Coaching (20%), OJT (70%)
+- **VS Code Layout**: Sidebar (hierarchy + staff ceiling), Main Tab (Survey Insights), Bottom Panel (Terminal), Right Inspector (Corporate Objectives alignment)
 
-## Phase 5: Integration and Testing
-- [ ] Update App.tsx to use Workbench instead of MainDashboard
-- [ ] Update utils/import.ts for real-time content generation
-- [ ] Test responsive behavior and drag-and-drop functionality
-- [ ] Verify real-time updates on data import (Establishment Register, Corporate Plan, CNA Survey)
+## Implementation Steps
 
-## Phase 6: Polish and Optimization
-- [ ] Ensure VS Code-like IDE experience
-- [ ] Optimize performance for large datasets
-- [ ] Add keyboard shortcuts and accessibility features
-- [ ] Final testing and bug fixes
+### Phase 1: Layout Structure
+
+- [ ] Restructure MainDashboard.tsx to VS Code-inspired layout
+- [ ] Create BottomPanel component (Terminal view for training logs/ROI)
+- [ ] Create RightInspector component (officer data vs Corporate Objectives)
+- [ ] Update Sidebar for organizational hierarchy and staff ceiling status
+
+### Phase 2: Data Integration
+
+- [ ] Implement global state updates on file import
+- [ ] Cross-reference data sources for workforce planning interventions
+- [ ] Calculate Total Staff Ceiling and Missing Gap projections
+
+### Phase 3: 10:20:70 Logic
+
+- [ ] Implement Formal training (10%) with Corporate Plan alignment
+- [ ] Implement Coaching (20%) based on skill gaps vs experience
+- [ ] Implement OJT (70%) linked to Job Descriptions
+
+### Phase 4: UI Components
+
+- [ ] Update SurveyInsights.tsx as main tab dashboard
+- [ ] Add heatmaps for individual and organizational skill gaps
+- [ ] Implement draggable organizational hierarchy in sidebar
+
+### Phase 5: Testing & Validation
+
+- [ ] Test global state updates on import
+- [ ] Validate data triangulation logic
+- [ ] Ensure responsive VS Code-style layout
+
+## Current Status
+
+- [x] Plan approved by user
+- [ ] Starting implementation

@@ -1,5 +1,5 @@
 
-import { OfficerRecord, UrgencyLevel, TrainingRecord, CapabilityRating, PerformanceRatingLevel, CurrentScoreCategory, EstablishmentRecord, AgencyType, GapTag } from '../types';
+import { OfficerRecord, UrgencyLevel, TrainingRecord, CapabilityRating, PerformanceRatingLevel, CurrentScoreCategory, EstablishmentRecord, AgencyType, GapTag, StructuredCorporatePlan } from '../types';
 import { getGradingGroup } from './helpers';
 
 // Make XLSX available from the global scope (loaded via script tag)
@@ -389,55 +389,91 @@ export const parsePastedData = (pastedText: string, agencyType: AgencyType): Pro
 /**
  * Parse extracted text from PDF to structure corporate plan data
  */
-const parseCorporatePlanText = (text: string): unknown => {
+const parseCorporatePlanText = (text: string): StructuredCorporatePlan => {
     // Clean and normalize the text
     const cleanText = text.replace(/\s+/g, ' ').trim();
 
-    // Extract sections using regex patterns
-    const extractSection = (pattern: RegExp): string => {
-        const match = cleanText.match(pattern);
-        return match ? match[1].trim() : '';
+    // Extract sections using improved regex patterns
+    const extractSection = (patterns: RegExp[]): string => {
+        for (const pattern of patterns) {
+            const match = cleanText.match(pattern);
+            if (match && match[1]) {
+                return match[1].trim();
+            }
+        }
+        return '';
     };
 
-    // Common patterns for corporate plan sections
-    const vision = extractSection(/(?:vision|mission statement)[^:]*:?\s*([^.!?]+[.!?])/i) ||
-                   extractSection(/vision[^:]*:?\s*([^.!?]+[.!?])/i);
+    // Common patterns for corporate plan sections with multiple variations
+    const visionPatterns = [
+        /(?:vision|mission statement)[^:]*:?\s*([^.!?\n]+[.!?\n])/i,
+        /vision[^:]*:?\s*([^.!?\n]+[.!?\n])/i,
+        /(?:our vision|organizational vision)[^:]*:?\s*([^.!?\n]+[.!?\n])/i
+    ];
+    const vision = extractSection(visionPatterns) || 'Vision extracted from PDF';
 
-    const mission = extractSection(/mission[^:]*:?\s*([^.!?]+[.!?])/i) ||
-                    extractSection(/(?:mission|mission statement)[^:]*:?\s*([^.!?]+[.!?])/i);
+    const missionPatterns = [
+        /mission[^:]*:?\s*([^.!?\n]+[.!?\n])/i,
+        /(?:mission|mission statement)[^:]*:?\s*([^.!?\n]+[.!?\n])/i,
+        /(?:our mission|organizational mission)[^:]*:?\s*([^.!?\n]+[.!?\n])/i
+    ];
+    const mission = extractSection(missionPatterns) || 'Mission extracted from PDF';
 
     // Extract objectives (may be multiple)
-    const objectivesMatch = cleanText.match(/(?:objectives|goals|strategic objectives)[^:]*:?\s*([^.!?]+(?:[.!?][^.!?]*)*)/i);
-    const objectives = objectivesMatch ? objectivesMatch[1].split(/[.!?]/).map(obj => obj.trim()).filter(obj => obj.length > 0) : [];
+    const objectivesPatterns = [
+        /(?:objectives|goals|strategic objectives|key objectives)[^:]*:?\s*([^.!?\n]+(?:[.!?\n][^.!?\n]*)*)/i,
+        /(?:strategic objectives|organizational objectives)[^:]*:?\s*([^.!?\n]+(?:[.!?\n][^.!?\n]*)*)/i
+    ];
+    const objectivesText = extractSection(objectivesPatterns);
+    const objectives = objectivesText
+        ? objectivesText.split(/[.!?\n]/).map(obj => obj.trim()).filter(obj => obj.length > 10)
+        : ['Objectives extracted from PDF'];
 
-    const trainingNeeds = extractSection(/(?:training needs|learning needs|capacity building)[^:]*:?\s*([^.!?]+[.!?])/i);
+    const trainingPatterns = [
+        /(?:training needs|learning needs|capacity building|human capacity)[^:]*:?\s*([^.!?\n]+[.!?\n])/i,
+        /(?:training|development|capacity)[^:]*:?\s*([^.!?\n]+[.!?\n])/i
+    ];
+    const trainingNeeds = extractSection(trainingPatterns) || 'Training needs extracted from PDF';
 
-    const financialContext = extractSection(/(?:financial context|budget|funding|resources)[^:]*:?\s*([^.!?]+[.!?])/i);
+    const financialPatterns = [
+        /(?:financial context|budget|funding|resources|financial plan)[^:]*:?\s*([^.!?\n]+[.!?\n])/i,
+        /(?:budget|funding|financial)[^:]*:?\s*([^.!?\n]+[.!?\n])/i
+    ];
+    const financialContext = extractSection(financialPatterns) || 'Financial context extracted from PDF';
 
-    const riskAssessment = extractSection(/(?:risk assessment|risks|challenges)[^:]*:?\s*([^.!?]+[.!?])/i);
+    const riskPatterns = [
+        /(?:risk assessment|risks|challenges|risk management)[^:]*:?\s*([^.!?\n]+[.!?\n])/i,
+        /(?:risks|challenges)[^:]*:?\s*([^.!?\n]+[.!?\n])/i
+    ];
+    const riskAssessment = extractSection(riskPatterns) || 'Risk assessment extracted from PDF';
 
-    const personnelEstablishment = extractSection(/(?:personnel establishment|staffing|workforce)[^:]*:?\s*([^.!?]+[.!?])/i);
-
-    // Use the full text as context if no specific sections found
-    const fullDocumentContext = cleanText.length > 100 ? cleanText.substring(0, 1000) + '...' : cleanText;
+    const personnelPatterns = [
+        /(?:personnel establishment|staffing|workforce|human resources)[^:]*:?\s*([^.!?\n]+[.!?\n])/i,
+        /(?:staffing|workforce|personnel)[^:]*:?\s*([^.!?\n]+[.!?\n])/i
+    ];
+    const personnelEstablishment = extractSection(personnelPatterns) || 'Personnel establishment extracted from PDF';
 
     return {
         strategic_goals: {
-            vision: vision || 'Vision extracted from PDF',
-            mission: mission || 'Mission extracted from PDF',
-            values: [], // Can be extended if values are found
-            objectives: objectives.length > 0 ? objectives : ['Objectives extracted from PDF']
+            vision,
+            mission,
+            objectives
         },
-        training_needs: trainingNeeds || 'Training needs extracted from PDF',
-        financial_context: financialContext || 'Financial context extracted from PDF',
-        risk_assessment: riskAssessment || 'Risk assessment extracted from PDF',
-        personnel_establishment: personnelEstablishment || 'Personnel establishment extracted from PDF',
-        full_document_context: fullDocumentContext
+        training_needs: trainingNeeds,
+        financial_context: financialContext,
+        risk_assessment: riskAssessment,
+        personnel_establishment: personnelEstablishment
     };
 };
 
-export const parseCorporatePlanFile = (file: File): Promise<{ data: unknown }> => {
+export const parseCorporatePlanFile = (file: File): Promise<{ data: StructuredCorporatePlan }> => {
     return new Promise((resolve, reject) => {
+        // Validate file type
+        if (!file.name.toLowerCase().endsWith('.pdf')) {
+            reject(new Error('Only PDF files are supported for corporate plan upload.'));
+            return;
+        }
+
         const reader = new FileReader();
         reader.onload = (e) => {
             try {
@@ -446,20 +482,56 @@ export const parseCorporatePlanFile = (file: File): Promise<{ data: unknown }> =
                 // Use dynamic import for pdf-parse
                 import('pdf-parse').then((pdfParse: unknown) => {
                     (pdfParse as { default: (data: Uint8Array) => Promise<{ text: string }> }).default(data).then((pdfData) => {
-                        const text = pdfData.text;
+                        try {
+                            const text = pdfData.text;
 
-                        // Parse the extracted text to structure corporate plan data
-                        const corporatePlanData = parseCorporatePlanText(text);
+                            if (!text || text.trim().length === 0) {
+                                reject(new Error('The PDF file appears to be empty or contains no extractable text. Please ensure the file is not password-protected or corrupted.'));
+                                return;
+                            }
 
-                        resolve({ data: corporatePlanData });
-                    }).catch((err: unknown) => {
-                        reject(err);
+                            // Parse the extracted text to structure corporate plan data
+                            const corporatePlanData = parseCorporatePlanText(text);
+
+                            // Validate the structure
+                            if (!corporatePlanData || typeof corporatePlanData !== 'object') {
+                                reject(new Error('Failed to extract structured data from the PDF. The document may not contain standard corporate plan sections.'));
+                                return;
+                            }
+
+                            // Ensure required fields exist
+                            const structuredData = corporatePlanData as StructuredCorporatePlan;
+                            if (!structuredData.strategic_goals) {
+                                structuredData.strategic_goals = {
+                                    vision: 'Vision not found in document',
+                                    mission: 'Mission not found in document',
+                                    objectives: ['Objectives not clearly identified in document']
+                                };
+                            }
+
+                            resolve({ data: structuredData });
+                        } catch (parseError) {
+                            console.error('PDF parsing error:', parseError);
+                            reject(new Error('Failed to parse the PDF content. The document may be corrupted or in an unsupported format.'));
+                        }
+                    }).catch((pdfError: unknown) => {
+                        console.error('PDF extraction error:', pdfError);
+                        reject(new Error('Failed to extract text from PDF. Please ensure the file is a valid PDF document.'));
                     });
-                }).catch((err: unknown) => {
-                    reject(err);
+                }).catch((importError: unknown) => {
+                    console.error('PDF library import error:', importError);
+                    reject(new Error('PDF processing library failed to load. Please refresh the page and try again.'));
                 });
-            } catch (err) { reject(err); }
+            } catch (err) {
+                console.error('File reading error:', err);
+                reject(new Error('Failed to read the uploaded file. Please try uploading again.'));
+            }
         };
+
+        reader.onerror = () => {
+            reject(new Error('Failed to read the file. Please check your file and try again.'));
+        };
+
         reader.readAsArrayBuffer(file);
     });
 };
