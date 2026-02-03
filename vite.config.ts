@@ -4,8 +4,8 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig(({ mode }) => {
     // This loads your variables from Render's environment
-    const env = loadEnv(mode, '.', ''); 
-    
+    const env = loadEnv(mode, '.', '');
+
     return {
       server: {
         port: 3000,
@@ -25,6 +25,9 @@ export default defineConfig(({ mode }) => {
         alias: {
           '@': path.resolve(__dirname, '.'),
         }
+      },
+      optimizeDeps: {
+        include: ['pdf-parse']
       }
     };
 });
