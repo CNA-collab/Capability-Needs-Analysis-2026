@@ -50,8 +50,8 @@ export const ImportModal: React.FC<ImportModalProps> = ({ onImport, onClose }) =
 
     const processCorporatePlanFile = async (file: File) => {
         // Check file size limit
-        if (file.size > 10 * 1024 * 1024) {
-            setError("Corporate Plan file too large (Limit: 10MB). Please use a smaller file.");
+        if (file.size > 20 * 1024 * 1024) {
+            setError("Corporate Plan file too large (Limit: 20MB). Please use a smaller file.");
             setCorporatePlanFile(null);
             return;
         }
