@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import { UrgencyLevel, GradingGroup, PerformanceRatingLevel, CapabilityRating, GapTag, TrainingRecord, OfficerRecord, EligibleOfficer } from '../types';
 import { Sidebar } from './Sidebar';
 import { SurveyInsights } from './SurveyInsights';
@@ -14,30 +15,16 @@ import { WelcomeModal } from './WelcomeModal';
 import { ImportModal } from './ImportModal';
 import {
     ChartBarSquareIcon,
-    UsersIcon,
-    AcademicCapIcon,
     SparklesIcon,
     DocumentChartBarIcon,
     PresentationChartLineIcon,
     UserCircleIcon,
     BuildingOfficeIcon,
-    ChevronDownIcon,
-    IdentificationIcon,
-    ArrowRightIcon,
     ChartPieIcon,
-    CheckCircleIcon,
-    ExclamationTriangleIcon,
-    TableCellsIcon,
-    ArrowDownTrayIcon,
-    InformationCircleIcon,
-    CalendarDaysIcon,
     TerminalIcon,
     ChatBubbleLeftRightIcon,
     XMarkIcon,
-    Bars3Icon,
-    MagnifyingGlassIcon,
-    Cog6ToothIcon
-} from './icons';
+    Bars3Icon} from './icons';
 
 // Terminal Component for 10% Formal Training logs
 const TrainingTerminal: React.FC<{
@@ -94,7 +81,7 @@ const TrainingTerminal: React.FC<{
 const CoachingPanel: React.FC<{
     isMinimized: boolean;
     onToggle: () => void;
-    mentoringMatches: any[];
+    mentoringMatches: unknown[];
 }> = ({ isMinimized, onToggle, mentoringMatches }) => {
     if (isMinimized) {
         return (
@@ -159,11 +146,12 @@ interface WorkbenchProps {
 }
 
 export const Workbench: React.FC<WorkbenchProps> = ({ onLogout }) => {
-    const { state, setCurrentView } = useAppContext();
+    const { state } = useAppContext();
     const [showReportingSuite, setShowReportingSuite] = useState(false);
     const [showWelcome, setShowWelcome] = useState(true);
     const [showImportModal, setShowImportModal] = useState(false);
-    const [selectedItem, setSelectedItem] = useState<string | null>(null);
+    // eslint-disable-next-line no-empty-pattern
+    const [] = useState<string | null>(null);
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const [terminalVisible, setTerminalVisible] = useState(false);
     const [coachingMinimized, setCoachingMinimized] = useState(true);

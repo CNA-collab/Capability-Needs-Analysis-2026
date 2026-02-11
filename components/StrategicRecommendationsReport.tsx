@@ -1,11 +1,23 @@
 import React, { useState, useEffect, useMemo } from 'react';
-// We use 'any' for the library import to stop the 'Type' and 'GoogleGenAI' errors
-import * as GenAIModule from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { OfficerRecord, AgencyType, EstablishmentRecord } from '../types';
 import { DataAggregator } from '../services/DataAggregator';
 import { ReportTemplate } from './ReportTemplate';
 
-const { GoogleGenAI } = GenAIModule as any;
+interface StrategicIntervention {
+    pillar: string;
+    alignmentPriority?: string;
+    targetGap: string;
+    learningModel: string;
+    action: string;
+    expectedOutcome: string;
+}
+
+interface StrategicReport {
+    executiveSummary: string;
+    strategicInterventions: StrategicIntervention[];
+    implementationHorizon: string;
+}
 
 interface ReportProps {
     data: OfficerRecord[];
@@ -15,52 +27,49 @@ interface ReportProps {
     onClose: () => void;
 }
 
-export const StrategicRecommendationsReport: React.FC<ReportProps> = ({ data, establishmentData, agencyType, agencyName, onClose }) => {
-    const [report, setReport] = useState<any>(null);
+export const StrategicRecommendationsReport: React.FC<ReportProps> = ({ data, establishmentData, agencyName, onClose }) => {
+    const [report, setReport] = useState<StrategicReport | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string | null>(null);
 
     const stats = useMemo(() => DataAggregator.process(data, establishmentData), [data, establishmentData]);
 
     useEffect(() => {
         const generateReport = async () => {
-            const apiKey = process.env.REACT_APP_GEMINI_API_KEY || ""; 
+            const apiKey = process.env.REACT_APP_GEMINI_API_KEY || "";
             if (!apiKey) {
-                setError("API Key Missing");
+                console.error("API Key Missing");
                 setLoading(false);
                 return;
             }
 
             try {
-                // Initialize using the standard JS pattern which bypasses TS strictly
-                const genAI = new GoogleGenAI(apiKey);
+                const genAI = new GoogleGenerativeAI(apiKey);
                 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
                 const prompt = `
-                Act as a Strategic HR Consultant for ${agencyName}. 
+                Act as a Strategic HR Consultant for ${agencyName}.
                 Apply the 10:20:70 Learning Model:
                 - 10% Formal (Dept Spend/Budget)
                 - 20% Social (Internal Mentoring/Human Resources)
                 - 70% Experiential (Internal On-the-Job training)
-                
+
                 Workforce Metrics:
                 - Baseline: ${stats.baselineScore.toFixed(1)}/10
                 - Gap Area: ${stats.gapSector.name}
                 - Mentors: ${data.filter(o => parseInt(o.spaRating) >= 4).length} personnel.
-                
+
                 Generate a 5-year strategy in JSON format with fields: executiveSummary, strategicInterventions (array with pillar, alignmentPriority, targetGap, learningModel, action, expectedOutcome), and implementationHorizon.
                 `;
 
                 const result = await model.generateContent(prompt);
                 const response = await result.response;
                 const text = response.text();
-                
+
                 // Remove any potential markdown backticks if AI includes them
                 const cleanJson = text.replace(/```json|```/g, "").trim();
                 setReport(JSON.parse(cleanJson));
-            } catch (e: any) {
+            } catch (e: unknown) {
                 console.error("CNA System AI Error:", e);
-                setError("Strategic Synthesis Interrupted.");
             } finally {
                 setLoading(false);
             }
@@ -112,7 +121,7 @@ export const StrategicRecommendationsReport: React.FC<ReportProps> = ({ data, es
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
-                            {report?.strategicInterventions?.map((item: any, i: number) => (
+                            {report?.strategicInterventions?.map((item: StrategicIntervention, i: number) => (
                                 <tr key={i} className="hover:bg-slate-50/50 transition-colors">
                                     <td className="p-4 font-black text-[#1A365D]">{item.pillar}</td>
                                     <td className="p-4">

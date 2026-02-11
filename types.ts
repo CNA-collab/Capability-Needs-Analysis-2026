@@ -694,6 +694,7 @@ export interface AiJobGroupTrainingNeedsReport {
         }>;
     }>;
     summary: AiReportSummary;
+    successionPlan: SuccessionCandidate[];
 }
 
 export interface KraPlanningRecord {
@@ -705,4 +706,25 @@ export interface KraPlanningRecord {
     location: string;
     year: number;
     remarks: string;
+}
+
+export interface AiBudgetForecastByYearReport {
+    executiveSummary: string;
+    budgetForecasts: Array<{
+        year: number;
+        totalBudget: string;
+        trainingBudget: string;
+        developmentBudget: string;
+        fundingSources: Array<{
+            source: string;
+            amount: string;
+            allocation: string;
+        }>;
+        projectedCosts: Array<{
+            category: string;
+            amount: string;
+            justification: string;
+        }>;
+    }>;
+    budgetSummary: string;
 }

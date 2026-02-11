@@ -34,7 +34,7 @@ export const VisualDashboardSummary: React.FC<ReportProps> = ({ data, onClose })
         const calculateAvgGap = (officers: OfficerRecord[]): number => {
             const allRatings = officers.flatMap(o => o.capabilityRatings);
             if (allRatings.length === 0) return 0;
-            const totalGap = allRatings.reduce((sum, r) => sum + r.averageGapScore, 0);
+            const totalGap = allRatings.reduce((sum, r) => sum + r.gapScore, 0);
             return totalGap / allRatings.length;
         };
 

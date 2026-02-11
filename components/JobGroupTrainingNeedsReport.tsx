@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { GoogleGenAI, Type } from "@google/genai";
-import { OfficerRecord, AiJobGroupTrainingNeedsReport, AgencyType, AiReportSummary, JobGroup, QUESTION_TEXT_MAPPING, SuccessionCandidate } from '../types';
+import { OfficerRecord, AiJobGroupTrainingNeedsReport, AgencyType, AiReportSummary, JobGroup, QUESTION_TEXT_MAPPING } from '../types';
 import { AI_JOB_GROUP_TRAINING_NEEDS_PROMPT_INSTRUCTIONS } from '../constants';
 import { XIcon, SparklesIcon, ChartBarSquareIcon } from './icons';
 import { ExportMenu } from './ExportMenu';

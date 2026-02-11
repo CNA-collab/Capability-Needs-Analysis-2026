@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { OfficerRecord } from '../types';
+import { formatKina } from '../utils/currency';
 import {
     BuildingOfficeIcon,
     ChartBarSquareIcon,
@@ -25,20 +26,16 @@ export const ExpenditureReview: React.FC<ExpenditureReviewProps> = ({ officers, 
 
     // Force immediate rendering - no loading states
     const expenditureData = useMemo(() => {
-        // Calculate expenditure projections based on workforce data
+        // Hardcoded values as per requirements
         const totalWorkforce = officers.length;
-        const averageSalary = 45000; // Base salary assumption
-        const trainingBudgetPerPerson = 2500; // Annual training budget per person
-        const developmentBudgetPerPerson = 1500; // Development budget per person
-
-        const totalSalaryExpenditure = totalWorkforce * averageSalary;
-        const totalTrainingExpenditure = totalWorkforce * trainingBudgetPerPerson;
-        const totalDevelopmentExpenditure = totalWorkforce * developmentBudgetPerPerson;
-        const totalExpenditure = totalSalaryExpenditure + totalTrainingExpenditure + totalDevelopmentExpenditure;
+        const totalSalaryExpenditure = 135000; // Base Salaries: K135,000
+        const totalTrainingExpenditure = 7500; // Training Programs: K7,500
+        const totalDevelopmentExpenditure = 4500; // Development Initiatives: K4,500
+        const totalExpenditure = 183000; // Annual Expenditure: K183,000
 
         // Gap-based adjustments
         const capabilityGapMultiplier = baselineData.kpis.establishmentGap / 100;
-        const adjustedTrainingBudget = totalTrainingExpenditure * (1 + capabilityGapMultiplier);
+        const adjustedTrainingBudget = 8850; // Training Budget (Gap Adjusted): K8,850
 
         return {
             totalWorkforce,
@@ -49,9 +46,12 @@ export const ExpenditureReview: React.FC<ExpenditureReviewProps> = ({ officers, 
             adjustedTrainingBudget,
             capabilityGapMultiplier,
             categories: [
-                { name: 'Base Salaries', amount: totalSalaryExpenditure, percentage: 85 },
-                { name: 'Training Programs', amount: totalTrainingExpenditure, percentage: 10 },
-                { name: 'Development Initiatives', amount: totalDevelopmentExpenditure, percentage: 5 }
+                { name: 'Base Salaries', amount: totalSalaryExpenditure, percentage: 74, fundingSource: 'Internal' },
+                { name: 'Training Programs', amount: totalTrainingExpenditure, percentage: 4, fundingSource: 'Internal' },
+                { name: 'Development Initiatives', amount: totalDevelopmentExpenditure, percentage: 2, fundingSource: 'Internal' },
+                { name: 'Leadership', amount: 25000, percentage: 14, fundingSource: 'Government' },
+                { name: 'Technical', amount: 8000, percentage: 4, fundingSource: 'Donor' },
+                { name: 'Compliance', amount: 3000, percentage: 2, fundingSource: 'Internal' }
             ]
         };
     }, [officers, baselineData]);
@@ -97,12 +97,12 @@ export const ExpenditureReview: React.FC<ExpenditureReviewProps> = ({ officers, 
                     </div>
                     <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 text-center">
                         <p className="text-xs font-black text-slate-500 uppercase mb-2">Annual Expenditure</p>
-                        <p className="text-3xl font-black text-blue-600">${expenditureData.totalExpenditure.toLocaleString()}</p>
+                        <p className="text-3xl font-black text-blue-600">{formatKina(expenditureData.totalExpenditure)}</p>
                         <p className="text-xs text-slate-400 mt-1">Total Budget</p>
                     </div>
                     <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 text-center">
                         <p className="text-xs font-black text-slate-500 uppercase mb-2">Training Budget</p>
-                        <p className="text-3xl font-black text-emerald-600">${expenditureData.adjustedTrainingBudget.toLocaleString()}</p>
+                        <p className="text-3xl font-black text-emerald-600">{formatKina(expenditureData.adjustedTrainingBudget)}</p>
                         <p className="text-xs text-slate-400 mt-1">Gap-Adjusted</p>
                     </div>
                     <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 text-center">
@@ -125,14 +125,18 @@ export const ExpenditureReview: React.FC<ExpenditureReviewProps> = ({ officers, 
                                                 {category.name.includes('Salaries') && <BuildingOfficeIcon className="w-6 h-6 text-slate-600" />}
                                                 {category.name.includes('Training') && <DocumentIcon className="w-6 h-6 text-slate-600" />}
                                                 {category.name.includes('Development') && <AcademicCapIcon className="w-6 h-6 text-slate-600" />}
+                                                {category.name.includes('Leadership') && <BuildingOfficeIcon className="w-6 h-6 text-slate-600" />}
+                                                {category.name.includes('Technical') && <DocumentIcon className="w-6 h-6 text-slate-600" />}
+                                                {category.name.includes('Compliance') && <AcademicCapIcon className="w-6 h-6 text-slate-600" />}
                                             </div>
                                             <div>
                                                 <p className="font-black text-slate-900">{category.name}</p>
                                                 <p className="text-sm text-slate-500">{category.percentage}% of total budget</p>
+                                                <p className="text-sm text-slate-500">Funding: {category.fundingSource}</p>
                                             </div>
                                         </div>
                                         <div className="text-right">
-                                            <p className="text-2xl font-black text-slate-900">${category.amount.toLocaleString()}</p>
+                                            <p className="text-2xl font-black text-slate-900">{formatKina(category.amount)}</p>
                                             <div className="w-32 bg-slate-200 rounded-full h-2 mt-2">
                                                 <div
                                                     className="bg-blue-600 h-2 rounded-full"
@@ -154,7 +158,7 @@ export const ExpenditureReview: React.FC<ExpenditureReviewProps> = ({ officers, 
                             <div className="space-y-3">
                                 <div className="p-3 bg-slate-800/50 rounded-xl">
                                     <p className="text-sm text-slate-300">
-                                        <strong className="text-white">Capability Gap Response:</strong> Allocate additional ${(expenditureData.adjustedTrainingBudget - expenditureData.totalTrainingExpenditure).toLocaleString()} for training programs to address identified skill gaps.
+                                        <strong className="text-white">Capability Gap Response:</strong> Allocate additional {formatKina(expenditureData.adjustedTrainingBudget - expenditureData.totalTrainingExpenditure)} for training programs to address identified skill gaps.
                                     </p>
                                 </div>
                                 <div className="p-3 bg-slate-800/50 rounded-xl">
@@ -173,12 +177,12 @@ export const ExpenditureReview: React.FC<ExpenditureReviewProps> = ({ officers, 
                             <div className="p-4 bg-blue-50 rounded-xl">
                                 <p className="text-xs font-black text-blue-600 uppercase">Primary Expenditure</p>
                                 <p className="text-lg font-black text-blue-900">Base Salaries</p>
-                                <p className="text-sm text-blue-700">85% of total budget</p>
+                                <p className="text-sm text-blue-700">74% of total budget</p>
                             </div>
                             <div className="p-4 bg-emerald-50 rounded-xl">
                                 <p className="text-xs font-black text-emerald-600 uppercase">Growth Investment</p>
                                 <p className="text-lg font-black text-emerald-900">Training & Development</p>
-                                <p className="text-sm text-emerald-700">15% of total budget</p>
+                                <p className="text-sm text-emerald-700">26% of total budget</p>
                             </div>
                             <div className="p-4 bg-amber-50 rounded-xl">
                                 <p className="text-xs font-black text-amber-600 uppercase">Gap Response</p>

@@ -195,7 +195,7 @@ export const DevelopmentPathwaysReport: React.FC<ReportProps> = ({ data, agencyN
                 <div className="mt-24 pt-12 border-t-2 border-slate-100 text-center page-break-avoid">
                     <h3 className="text-[10px] font-black text-[#1A365D] uppercase tracking-[0.5em] mb-6">Official Strategic Directive</h3>
                     <div className="report-justified-text text-[10.5pt] italic text-slate-500 font-serif leading-relaxed max-w-2xl mx-auto text-center">
-                        &ldquo;The development pathways identified for this cohort represent the mandatory leadership pipeline for {agencyName}. This strategic intervention is designed to mitigate transition risks and professionalize service delivery across the national network through 2029.&rdquo;
+                        "The development pathways identified for this cohort represent the mandatory leadership pipeline for {agencyName}. This strategic intervention is designed to mitigate transition risks and professionalize service delivery across the national network through 2029."
                     </div>
                 </div>
             </div>

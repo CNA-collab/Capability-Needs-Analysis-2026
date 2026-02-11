@@ -204,7 +204,7 @@ export const ImportModal: React.FC<ImportModalProps> = ({ onImport, onClose }) =
                                         <input type="file" accept=".xlsx,.csv" onChange={(e) => handleFileChange(e, setCnaFile)} className="hidden" id="cna-file-upload" />
                                         <label htmlFor="cna-file-upload" className="cursor-pointer flex flex-col items-center">
                                             <DocumentArrowUpIcon className="w-10 h-10 text-slate-300 mb-2" />
-                                            <span className="text-sm font-bold text-slate-500">{cnaFile ? cnaFile.name : "Attach CNA Registry (XLSX/CSV)"}</span>
+<span className="text-sm font-bold text-slate-500">{cnaFile ? cnaFile.name : 'Attach CNA Registry (XLSX/CSV)'}</span>
                                         </label>
                                     </div>
                                 )}

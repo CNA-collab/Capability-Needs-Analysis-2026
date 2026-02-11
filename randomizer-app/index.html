@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Randomizer Karakter</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Randomizer Karakter dan Simbol</h1>
+        <form id="randomizer-form">
+            <div class="input-group">
+                <label for="uppercase">Input huruf besar:</label>
+                <input type="text" id="uppercase" placeholder="Contoh: ABCDEFGHIJKLMNOPQRSTUVWXYZ">
+            </div>
+            <div class="input-group">
+                <label for="lowercase">Input huruf kecil:</label>
+                <input type="text" id="lowercase" placeholder="Contoh: abcdefghijklmnopqrstuvwxyz">
+            </div>
+            <div class="input-group">
+                <label for="numbers">Input angka:</label>
+                <input type="text" id="numbers" placeholder="Contoh: 0123456789">
+            </div>
+            <div class="input-group">
+                <label for="symbols">Input simbol:</label>
+                <input type="text" id="symbols" placeholder="Contoh: !@#$%^&*()_+-=[]{}|;:,.<>?">
+            </div>
+            <div class="input-group">
+                <label for="length">Panjang karakter:</label>
+                <input type="number" id="length" value="10" min="1">
+            </div>
+            <div class="input-group">
+                <label for="count">Jumlah output:</label>
+                <input type="number" id="count" value="10" min="1">
+            </div>
+            <button type="submit">Generate</button>
+        </form>
+        <div id="output">
+            <button id="copy-all">Salin Semua</button>
+            <div id="results"></div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
