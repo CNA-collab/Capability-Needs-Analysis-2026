@@ -181,7 +181,7 @@ export const CapabilityGapAnalysisReport: React.FC<ReportProps> = ({ data, agenc
     const [report, setReport] = useState<GapAnalysisReport | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const [spaChartData, setSPACHartData] = useState<any>(null);
+    const [spaChartData] = useState<any>(null);
 
     // Task progress tracking
     const [taskProgress, setTaskProgress] = useState<{

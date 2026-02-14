@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { SuccessionCandidate, OfficerRecord, EstablishmentRecord } from '../types';
 import { XIcon, UsersIcon, ArrowPathIcon, CheckCircleIcon } from './icons';
@@ -26,6 +25,9 @@ const GapIcon: React.FC<{ type: string }> = ({ type }) => {
     );
     if (type.includes('SKILL')) return (
         <span title="Skill Gap: Needs Workshop/Mentoring" className="w-5 h-5 rounded-md bg-[#2AAA52] text-white flex items-center justify-center text-[10px] font-black shrink-0">S</span>
+    );
+    if (type.includes('LEADERSHIP')) return (
+        <span title="Leadership Gap" className="w-5 h-5 rounded-md bg-purple-500 text-white flex items-center justify-center text-[10px] font-black shrink-0">L</span>
     );
     return null;
 };
@@ -299,9 +301,7 @@ export const SuccessionPlanningTable: React.FC<SuccessionPlanningTableProps> = (
                                         <div className="flex items-start gap-2 flex-wrap">
                                             {data.developmentNeeds.includes('[QUAL') && <GapIcon type="QUAL" />}
                                             {data.developmentNeeds.includes('[SKILL') && <GapIcon type="SKILL" />}
-                                            {data.developmentNeeds.includes('[LEADERSHIP') && (
-                                                <span title="Leadership Gap" className="w-5 h-5 rounded-md bg-purple-500 text-white flex items-center justify-center text-[10px] font-black shrink-0">L</span>
-                                            )}
+                                            {data.developmentNeeds.includes('[LEADERSHIP') && <GapIcon type="LEADERSHIP" />}
                                             <span>{data.developmentNeeds}</span>
                                         </div>
                                     </td>
@@ -460,3 +460,4 @@ export const SuccessionPlanningTool: React.FC<{
             )}
         </div>
     );
+}

@@ -1,6 +1,7 @@
 # Capability Gap Analysis Report - SPA Rating Implementation
 
 ## Task
+
 Activate the Capability Gap Analysis Report to compare 'Most attained SPA Ratings' against the department's required baseline with a bar chart showing the delta and training recommendations.
 
 ## Implementation Steps
@@ -13,6 +14,7 @@ Activate the Capability Gap Analysis Report to compare 'Most attained SPA Rating
 - [ ] 6. Test the implementation
 
 ## Technical Details
+
 - SPA Rating Scale: 1-5
 - Required Baseline: Rating 3 ("At Required Level") or higher
 - Chart Type: Bar chart showing distribution vs baseline
