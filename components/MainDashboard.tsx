@@ -7,6 +7,7 @@ import { SurveyInsights } from './SurveyInsights';
 import { ExpenditureReview } from './ExpenditureReview';
 import { CnaPolicyToolkit } from './CnaPolicyToolkit';
 import { GesiPolicyToolkit } from './GesiPolicyToolkit';
+import { SystemSettings } from './SystemSettings';
 
 import { useAppContext } from './AppContext';
 
@@ -594,6 +595,33 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ onLogout }) => {
 
             case 'gesi':
                 return <GesiPolicyToolkit onShowGesiAnalysis={() => {}} />;
+
+            case 'settings':
+                return <SystemSettings />;
+
+            case 'pathways':
+                return (
+                    <div className="p-8">
+                        <div className="mb-6">
+                            <h2 className="text-2xl font-black text-slate-900 uppercase mb-2">Development Pathways</h2>
+                            <p className="text-slate-600">Access career development pathways and training progression</p>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <button onClick={() => setCurrentView('all-components')} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:border-blue-500 transition-colors text-left">
+                                <h3 className="text-lg font-black text-slate-900 uppercase mb-2">Training Pathways Report</h3>
+                                <p className="text-sm text-slate-600">View training pathway development</p>
+                            </button>
+                            <button onClick={() => setCurrentView('all-components')} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:border-blue-500 transition-colors text-left">
+                                <h3 className="text-lg font-black text-slate-900 uppercase mb-2">Development Pathways Report</h3>
+                                <p className="text-sm text-slate-600">Career development pathways</p>
+                            </button>
+                            <button onClick={() => setCurrentView('all-components')} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:border-blue-500 transition-colors text-left">
+                                <h3 className="text-lg font-black text-slate-900 uppercase mb-2">Competency Projection Report</h3>
+                                <p className="text-sm text-slate-600">Future competency forecasting</p>
+                            </button>
+                        </div>
+                    </div>
+                );
 
             case 'all-components':
                 return (

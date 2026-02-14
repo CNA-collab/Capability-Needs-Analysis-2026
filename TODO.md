@@ -1,33 +1,23 @@
-## Status
+# Testing Setup - CNAS Project
 
-- [x] Plan approved by user
-- [x] Implementation started
-- [x] All 5 report components created
-- [x] TypeScript interfaces added
-- [x] Export functionality implemented for all reports
+## Status: IN PROGRESS
 
-## Summary
+### Step 1: Set up Vitest Testing Framework
 
-Successfully created 5 new AI-powered analytics reports:
+- [x] Analyze existing code and plan testing approach
+- [ ] Install Vitest and related packages
+- [ ] Add test script to package.json
+- [ ] Create vitest.config.ts
 
-1. ✅ TrainingPlanByDivisionReport.tsx - Division-based training plans
-2. ✅ BudgetForecastByYearReport.tsx - Budget projections by year  
-3. ✅ HighRiskRolesWithoutTrainingReport.tsx - High-risk roles identification
-4. ✅ SuccessionPipelineListReport.tsx - Succession candidate pipelines
-5. ✅ PriorityTrainingRegisterReport.tsx - Priority training needs register
+### Step 2: Write Unit Tests
 
-All reports follow the established pattern with:
+- [ ] utils/trainingScheduler.ts - Convert to proper Vitest tests
+- [ ] utils/helpers.ts - Write tests for getGradingGroup
+- [ ] utils/currency.ts - Write tests for formatKina
+- [ ] utils/dataCleaning.ts - Write tests for cleanLearningDevelopmentTable
+- [ ] utils/chartUtils.ts - Write tests for transformSheetDataForCharts
 
-- AI schema definitions for structured output
-- Gemini API integration for content generation
-- Export functionality (PDF, XLSX, DOCX)
-- Consistent UI/UX with existing reports
-- Error handling and loading states
-- Dark mode support
+### Step 3: Run Tests
 
-## Next Steps
-
-- Test each report with sample data
-- Verify AI prompts generate appropriate content
-- Ensure export functionality works correctly
-- Integrate reports into dashboard if needed
+- [ ] Execute tests and verify they pass
+- [ ] Fix any failing tests

@@ -1,7 +1,8 @@
 export type TaskPriority = 'High' | 'Medium' | 'Low';
 
 export interface TrainingItem {
-    priority: TaskPriority;
+    priority?: TaskPriority;
+    trainingArea: string;
     [key: string]: unknown; // Allow additional properties
 }
 
@@ -57,8 +58,8 @@ export function scheduleTraining(trainingItems: TrainingItem[]): ScheduledTraini
 /**
  * Get the planned years for a given priority level
  */
-export function getPlannedYearsForPriority(priority: TaskPriority): number[] {
-    switch (priority) {
+export function getPlannedYearsForPriority(priority: string): number[] {
+    switch (priority as TaskPriority) {
         case 'High':
             return [2023, 2024];
         case 'Medium':
