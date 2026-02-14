@@ -89,8 +89,34 @@ export const TrainingEligibilitySummaryReport: React.FC<ReportProps> = ({ data, 
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [filter, setFilter] = useState('');
+    const [employmentSummary, setEmploymentSummary] = useState<{
+        permanentCount: number;
+        permanentPercentage: number;
+        actingCount: number;
+        actingPercentage: number;
+        otherCount: number;
+        otherPercentage: number;
+    } | null>(null);
 
     const yearHeaders = [2025, 2026, 2027, 2028, 2029];
+
+    useEffect(() => {
+        if (data && data.length > 0) {
+            const permanentCount = data.filter(o => o.employmentStatus?.toLowerCase().includes('permanent')).length;
+            const actingCount = data.filter(o => o.employmentStatus?.toLowerCase().includes('acting') || o.employmentStatus?.toLowerCase().includes('short-term')).length;
+            const otherCount = data.length - permanentCount - actingCount;
+            const totalCount = data.length;
+
+            setEmploymentSummary({
+                permanentCount,
+                permanentPercentage: totalCount > 0 ? (permanentCount / totalCount) * 100 : 0,
+                actingCount,
+                actingPercentage: totalCount > 0 ? (actingCount / totalCount) * 100 : 0,
+                otherCount,
+                otherPercentage: totalCount > 0 ? (otherCount / totalCount) * 100 : 0,
+            });
+        }
+    }, [data]);
     
     const promptContext = useMemo(() => {
         if (agencyName && agencyType !== 'All Agencies') {
@@ -189,7 +215,7 @@ export const TrainingEligibilitySummaryReport: React.FC<ReportProps> = ({ data, 
         }
     };
     
-    const renderContent = () => {
+const renderContent = () => {
         if (loading) {
             return (
                 <div className="flex flex-col items-center justify-center h-full text-center p-8 min-h-[400px]">
@@ -214,6 +240,22 @@ export const TrainingEligibilitySummaryReport: React.FC<ReportProps> = ({ data, 
             return (
                 <div className="space-y-6">
                     <ReportSection title="Executive Summary"><p>{report.executiveSummary}</p></ReportSection>
+                    {employmentSummary && (
+                        <ReportSection title="Employment Status Summary">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4">
+                                    <h3 className="text-lg font-semibold text-blue-800 dark:text-blue-200 mb-2">Permanent Employment</h3>
+                                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-300">{employmentSummary.permanentPercentage.toFixed(1)}%</p>
+                                    <p className="text-gray-600 dark:text-gray-400">Eligible for 10% Formal Spend</p>
+                                </div>
+                                <div className="bg-orange-50 dark:bg-orange-900/30 rounded-lg p-4">
+                                    <h3 className="text-lg font-semibold text-orange-800 dark:text-orange-200 mb-2">Acting/Short-Term</h3>
+                                    <p className="text-2xl font-bold text-orange-600 dark:text-orange-300">{employmentSummary.actingPercentage.toFixed(1)}%</p>
+                                    <p className="text-gray-600 dark:text-gray-400">20/70 Coaching & Mentoring Only</p>
+                                </div>
+                            </div>
+                        </ReportSection>
+                    )}
                     <div className="bg-white dark:bg-gray-800/50 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
                         <div className="flex justify-between items-center mb-4">
                             <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">{`Eligible Officers (${filteredOfficers.length})`}</h2>

@@ -1,11 +1,91 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { GoogleGenAI, Type } from "@google/genai";
 import { OfficerRecord, AgencyType, SuccessionCandidate } from '../types';
 import { AI_GAP_ANALYSIS_REPORT_PROMPT_INSTRUCTIONS } from '../constants';
 import { ReportTemplate } from './ReportTemplate';
 import { SuccessionPlanningTable } from './SuccessionPlanningTable';
 import { exportToPdf, exportToDocx, exportToXlsx, ReportData } from '../utils/export';
+import { ChartComponent } from './charts';
+
+// SPA Ratings baseline configuration
+const SPA_BASELINE = {
+  rating1: 10,  // Rating 1: 10% target
+  rating2: 20,  // Rating 2: 20% target
+  rating3: 30,  // Rating 3: 30% target
+  rating4: 25,  // Rating 4: 25% target
+  rating5: 15   // Rating 5: 15% target
+};
+
+// Training recommendations by rating bracket
+const TRAINING_RECOMMENDATIONS = {
+  rating1: 'Formal Training - Overseas (10%)',
+  rating2: 'In-House Coaching / On-the-Job (70%)',
+  rating3: 'Peer Mentorship (20%)',
+  rating4: 'Task Diversification',
+  rating5: 'Communities of Practice'
+};
+
+// Calculate SPA Ratings delta
+const calculateSPADelta = (currentRatings: Record<string, number>) => {
+  const delta: Record<string, number> = {};
+  Object.keys(SPA_BASELINE).forEach(rating => {
+    const current = currentRatings[rating] || 0;
+    delta[rating] = current - SPA_BASELINE[rating];
+  });
+  return delta;
+};
+
+// Generate training recommendations
+const generateTrainingRecommendations = (delta: Record<string, number>) => {
+  const recommendations: Array<{
+    rating: string;
+    current: number;
+    target: number;
+    delta: number;
+    recommendation: string;
+  }> = [];
+
+  Object.keys(delta).forEach(rating => {
+    const current = SPA_BASELINE[rating] + delta[rating];
+    const target = SPA_BASELINE[rating];
+    const recommendation = delta[rating] < 0 ? TRAINING_RECOMMENDATIONS[rating] : 'Maintain Current Level';
+
+    recommendations.push({
+      rating,
+      current,
+      target,
+      delta: delta[rating],
+      recommendation
+    });
+  });
+
+  return recommendations;
+};
+
+// SPA Ratings bar chart data
+const createSPABarChartData = (delta: Record<string, number>) => {
+  const labels = Object.keys(delta);
+  const positiveData = labels.map(rating => Math.max(0, delta[rating]));
+  const negativeData = labels.map(rating => Math.min(0, delta[rating]));
+
+  return {
+    labels,
+    datasets: [
+      {
+        label: 'Above Target',
+        data: positiveData,
+        backgroundColor: '#10b981',
+        stack: 'Stack 0'
+      },
+      {
+        label: 'Below Target',
+        data: negativeData,
+        backgroundColor: '#ef4444',
+        stack: 'Stack 0'
+      }
+    ]
+  };
+};
 
 interface GapAnalysisReport {
     executiveSummary: string;
@@ -17,6 +97,18 @@ interface GapAnalysisReport {
         actionableIntervention: string;
     }>;
     successionPlan: SuccessionCandidate[];
+    spaRatings: {
+        currentRatings: Record<string, number>;
+        baselineRatings: Record<string, number>;
+        deltaRatings: Record<string, number>;
+        trainingRecommendations: Array<{
+            rating: string;
+            current: number;
+            target: number;
+            delta: number;
+            recommendation: string;
+        }>;
+    };
 }
 
 interface ReportProps {
@@ -57,64 +149,55 @@ const aiGapAnalysisReportSchema = {
                 },
                 required: ["roleOrPosition", "potentialSuccessors", "readinessLevel", "developmentNeeds", "estimatedTimeline"]
             }
+        },
+        spaRatings: {
+            type: Type.OBJECT,
+            properties: {
+                currentRatings: { type: Type.OBJECT },
+                baselineRatings: { type: Type.OBJECT },
+                deltaRatings: { type: Type.OBJECT },
+                trainingRecommendations: {
+                    type: Type.ARRAY,
+                    items: {
+                        type: Type.OBJECT,
+                        properties: {
+                            rating: { type: Type.STRING },
+                            current: { type: Type.NUMBER },
+                            target: { type: Type.NUMBER },
+                            delta: { type: Type.NUMBER },
+                            recommendation: { type: Type.STRING }
+                        },
+                        required: ["rating", "current", "target", "delta", "recommendation"]
+                    }
+                }
+            },
+            required: ["currentRatings", "baselineRatings", "deltaRatings", "trainingRecommendations"]
         }
     },
-    required: ["executiveSummary", "prioritizedGaps", "successionPlan"]
+    required: ["executiveSummary", "prioritizedGaps", "successionPlan", "spaRatings"]
 };
 
 export const CapabilityGapAnalysisReport: React.FC<ReportProps> = ({ data, agencyName, onClose }) => {
     const [report, setReport] = useState<GapAnalysisReport | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const [spaChartData, setSPACHartData] = useState<any>(null);
 
-    useEffect(() => {
-        const generateReport = async () => {
-            if (!process.env.GEMINI_API_KEY) {
-                setError("System Configuration Error: Missing AI Gateway.");
-                setLoading(false);
-                return;
-            }
-
-            try {
-                const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-                const prompt = `
-                Generate a high-fidelity Gap Analysis Report for ${agencyName}.
-                
-                **LOGIC ENGINE PARAMETERS:**
-                1. Differentiate between SKILL GAPS (functional/training) and QUALIFICATION GAPS (formal/academic).
-                2. Explicitly label the 'type' field in the JSON response as either '[SKILL GAP]' or '[QUALIFICATION GAP]'.
-                3. Cross-reference low scores (1-6) from Sections A-G for Skills.
-                4. Identify Qualification gaps for officers in Grade 14+ lacking Degrees.
-                
-                DATA: ${JSON.stringify(data.map(o => ({ 
-                    name: o.name, 
-                    grade: o.grade, 
-                    qual: o.jobQualification, 
-                    ratings: o.capabilityRatings 
-                })))}
-                `;
-                
-                const response = await ai.models.generateContent({
-                    model: 'gemini-3-flash-preview',
-                    contents: prompt,
-                    config: {
-                        systemInstruction: AI_GAP_ANALYSIS_REPORT_PROMPT_INSTRUCTIONS,
-                        responseMimeType: "application/json",
-                        responseSchema: aiGapAnalysisReportSchema,
-                    },
-                });
-
-                setReport(JSON.parse(response.text.trim()));
-            } catch (e) {
-                console.error("Gap Analysis Error:", e);
-                setError("AI Data Triangulation Failed.");
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        generateReport();
-    }, [data]);
+    // Task progress tracking
+    const [taskProgress, setTaskProgress] = useState<{
+        completed: string[];
+        total: string[];
+    }>({
+        completed: [],
+        total: [
+            'Initialize component state',
+            'Generate AI report',
+            'Process SPA Ratings data',
+            'Render report sections',
+            'Handle export functionality',
+            'Display error states'
+        ]
+    });
 
     const handleExport = (format: 'pdf' | 'docx' | 'xlsx') => {
         if (!report) return;
@@ -129,6 +212,17 @@ export const CapabilityGapAnalysisReport: React.FC<ReportProps> = ({ data, agenc
                         headers: ['Capability Area', 'Gap Classification', 'Impact', 'Strategic Context', 'Recommended Intervention'],
                         rows: report.prioritizedGaps.map((g) => [
                             g.gapName, g.type, g.impact, g.context, g.actionableIntervention
+                        ])
+                    }],
+                    orientation: 'landscape'
+                },
+                {
+                    title: "SPA Ratings Analysis",
+                    content: [{
+                        type: 'table',
+                        headers: ['Rating', 'Current %', 'Target %', 'Delta %', 'Training Recommendation'],
+                        rows: report.spaRatings.trainingRecommendations.map((r: any) => [
+                            r.rating, r.current, r.target, r.delta, r.recommendation
                         ])
                     }],
                     orientation: 'landscape'
@@ -154,11 +248,11 @@ export const CapabilityGapAnalysisReport: React.FC<ReportProps> = ({ data, agenc
 
     if (error) {
         return (
-            <ReportTemplate 
-                title="Capability Gap Analysis" 
-                subtitle={agencyName} 
-                onClose={onClose} 
-                onExport={handleExport} 
+            <ReportTemplate
+                title="Capability Gap Analysis"
+                subtitle={agencyName}
+                onClose={onClose}
+                onExport={handleExport}
                 loading={false}
             >
                 <div className="flex items-center justify-center py-32">
@@ -177,11 +271,11 @@ export const CapabilityGapAnalysisReport: React.FC<ReportProps> = ({ data, agenc
     }
 
     return (
-        <ReportTemplate 
-            title="Capability Gap Analysis" 
-            subtitle={agencyName} 
-            onClose={onClose} 
-            onExport={handleExport} 
+        <ReportTemplate
+            title="Capability Gap Analysis"
+            subtitle={agencyName}
+            onClose={onClose}
+            onExport={handleExport}
             loading={loading}
         >
             <div className="space-y-12">
@@ -216,8 +310,8 @@ export const CapabilityGapAnalysisReport: React.FC<ReportProps> = ({ data, agenc
                                         </td>
                                         <td className="p-5">
                                             <span className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest border ${
-                                                gap.type.includes('QUALIFICATION') 
-                                                ? 'bg-blue-50 text-blue-700 border-blue-200' 
+                                                gap.type.includes('QUALIFICATION')
+                                                ? 'bg-blue-50 text-blue-700 border-blue-200'
                                                 : 'bg-emerald-50 text-emerald-700 border-emerald-200'
                                             }`}>
                                                 {gap.type}
@@ -233,6 +327,68 @@ export const CapabilityGapAnalysisReport: React.FC<ReportProps> = ({ data, agenc
                                 ))}
                             </tbody>
                         </table>
+                    </div>
+                </section>
+
+                <section>
+                    <h3 className="text-xs font-black text-[#1A365D] uppercase tracking-[0.2em] mb-6 flex items-center gap-3">
+                        <div className="w-1 h-6 bg-[#2AAA52] rounded-full"></div>
+                        SPA Ratings Analysis
+                    </h3>
+                    <div className="overflow-x-auto border border-slate-100 rounded-[20px] shadow-xl bg-white">
+                        <table className="w-full text-left text-[11px] border-collapse">
+                            <thead className="bg-[#1A365D] text-white">
+                                <tr>
+                                    <th className="p-5 font-black uppercase tracking-widest">Rating</th>
+                                    <th className="p-5 font-black uppercase tracking-widest">Current %</th>
+                                    <th className="p-5 font-black uppercase tracking-widest">Target %</th>
+                                    <th className="p-5 font-black uppercase tracking-widest">Delta %</th>
+                                    <th className="p-5 font-black uppercase tracking-widest">Training Recommendation</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                                {report?.spaRatings.trainingRecommendations.map((rec: any, i: number) => (
+                                    <tr key={i} className="hover:bg-slate-50 transition-colors group">
+                                        <td className="p-5 font-black text-[#1A365D] text-[12px]">{rec.rating}</td>
+                                        <td className="p-5">{rec.current}%</td>
+                                        <td className="p-5">{rec.target}%</td>
+                                        <td className={`p-5 ${rec.delta < 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
+                                            {rec.delta > 0 ? `+${rec.delta}%` : `${rec.delta}%`}
+                                        </td>
+                                        <td className="p-5 leading-relaxed font-semibold text-slate-600 italic whitespace-normal">
+                                            {rec.recommendation}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section>
+                    <h3 className="text-xs font-black text-[#1A365D] uppercase tracking-[0.2em] mb-6 flex items-center gap-3">
+                        <div className="w-1 h-6 bg-[#2AAA52] rounded-full"></div>
+                        SPA Ratings Delta Chart
+                    </h3>
+                    <div className="overflow-x-auto border border-slate-100 rounded-[20px] shadow-xl bg-white">
+                        {spaChartData && (
+                            <ChartComponent
+                                type="horizontalBar"
+                                data={spaChartData}
+                                options={{
+                                    plugins: {
+                                        legend: {
+                                            display: true,
+                                            position: 'top'
+                                        },
+                                        title: {
+                                            display: true,
+                                            text: 'SPA Ratings vs Target Baseline'
+                                        }
+                                    }
+                                }}
+                            />
+                        )}
                     </div>
                 </section>
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { OfficerRecord } from '../types';
 import { 
     UserCircleIcon, 
@@ -7,11 +7,13 @@ import {
     AcademicCapIcon
 } from './icons'; 
 import { UrgencyBadge, SPARatingBadge, GradingGroupBadge } from './Badges';
+import { OfficerDetailModal } from './OfficerDetailModal';
 
 interface StaffCardProps {
   officer: OfficerRecord;
   onViewSummary: (officer: OfficerRecord) => void;
   onSuggestTraining: (officer: OfficerRecord) => void;
+  onViewDetails?: (officer: OfficerRecord) => void;
   isLoadingSuggestions: boolean;
 }
 
@@ -19,16 +21,17 @@ export const StaffCard: React.FC<StaffCardProps> = ({
     officer, 
     onViewSummary, 
     onSuggestTraining, 
+    onViewDetails,
     isLoadingSuggestions 
 }) => {
-  const allRatings = officer.capabilityRatings || [];
+const allRatings = officer.capabilityRatings || [];
   const avgCapabilityScore = allRatings.length > 0
-    ? allRatings.reduce((sum, r) => sum + r.averageCurrentRating, 0) / allRatings.length
+    ? allRatings.reduce((sum, r) => sum + r.currentScore, 0) / allRatings.length
     : 0;
 
   const scoreCurrent = avgCapabilityScore;
   const isRetiringSoon = officer.age && officer.age >= 55;
-  
+
   /**
    * 10:20:70 Logic
    * Officers with a SPA Rating of 4 or 5 are qualified as Internal Mentors.
@@ -37,8 +40,17 @@ export const StaffCard: React.FC<StaffCardProps> = ({
    */
   const isMentorQualified = parseInt(officer.spaRating || '0') >= 4;
 
-  return (
-    <div className="bg-[#FFFFFF] rounded-[20px] shadow-[0_8px_20px_rgba(0,0,0,0.04)] border border-slate-100 p-10 flex flex-col transition-all hover:shadow-xl hover:translate-y-[-2px] relative overflow-hidden group">
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleCardClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+return (
+  <div className="bg-[#FFFFFF] rounded-[20px] shadow-[0_8px_20px_rgba(0,0,0,0.04)] border border-slate-100 p-10 flex flex-col transition-all hover:shadow-xl hover:translate-y-[-2px] relative overflow-hidden group" onClick={handleCardClick}>
         {/* Top Badges Layer */}
         <div className="absolute top-4 right-4 flex gap-2">
             {isMentorQualified && (
@@ -161,6 +173,18 @@ export const StaffCard: React.FC<StaffCardProps> = ({
                 </button>
             </div>
         </div>
-    </div>
+</div>
+  );
+
+  return (
+    <>
+      {isModalOpen && (
+        <OfficerDetailModal 
+          officer={officer} 
+          isOpen={isModalOpen} 
+          onClose={handleCloseModal}
+        />
+      )}
+    </>
   );
 };

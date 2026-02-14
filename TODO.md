@@ -1,23 +1,19 @@
-# Testing Setup - CNAS Project
+# Capability Gap Analysis Report - SPA Rating Implementation
 
-## Status: IN PROGRESS
+## Task
+Activate the Capability Gap Analysis Report to compare 'Most attained SPA Ratings' against the department's required baseline with a bar chart showing the delta and training recommendations.
 
-### Step 1: Set up Vitest Testing Framework
+## Implementation Steps
 
-- [x] Analyze existing code and plan testing approach
-- [ ] Install Vitest and related packages
-- [ ] Add test script to package.json
-- [ ] Create vitest.config.ts
+- [ ] 1. Add imports for ChartComponent and useRef to CapabilityGapAnalysisReport.tsx
+- [ ] 2. Add spaChartRef and computed data for SPA rating distribution
+- [ ] 3. Add new section for SPA Rating Gap Analysis with bar chart
+- [ ] 4. Calculate delta between current ratings and required baseline
+- [ ] 5. Add training recommendations for permanent staff below baseline
+- [ ] 6. Test the implementation
 
-### Step 2: Write Unit Tests
-
-- [ ] utils/trainingScheduler.ts - Convert to proper Vitest tests
-- [ ] utils/helpers.ts - Write tests for getGradingGroup
-- [ ] utils/currency.ts - Write tests for formatKina
-- [ ] utils/dataCleaning.ts - Write tests for cleanLearningDevelopmentTable
-- [ ] utils/chartUtils.ts - Write tests for transformSheetDataForCharts
-
-### Step 3: Run Tests
-
-- [ ] Execute tests and verify they pass
-- [ ] Fix any failing tests
+## Technical Details
+- SPA Rating Scale: 1-5
+- Required Baseline: Rating 3 ("At Required Level") or higher
+- Chart Type: Bar chart showing distribution vs baseline
+- Filter: Permanent staff only for training recommendations
