@@ -1,6 +1,6 @@
-const express = require('express');
-const { google } = require('googleapis');
-const cors = require('cors');
+import express from 'express';
+import { google } from 'googleapis';
+import cors from 'cors';
 
 const app = express();
 app.use(cors());
@@ -15,7 +15,7 @@ function transformSheetData(rows) {
 
   // Sanitize headers from row 0
   const headers = rows[0].map(h => String(h || '').trim());
-  
+
   return rows.slice(1)
     .filter(row => {
       // Gracefully handle empty rows: only include rows that have at least one non-empty cell
@@ -55,20 +55,20 @@ app.post('/api/fetch-google-sheets', async (req, res) => {
     });
 
     const sheets = google.sheets({ version: 'v4', auth });
-    
+
     // Fetch data from 'Sheet1' (Assumes standard Google Form output tab name)
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId,
-      range: 'Sheet1!A:Z', 
+      range: 'Sheet1!A:Z',
     });
 
     const data = transformSheetData(response.data.values);
-    
+
     res.json({ success: true, data });
 
   } catch (error) {
     console.error("Google Sheets API Proxy Error:", error);
-    
+
     const saEmail = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON || '{}').client_email || "[your-service-account-email]";
 
     if (error.code === 403 || error.message.toLowerCase().includes('permission')) {
@@ -85,9 +85,9 @@ app.post('/api/fetch-google-sheets', async (req, res) => {
       });
     }
 
-    res.status(500).json({ 
-      success: false, 
-      error: "Failed to retrieve data. Check permissions or Spreadsheet ID." 
+    res.status(500).json({
+      success: false,
+      error: "Failed to retrieve data. Check permissions or Spreadsheet ID."
     });
   }
 });
