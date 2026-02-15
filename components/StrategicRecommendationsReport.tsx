@@ -107,7 +107,7 @@ export const StrategicRecommendationsReport: React.FC<ReportProps> = ({ data, es
 
                 <section className="bg-[#1A365D] p-6 rounded-2xl text-white shadow-xl">
                     <h3 className="text-[7pt] font-black uppercase tracking-[0.3em] mb-2 text-emerald-400">Executive Strategic Intent</h3>
-                    <p className="text-[10pt] leading-relaxed font-light italic">"{report?.executiveSummary}"</p>
+                    <p className="text-[10pt] leading-relaxed font-light italic">&quot;{report?.executiveSummary}&quot;</p>
                 </section>
 
                 <div className="overflow-hidden border border-slate-200 rounded-2xl bg-white shadow-sm">
