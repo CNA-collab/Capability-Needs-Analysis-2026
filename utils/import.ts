@@ -474,6 +474,12 @@ export const parseCorporatePlanFile = (file: File): Promise<{ data: StructuredCo
             return;
         }
 
+        // Check file size limit
+        if (file.size > 20 * 1024 * 1024) {
+            reject(new Error('Corporate Plan file too large (Limit: 20MB). Please use a smaller file.'));
+            return;
+        }
+
         const reader = new FileReader();
         reader.onload = (e) => {
             try {
@@ -507,6 +513,12 @@ export const parseCorporatePlanFile = (file: File): Promise<{ data: StructuredCo
                                     mission: 'Mission not found in document',
                                     objectives: ['Objectives not clearly identified in document']
                                 };
+                            }
+
+                            // Additional validation for required fields
+                            if (!structuredData.strategic_goals.vision || !structuredData.strategic_goals.mission) {
+                                reject(new Error('The PDF does not contain essential corporate plan sections (Vision/Mission). Please ensure the document follows standard corporate plan format.'));
+                                return;
                             }
 
                             resolve({ data: structuredData });
