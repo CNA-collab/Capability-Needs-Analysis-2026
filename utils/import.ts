@@ -30,7 +30,7 @@ interface HtmlParser {
 
 // Configuration constants
 const FILE_SIZE_LIMIT = 20 * 1024 * 1024; // 20MB
-const SUPPORTED_FORMATS = ['.pdf', '.docx', '.txt', '.html'] as const;
+const SUPPORTED_FORMATS = ['.pdf', '.docx', '.txt', '.html', '.xlsx'] as const;
 
 // Header mappings
 const HEADER_MAPPING: Record<keyof Omit<OfficerRecord, 'capabilityRatings' | 'performanceRatingLevel' | 'misalignmentFlag' | 'gradingGroup' | 'gapTag' | 'gapTagReason'>, string[]> = {
@@ -667,6 +667,30 @@ const parseCorporatePlanFile = async (file: File): Promise<{ data: StructuredCor
               console.error('HTML library import error:', importError);
               reject(new FileParseError('HTML processing library failed to load. Please refresh the page and try again.', 'HTML'));
             });
+            break;
+
+          case '.xlsx':
+            try {
+              const workbook = XLSX.read(data, { type: 'array' });
+              let allText = '';
+              
+              // Read all sheets and concatenate their text content
+              workbook.SheetNames.forEach((sheetName) => {
+                const worksheet = workbook.Sheets[sheetName];
+                const sheetText = XLSX.utils.sheet_to_csv(worksheet);
+                allText += sheetText + '\n';
+              });
+              
+              if (!allText || allText.trim().length === 0) {
+                reject(new FileParseError('The Excel file appears to be empty or contains no extractable text.', 'XLSX'));
+                return;
+              }
+              const corporatePlanData = parseCorporatePlanText(allText);
+              resolve({ data: corporatePlanData });
+            } catch (parseError) {
+              console.error('XLSX parsing error:', parseError);
+              reject(new FileParseError('Failed to parse the Excel file. The document may be corrupted or in an unsupported format.', 'XLSX'));
+            }
             break;
 
           default:
