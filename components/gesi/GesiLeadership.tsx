@@ -1,6 +1,11 @@
 import React from 'react';
 
-const values = [
+interface LeadershipValue {
+    name: string;
+    description: string;
+}
+
+const values: LeadershipValue[] = [
     {
         name: "Honesty",
         description: "Being truthful and transparent in all dealings, especially when addressing GESI-related issues and reporting on progress."

@@ -27,7 +27,7 @@ export default defineConfig(({ mode }) => {
         }
       },
       optimizeDeps: {
-        include: ['pdf-parse']
+        include: ['pdf-parse', 'pdfjs-dist']
       }
     };
 });
