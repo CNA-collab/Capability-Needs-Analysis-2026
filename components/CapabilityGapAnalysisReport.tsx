@@ -181,7 +181,93 @@ export const CapabilityGapAnalysisReport: React.FC<ReportProps> = ({ data, agenc
     const [report, setReport] = useState<GapAnalysisReport | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const [spaChartData] = useState<any>(null);
+    const [spaChartData, setSpaChartData] = useState<any>(null);
+    const spaChartRef = useRef<any>(null);
+
+    // Process SPA ratings from officer data
+    const processedSPAData = useMemo(() => {
+        if (!data || data.length === 0) return null;
+
+        // Filter for permanent staff only
+        const permanentStaff = data.filter(officer => 
+            officer.employmentStatus?.toLowerCase().includes('permanent') ||
+            officer.employmentStatus?.toLowerCase().includes('confirmed')
+        );
+
+        // Count SPA ratings distribution
+        const ratingCounts: Record<string, number> = {
+            rating1: 0,
+            rating2: 0,
+            rating3: 0,
+            rating4: 0,
+            rating5: 0
+        };
+
+        let totalCounted = 0;
+        permanentStaff.forEach(officer => {
+            const spaRating = officer.spaRating;
+            if (spaRating) {
+                const ratingStr = String(spaRating).toLowerCase().trim();
+                if (ratingStr.includes('1') || ratingStr.includes('well below')) {
+                    ratingCounts.rating1++;
+                    totalCounted++;
+                } else if (ratingStr.includes('2') || ratingStr.includes('below')) {
+                    ratingCounts.rating2++;
+                    totalCounted++;
+                } else if (ratingStr.includes('3') || ratingStr.includes('at required')) {
+                    ratingCounts.rating3++;
+                    totalCounted++;
+                } else if (ratingStr.includes('4') || ratingStr.includes('above')) {
+                    ratingCounts.rating4++;
+                    totalCounted++;
+                } else if (ratingStr.includes('5') || ratingStr.includes('well above')) {
+                    ratingCounts.rating5++;
+                    totalCounted++;
+                }
+            }
+        });
+
+        // Calculate percentages
+        const currentRatings: Record<string, number> = {};
+        if (totalCounted > 0) {
+            Object.keys(ratingCounts).forEach(rating => {
+                currentRatings[rating] = Math.round((ratingCounts[rating] / totalCounted) * 100);
+            });
+        }
+
+        // Calculate delta
+        const delta = calculateSPADelta(currentRatings);
+
+        // Generate chart data
+        const chartData = createSPABarChartData(delta);
+
+        // Generate training recommendations for staff below baseline
+        const trainingRecs = generateTrainingRecommendations(delta);
+
+        // Find permanent staff below baseline (rating 1 or 2)
+        const staffBelowBaseline = permanentStaff.filter(officer => {
+            const spaRating = String(officer.spaRating || '').toLowerCase();
+            return spaRating.includes('1') || spaRating.includes('well below') ||
+                   spaRating.includes('2') || spaRating.includes('below');
+        });
+
+        return {
+            currentRatings,
+            delta,
+            chartData,
+            trainingRecs,
+            staffBelowBaseline,
+            totalPermanentStaff: permanentStaff.length,
+            staffWithSpaRating: totalCounted
+        };
+    }, [data]);
+
+    // Update chart data when processed data is available
+    useEffect(() => {
+        if (processedSPAData?.chartData) {
+            setSpaChartData(processedSPAData.chartData);
+        }
+    }, [processedSPAData]);
 
     // Task progress tracking
     const [taskProgress, setTaskProgress] = useState<{
@@ -371,7 +457,7 @@ export const CapabilityGapAnalysisReport: React.FC<ReportProps> = ({ data, agenc
                         SPA Ratings Delta Chart
                     </h3>
                     <div className="overflow-x-auto border border-slate-100 rounded-[20px] shadow-xl bg-white">
-                        {spaChartData && (
+                        {spaChartData ? (
                             <ChartComponent
                                 type="horizontalBar"
                                 data={spaChartData}
@@ -388,9 +474,77 @@ export const CapabilityGapAnalysisReport: React.FC<ReportProps> = ({ data, agenc
                                     }
                                 }}
                             />
+                        ) : (
+                            <div className="p-8 text-center text-slate-400">
+                                <p className="text-sm">No SPA rating data available</p>
+                            </div>
                         )}
                     </div>
                 </section>
+
+                {/* Training Recommendations for Staff Below Baseline */}
+                {processedSPAData && processedSPAData.staffBelowBaseline.length > 0 && (
+                    <section>
+                        <h3 className="text-xs font-black text-rose-600 uppercase tracking-[0.2em] mb-6 flex items-center gap-3">
+                            <div className="w-1 h-6 bg-rose-500 rounded-full"></div>
+                            Training Recommendations for Staff Below Baseline
+                        </h3>
+                        <div className="bg-rose-50 border border-rose-200 rounded-[20px] p-6 mb-6">
+                            <div className="flex items-center justify-between mb-4">
+                                <span className="text-sm font-semibold text-rose-800">
+                                    Staff Requiring Development (Rating 1-2)
+                                </span>
+                                <span className="bg-rose-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                                    {processedSPAData.staffBelowBaseline.length} Officers
+                                </span>
+                            </div>
+                            <p className="text-xs text-rose-700 mb-4">
+                                The following permanent staff members have SPA ratings below the required baseline (Rating 3 "At Required Level" or higher). 
+                                Targeted training interventions are recommended:
+                            </p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {processedSPAData.staffBelowBaseline.slice(0, 12).map((officer, idx) => (
+                                    <div key={idx} className="bg-white rounded-lg p-4 border border-rose-100 shadow-sm">
+                                        <p className="font-bold text-[#1A365D] text-sm">{officer.name || 'Unknown'}</p>
+                                        <p className="text-xs text-slate-500">{officer.position || officer.grade || 'N/A'}</p>
+                                        <div className="mt-2 flex items-center gap-2">
+                                            <span className="text-xs font-semibold text-rose-600 bg-rose-100 px-2 py-1 rounded">
+                                                {officer.spaRating || 'Not Rated'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            {processedSPAData.staffBelowBaseline.length > 12 && (
+                                <p className="text-xs text-rose-600 mt-4 text-center">
+                                    +{processedSPAData.staffBelowBaseline.length - 12} more officers require training interventions
+                                </p>
+                            )}
+                        </div>
+                        
+                        {/* Summary Statistics */}
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                            <div className="bg-white rounded-xl p-4 border border-slate-100 shadow-md">
+                                <p className="text-xs text-slate-400 font-semibold uppercase">Total Permanent Staff</p>
+                                <p className="text-2xl font-black text-[#1A365D]">{processedSPAData.totalPermanentStaff || 0}</p>
+                            </div>
+                            <div className="bg-white rounded-xl p-4 border border-slate-100 shadow-md">
+                                <p className="text-xs text-slate-400 font-semibold uppercase">Staff with SPA Rating</p>
+                                <p className="text-2xl font-black text-[#1A365D]">{processedSPAData.staffWithSpaRating || 0}</p>
+                            </div>
+                            <div className="bg-white rounded-xl p-4 border border-rose-100 shadow-md">
+                                <p className="text-xs text-rose-500 font-semibold uppercase">Below Baseline</p>
+                                <p className="text-2xl font-black text-rose-600">{processedSPAData.staffBelowBaseline.length || 0}</p>
+                            </div>
+                            <div className="bg-white rounded-xl p-4 border border-emerald-100 shadow-md">
+                                <p className="text-xs text-emerald-600 font-semibold uppercase">At/Above Baseline</p>
+                                <p className="text-2xl font-black text-emerald-600">
+                                    {(processedSPAData.staffWithSpaRating - processedSPAData.staffBelowBaseline.length) || 0}
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+                )}
 
                 <section>
                     <h3 className="text-xs font-black text-[#1A365D] uppercase tracking-[0.2em] mb-6 flex items-center gap-3">
