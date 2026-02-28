@@ -121,108 +121,151 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ onLogout }) => {
 
     const renderView = () => {
         switch (state.currentView) {
-            case 'dashboard':
+    case 'dashboard':
                 return (
                     <div className="p-8 space-y-8">
-                        {/* Organisational Overview */}
+                        {/* Organisational Overview - Professional KPI Cards */}
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                                <div className="flex items-center gap-3 mb-4">
-                                    <BuildingOfficeIcon className="w-8 h-8 text-blue-600" />
-                                    <div>
-                                        <p className="text-sm font-bold text-slate-500 uppercase">Total Workforce</p>
-                                        <p className="text-2xl font-black text-slate-900">{effectiveData.totalStaff}</p>
+                            {/* Total Workforce Card */}
+                            <div className="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden hover:shadow-card-hover transition-shadow duration-300">
+                                <div className="h-1.5 bg-gradient-to-r from-blue-500 to-blue-600"></div>
+                                <div className="p-6">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="p-3 bg-blue-50 rounded-xl">
+                                            <BuildingOfficeIcon className="w-6 h-6 text-blue-600" />
+                                        </div>
+                                        <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">+12%</span>
                                     </div>
+                                    <p className="text-3xl font-bold text-slate-900">{effectiveData.totalStaff}</p>
+                                    <p className="text-sm font-semibold text-slate-500 mt-1">Total Workforce</p>
+                                    <p className="text-xs text-slate-400 mt-2">Active positions in establishment</p>
                                 </div>
-                                <p className="text-xs text-slate-400">Active positions in establishment</p>
                             </div>
 
-                            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                                <div className="flex items-center gap-3 mb-4">
-                                    <UsersIcon className="w-8 h-8 text-emerald-600" />
-                                    <div>
-                                        <p className="text-sm font-bold text-slate-500 uppercase">Survey Responses</p>
-                                        <p className="text-2xl font-black text-slate-900">{effectiveData.activeSurveys}</p>
+                            {/* Survey Responses Card */}
+                            <div className="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden hover:shadow-card-hover transition-shadow duration-300">
+                                <div className="h-1.5 bg-gradient-to-r from-emerald-500 to-emerald-600"></div>
+                                <div className="p-6">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="p-3 bg-emerald-50 rounded-xl">
+                                            <UsersIcon className="w-6 h-6 text-emerald-600" />
+                                        </div>
+                                        <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">{effectiveData.completionRate}%</span>
                                     </div>
+                                    <p className="text-3xl font-bold text-slate-900">{effectiveData.activeSurveys}</p>
+                                    <p className="text-sm font-semibold text-slate-500 mt-1">Survey Responses</p>
+                                    <p className="text-xs text-slate-400 mt-2">Completion rate</p>
                                 </div>
-                                <p className="text-xs text-slate-400">{effectiveData.completionRate}% completion rate</p>
                             </div>
 
-                            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                                <div className="flex items-center gap-3 mb-4">
-                                    <SparklesIcon className="w-8 h-8 text-amber-600" />
-                                    <div>
-                                        <p className="text-sm font-bold text-slate-500 uppercase">Critical Gaps</p>
-                                        <p className="text-2xl font-black text-slate-900">{effectiveData.criticalGaps}</p>
+                            {/* Critical Gaps Card */}
+                            <div className="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden hover:shadow-card-hover transition-shadow duration-300">
+                                <div className="h-1.5 bg-gradient-to-r from-amber-500 to-amber-600"></div>
+                                <div className="p-6">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="p-3 bg-amber-50 rounded-xl">
+                                            <SparklesIcon className="w-6 h-6 text-amber-600" />
+                                        </div>
+                                        <span className="text-xs font-medium text-amber-600 bg-amber-50 px-2 py-1 rounded-full">Priority</span>
                                     </div>
+                                    <p className="text-3xl font-bold text-slate-900">{effectiveData.criticalGaps}</p>
+                                    <p className="text-sm font-semibold text-slate-500 mt-1">Critical Gaps</p>
+                                    <p className="text-xs text-slate-400 mt-2">High-priority capability needs</p>
                                 </div>
-                                <p className="text-xs text-slate-400">High-priority capability needs</p>
                             </div>
 
-                            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                                <div className="flex items-center gap-3 mb-4">
-                                    <AcademicCapIcon className="w-8 h-8 text-purple-600" />
-                                    <div>
-                                        <p className="text-sm font-bold text-slate-500 uppercase">Training Pipeline</p>
-                                        <p className="text-2xl font-black text-slate-900">{effectiveData.kpis.trainingCompletion}%</p>
+                            {/* Training Pipeline Card */}
+                            <div className="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden hover:shadow-card-hover transition-shadow duration-300">
+                                <div className="h-1.5 bg-gradient-to-r from-purple-500 to-purple-600"></div>
+                                <div className="p-6">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="p-3 bg-purple-50 rounded-xl">
+                                            <AcademicCapIcon className="w-6 h-6 text-purple-600" />
+                                        </div>
+                                        <span className="text-xs font-medium text-purple-600 bg-purple-50 px-2 py-1 rounded-full">In Progress</span>
                                     </div>
+                                    <p className="text-3xl font-bold text-slate-900">{effectiveData.kpis.trainingCompletion}%</p>
+                                    <p className="text-sm font-semibold text-slate-500 mt-1">Training Pipeline</p>
+                                    <p className="text-xs text-slate-400 mt-2">Current completion rate</p>
                                 </div>
-                                <p className="text-xs text-slate-400">Current training completion</p>
                             </div>
                         </div>
 
-                        {/* Quick Actions */}
+                        {/* Quick Actions - Professional Card Buttons */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <button
                                 onClick={() => setCurrentView('organizational')}
-                                className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6 rounded-2xl hover:from-blue-700 hover:to-blue-800 transition-all transform hover:scale-105"
+                                className="group relative overflow-hidden bg-white rounded-2xl shadow-card border border-slate-100 p-6 text-left hover:shadow-card-hover hover:border-blue-200 transition-all duration-300"
                             >
-                                <ChartBarSquareIcon className="w-8 h-8 mb-3" />
-                                <h3 className="text-lg font-black uppercase mb-2">Strategic Analysis</h3>
-                                <p className="text-sm opacity-90">View workforce analytics and KPIs</p>
+                                <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                <div className="relative">
+                                    <div className="p-3 bg-blue-100 rounded-xl inline-flex mb-4 group-hover:scale-110 transition-transform duration-300">
+                                        <ChartBarSquareIcon className="w-7 h-7 text-blue-600" />
+                                    </div>
+                                    <h3 className="text-base font-bold text-slate-900 mb-2">Strategic Analysis</h3>
+                                    <p className="text-sm text-slate-500">View workforce analytics and KPIs</p>
+                                </div>
                             </button>
 
                             <button
                                 onClick={() => setCurrentView('individual')}
-                                className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white p-6 rounded-2xl hover:from-emerald-700 hover:to-emerald-800 transition-all transform hover:scale-105"
+                                className="group relative overflow-hidden bg-white rounded-2xl shadow-card border border-slate-100 p-6 text-left hover:shadow-card-hover hover:border-emerald-200 transition-all duration-300"
                             >
-                                <UserCircleIcon className="w-8 h-8 mb-3" />
-                                <h3 className="text-lg font-black uppercase mb-2">Individual Operations</h3>
-                                <p className="text-sm opacity-90">Officer-specific analysis and plans</p>
+                                <div className="absolute inset-0 bg-gradient-to-br from-emerald-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                <div className="relative">
+                                    <div className="p-3 bg-emerald-100 rounded-xl inline-flex mb-4 group-hover:scale-110 transition-transform duration-300">
+                                        <UserCircleIcon className="w-7 h-7 text-emerald-600" />
+                                    </div>
+                                    <h3 className="text-base font-bold text-slate-900 mb-2">Individual Operations</h3>
+                                    <p className="text-sm text-slate-500">Officer-specific analysis and plans</p>
+                                </div>
                             </button>
 
                             <button
                                 onClick={() => setShowReportingSuite(true)}
-                                className="bg-gradient-to-r from-purple-600 to-purple-700 text-white p-6 rounded-2xl hover:from-purple-700 hover:to-purple-800 transition-all transform hover:scale-105"
+                                className="group relative overflow-hidden bg-white rounded-2xl shadow-card border border-slate-100 p-6 text-left hover:shadow-card-hover hover:border-purple-200 transition-all duration-300"
                             >
-                                <DocumentChartBarIcon className="w-8 h-8 mb-3" />
-                                <h3 className="text-lg font-black uppercase mb-2">Reporting Suite</h3>
-                                <p className="text-sm opacity-90">Generate comprehensive reports</p>
+                                <div className="absolute inset-0 bg-gradient-to-br from-purple-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                <div className="relative">
+                                    <div className="p-3 bg-purple-100 rounded-xl inline-flex mb-4 group-hover:scale-110 transition-transform duration-300">
+                                        <DocumentChartBarIcon className="w-7 h-7 text-purple-600" />
+                                    </div>
+                                    <h3 className="text-base font-bold text-slate-900 mb-2">Reporting Suite</h3>
+                                    <p className="text-sm text-slate-500">Generate comprehensive reports</p>
+                                </div>
                             </button>
                         </div>
 
-                        {/* Recent Activity */}
-                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                            <h3 className="text-lg font-black text-slate-900 uppercase mb-4">Recent Activity</h3>
-                            <div className="space-y-3">
-                                <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
-                                    <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                                    <div className="flex-1">
-                                        <p className="text-sm font-bold text-slate-900">CNA Survey Analysis Completed</p>
+                        {/* Recent Activity - Professional Section */}
+                        <div className="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden">
+                            <div className="px-6 py-4 border-b border-slate-100">
+                                <h3 className="text-base font-bold text-slate-900">Recent Activity</h3>
+                            </div>
+                            <div className="divide-y divide-slate-50">
+                                <div className="flex items-center gap-4 p-4 hover:bg-slate-50 transition-colors duration-200">
+                                    <div className="p-2 bg-emerald-100 rounded-lg">
+                                        <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-semibold text-slate-900">CNA Survey Analysis Completed</p>
                                         <p className="text-xs text-slate-500">{effectiveData.activeSurveys} responses processed • 2 hours ago</p>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
-                                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                                    <div className="flex-1">
-                                        <p className="text-sm font-bold text-slate-900">Establishment Data Imported</p>
+                                <div className="flex items-center gap-4 p-4 hover:bg-slate-50 transition-colors duration-200">
+                                    <div className="p-2 bg-blue-100 rounded-lg">
+                                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-semibold text-slate-900">Establishment Data Imported</p>
                                         <p className="text-xs text-slate-500">{effectiveData.totalStaff} positions synchronized • 1 day ago</p>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
-                                    <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
-                                    <div className="flex-1">
-                                        <p className="text-sm font-bold text-slate-900">{effectiveData.criticalGaps} Critical Gaps Identified</p>
+                                <div className="flex items-center gap-4 p-4 hover:bg-slate-50 transition-colors duration-200">
+                                    <div className="p-2 bg-amber-100 rounded-lg">
+                                        <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-semibold text-slate-900">{effectiveData.criticalGaps} Critical Gaps Identified</p>
                                         <p className="text-xs text-slate-500">Action plans generated • 3 days ago</p>
                                     </div>
                                 </div>

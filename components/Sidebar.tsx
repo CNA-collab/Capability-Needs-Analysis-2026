@@ -103,17 +103,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                 if (window.innerWidth < 768) onClose();
                             }}
                             className={`
-                                w-full flex items-center gap-4 px-3 py-3 rounded-xl transition-all duration-200 group
+                                w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group relative
                                 ${currentView === item.id
-                                    ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-900/20'
-                                    : 'text-slate-300 hover:bg-white/10 hover:text-white'}
+                                    ? 'bg-emerald-500/20 text-emerald-400 border-l-2 border-emerald-500'
+                                    : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'}
                             `}
                         >
-                            <item.icon className="w-5 h-5" />
+                            <item.icon className="w-5 h-5 flex-shrink-0" />
                             {!isCollapsed && (
-                                <span className="text-[10px] font-black uppercase tracking-tight">
+                                <span className="text-xs font-medium truncate">
                                     {item.label}
                                 </span>
+                            )}
+                            {currentView === item.id && (
+                                <div className="absolute right-2 w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
                             )}
                         </button>
                     ))}
