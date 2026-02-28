@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { GoogleGenAI, Type } from "@google/genai";
 import { OfficerRecord, AgencyType, SuccessionCandidate } from '../types';
 import { AI_GAP_ANALYSIS_REPORT_PROMPT_INSTRUCTIONS } from '../constants';
@@ -181,8 +181,7 @@ export const CapabilityGapAnalysisReport: React.FC<ReportProps> = ({ data, agenc
     const [report, setReport] = useState<GapAnalysisReport | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const [spaChartData, setSpaChartData] = useState<any>(null);
-    const spaChartRef = useRef<any>(null);
+    const [spaChartData, setSpaChartData] = useState<ReturnType<typeof createSPABarChartData> | null>(null);
 
     // Process SPA ratings from officer data
     const processedSPAData = useMemo(() => {
@@ -269,21 +268,40 @@ export const CapabilityGapAnalysisReport: React.FC<ReportProps> = ({ data, agenc
         }
     }, [processedSPAData]);
 
-    // Task progress tracking
-    const [taskProgress, setTaskProgress] = useState<{
-        completed: string[];
-        total: string[];
-    }>({
-        completed: [],
-        total: [
-            'Initialize component state',
-            'Generate AI report',
-            'Process SPA Ratings data',
-            'Render report sections',
-            'Handle export functionality',
-            'Display error states'
-        ]
-    });
+    useEffect(() => {
+        const generateReport = async () => {
+            if (!process.env.GEMINI_API_KEY) {
+                setError("API key not configured.");
+                setLoading(false);
+                return;
+            }
+            try {
+                const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+                const prompt = `Perform a Capability Gap Analysis for ${agencyName}. 
+                Data: ${JSON.stringify(data.slice(0, 20))}`;
+                
+                const response = await ai.models.generateContent({
+                    model: 'gemini-1.5-flash',
+                    contents: prompt,
+                    config: {
+                        systemInstruction: AI_GAP_ANALYSIS_REPORT_PROMPT_INSTRUCTIONS,
+                        responseMimeType: "application/json",
+                        responseSchema: aiGapAnalysisReportSchema,
+                    },
+                });
+
+                const result = JSON.parse(response.text.trim());
+                setReport(result);
+            } catch (e) {
+                console.error("AI Analysis Failed:", e);
+                setError("Failed to generate AI report.");
+            } finally {
+                setLoading(false);
+            }
+        };
+        generateReport();
+    }, [data, agencyName]);
+
 
     const handleExport = (format: 'pdf' | 'docx' | 'xlsx') => {
         if (!report) return;
@@ -307,7 +325,7 @@ export const CapabilityGapAnalysisReport: React.FC<ReportProps> = ({ data, agenc
                     content: [{
                         type: 'table',
                         headers: ['Rating', 'Current %', 'Target %', 'Delta %', 'Training Recommendation'],
-                        rows: report.spaRatings.trainingRecommendations.map((r: any) => [
+                        rows: report.spaRatings.trainingRecommendations.map((r) => [
                             r.rating, r.current, r.target, r.delta, r.recommendation
                         ])
                     }],
@@ -388,7 +406,7 @@ export const CapabilityGapAnalysisReport: React.FC<ReportProps> = ({ data, agenc
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
-                                {report?.prioritizedGaps.map((gap, i: number) => (
+                                {report?.prioritizedGaps.map((gap, i) => (
                                     <tr key={i} className="hover:bg-slate-50 transition-colors group">
                                         <td className="p-5">
                                             <p className="font-black text-[#1A365D] text-[12px] group-hover:text-blue-600 transition-colors">{gap.gapName}</p>
@@ -433,7 +451,7 @@ export const CapabilityGapAnalysisReport: React.FC<ReportProps> = ({ data, agenc
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
-                                {report?.spaRatings.trainingRecommendations.map((rec: any, i: number) => (
+                                {report?.spaRatings.trainingRecommendations.map((rec, i: number) => (
                                     <tr key={i} className="hover:bg-slate-50 transition-colors group">
                                         <td className="p-5 font-black text-[#1A365D] text-[12px]">{rec.rating}</td>
                                         <td className="p-5">{rec.current}%</td>
@@ -499,7 +517,7 @@ export const CapabilityGapAnalysisReport: React.FC<ReportProps> = ({ data, agenc
                                 </span>
                             </div>
                             <p className="text-xs text-rose-700 mb-4">
-                                The following permanent staff members have SPA ratings below the required baseline (Rating 3 "At Required Level" or higher). 
+                                The following permanent staff members have SPA ratings below the required baseline (Rating 3 "At Required Level" or higher).
                                 Targeted training interventions are recommended:
                             </p>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

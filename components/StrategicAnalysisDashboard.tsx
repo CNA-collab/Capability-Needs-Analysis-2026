@@ -1,11 +1,12 @@
 import React, { useMemo } from 'react';
-import { OfficerRecord, EstablishmentRecord } from '../types';
+import { OfficerRecord, EstablishmentRecord, StructuredCorporatePlan } from '../types';
 import { XIcon, ChartBarSquareIcon, SparklesIcon, UsersIcon, AcademicCapIcon } from './icons';
 import { ChartComponent } from './charts';
 
 interface DashboardProps {
     cnaData: OfficerRecord[];
     establishmentData: EstablishmentRecord[];
+    corporatePlanData?: StructuredCorporatePlan;
     agencyName: string;
     baselineData?: {
         kpis: {

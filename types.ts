@@ -120,6 +120,16 @@ export interface EstablishmentRecord {
     gen: string;
 }
 
+// Generalized types for Agency-wide use
+export interface EstablishmentMetrics {
+    divisionName: string;
+    totalPositions: number;
+    confirmed: number;
+    vacant: number;
+    eligibleForTraining: number;
+    cnaSubmitted: number;
+}
+
 export const QUESTION_TEXT_MAPPING: Record<string, string> = {
     'A1': "Rate out of 10 – The organisation has a documented strategic corporate plan linked to PNG Vision 2050 and other macro policies.",
     'A2': "Rate out of 10 – The organisation’s current corporate plan is clear and understood by me.",
@@ -382,20 +392,28 @@ export interface AnnualTrainingPlanItem {
     rationale: string;
 }
 
+export interface FiveYearPlanItem {
+    positionNumber: string;
+    grade: string;
+    designation: string;
+    occupant: string;
+    proposedCourse: string;
+    institution: string;
+    year2026: string;
+    year2027: string;
+    year2028: string;
+    year2029: string;
+    year2030: string;
+}
+
+export interface FiveYearPlanByDivision {
+    division: string;
+    positions: FiveYearPlanItem[];
+}
+
 export interface AiFiveYearPlan {
     executiveSummary: string;
-    trainingPlan: Array<{
-        division: string;
-        positionNumber: string;
-        grade: string;
-        designation: string;
-        occupant: string;
-        proposedCourse: string;
-        institution: string;
-        fundingSource: string;
-        trainingYear: number;
-        rationale: string;
-    }>;
+    trainingPlan: FiveYearPlanByDivision[];
     summary: AiReportSummary;
 }
 

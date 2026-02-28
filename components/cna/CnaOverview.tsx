@@ -13,6 +13,21 @@ const BenefitCard: React.FC<{ title: string; children: React.ReactNode; icon: Re
     </div>
 );
 
+const CoreTermCard: React.FC<{ number: string; title: string; description: string; detailedDescription: string }> = ({ number, title, description, detailedDescription }) => (
+    <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+        <div className="flex items-start gap-4">
+            <div className="flex-shrink-0 w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center">
+                <span className="font-black text-emerald-600 text-sm">{number}</span>
+            </div>
+            <div>
+                <h4 className="font-bold text-slate-900 text-sm mb-1">{title}</h4>
+                <p className="text-xs text-slate-500 mb-3 font-medium">{description}</p>
+                <p className="text-xs text-slate-600 leading-relaxed">{detailedDescription}</p>
+            </div>
+        </div>
+    </div>
+);
+
 export const CnaOverview: React.FC = () => {
     return (
         <div className="space-y-12 max-w-[1200px]">
@@ -30,6 +45,36 @@ export const CnaOverview: React.FC = () => {
                     <p className="text-sm text-slate-600 mt-4 leading-relaxed">
                         It serves as a critical diagnostic tool for effective Human Resource Development (HRD) and Learning & Development (L&D) planning. Instead of guessing what training is needed, a CNA provides evidence-based insights into specific skill and knowledge gaps at individual, team, and organizational levels.
                     </p>
+                </div>
+            </section>
+
+            {/* Section 2.1: Determining Core Terms in CNA */}
+            <section>
+                <h2 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6">Section 2.1: Determining Core Terms in CNA</h2>
+                <div className="bg-slate-50/50 border border-slate-100 p-8 rounded-[24px]">
+                    <p className="text-sm text-slate-600 leading-relaxed font-medium mb-6">
+                        To effectively implement Capability Needs Analysis (CNA), understanding its foundational terms is paramount. These core definitions establish a shared framework, guiding planning and execution:
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <CoreTermCard 
+                            number="i" 
+                            title="Capacity Building" 
+                            description="Strategies that enhance performance across levels to improve overall effectiveness"
+                            detailedDescription="This refers to the strategic enhancement of individual, team, and organizational performance. It focuses on equipping stakeholders at all levels with the tools, knowledge, and processes to improve overall effectiveness and meet evolving challenges head-on."
+                        />
+                        <CoreTermCard 
+                            number="ii" 
+                            title="Capability" 
+                            description="The ability to manage unexpected context effectively, ensuring adaptability"
+                            detailedDescription="Capability is the organization's and individual's ability to respond effectively to unforeseen or changing circumstances. It underscores adaptability and resilience, critical traits for navigating today's dynamic professional landscape."
+                        />
+                        <CoreTermCard 
+                            number="iii" 
+                            title="Competency" 
+                            description="Minimum skills required for job performance, forming the basis for training"
+                            detailedDescription="Competency represents the essential skills, knowledge, and behaviors required to perform specific job roles successfully. This concept forms the foundation for designing targeted training programs, ensuring that employees meet or exceed baseline performance standards."
+                        />
+                    </div>
                 </div>
             </section>
 

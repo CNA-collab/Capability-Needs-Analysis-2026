@@ -12,6 +12,21 @@ const Step: React.FC<{ number: number; title: string; children: React.ReactNode 
     </div>
 );
 
+const FocusAreaCard: React.FC<{ number: string; title: string; description: string; detailedDescription: string }> = ({ number, title, description, detailedDescription }) => (
+    <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+        <div className="flex items-start gap-4">
+            <div className="flex-shrink-0 w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
+                <span className="font-black text-blue-600 text-sm">{number}</span>
+            </div>
+            <div>
+                <h4 className="font-bold text-slate-900 text-sm mb-1">{title}</h4>
+                <p className="text-xs text-slate-500 mb-3 font-medium">{description}</p>
+                <p className="text-xs text-slate-600 leading-relaxed">{detailedDescription}</p>
+            </div>
+        </div>
+    </div>
+);
+
 export const CnaProcessGuide: React.FC = () => {
     return (
         <div className="max-w-[800px] mx-auto space-y-12">
@@ -19,6 +34,43 @@ export const CnaProcessGuide: React.FC = () => {
                  <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tighter">Standard Operating Procedure</h2>
                  <p className="text-sm text-slate-500 mt-1">Following the Department of Personnel Management guidelines.</p>
             </header>
+
+            {/* Section 2.2: Scope of the CNA Policy */}
+            <section className="bg-slate-50/50 border border-slate-100 p-8 rounded-[24px]">
+                <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Section 2.2: Scope of the CNA Policy</h3>
+                <p className="text-sm text-slate-600 leading-relaxed font-medium mb-6">
+                    The CNA policy is strategically designed to address key aspects of workforce planning and development within the National Public Service. It centers on fostering a culture of continuous learning and adaptive skill-building through four pivotal focus areas:
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FocusAreaCard 
+                        number="i" 
+                        title="Capability Needs Analysis (CNA)" 
+                        description="Systematic process of identifying gaps between current and desired capabilities"
+                        detailedDescription="This involves a systematic process of identifying gaps between current and desired capabilities, enabling data-driven decisions for workforce development."
+                    />
+                    <FocusAreaCard 
+                        number="ii" 
+                        title="Learning & Development Approach (Model) 70:20:10" 
+                        description="Proven framework for holistic skill development"
+                        detailedDescription="The policy embraces the 70:20:10 model, a proven framework emphasizing experiential learning (70%), social learning (20%), and formal education (10%) to ensure holistic skill development."
+                    />
+                    <FocusAreaCard 
+                        number="iii" 
+                        title="Learning & Development Plan" 
+                        description="Comprehensive roadmap for addressing capability gaps"
+                        detailedDescription="This serves as a comprehensive roadmap for addressing the identified capability gaps. It aligns workforce development initiatives with organizational goals, ensuring that training investments deliver measurable outcomes."
+                    />
+                    <FocusAreaCard 
+                        number="iv" 
+                        title="Administration of the L&D Approach" 
+                        description="Governance mechanisms for monitoring and evaluating L&D strategies"
+                        detailedDescription="Effective implementation of the learning and development approach requires robust governance. The policy outlines mechanisms for monitoring, evaluating, and refining L&D strategies to maximize their impact."
+                    />
+                </div>
+                <p className="text-xs text-slate-500 mt-6 leading-relaxed">
+                    By establishing these core definitions and scope, the CNA policy lays a solid foundation for workforce transformation, aligning individual growth with institutional excellence.
+                </p>
+            </section>
 
             <div className="space-y-4">
                 <Step number={1} title="Define Strategic Objectives">

@@ -1,5 +1,5 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { UrgencyLevel, GradingGroup, PerformanceRatingLevel, CapabilityRating, GapTag, TrainingRecord, OfficerRecord, EligibleOfficer } from '../types';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { OfficerRecord, EligibleOfficer, EstablishmentRecord, StructuredCorporatePlan, AgencyType } from '../types';
 import { Sidebar } from './Sidebar';
 import { ReportingSuiteModal } from './ReportingSuiteModal';
 import { StrategicAnalysisDashboard } from './StrategicAnalysisDashboard';
@@ -8,6 +8,7 @@ import { ExpenditureReview } from './ExpenditureReview';
 import { CnaPolicyToolkit } from './CnaPolicyToolkit';
 import { GesiPolicyToolkit } from './GesiPolicyToolkit';
 import { SystemSettings } from './SystemSettings';
+import { CapabilityGapAnalysisReport } from './CapabilityGapAnalysisReport';
 
 import { useAppContext } from './AppContext';
 
@@ -44,7 +45,50 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ onLogout }) => {
     const [showReportingSuite, setShowReportingSuite] = useState(false);
     const [showWelcome, setShowWelcome] = useState(true);
     const [showImportModal, setShowImportModal] = useState(false);
+    const [showCapabilityGapReport, setShowCapabilityGapReport] = useState(false);
     const [selectedItem, setSelectedItem] = useState<string | null>(null);
+
+    // Use actual imported data or fallback to demo data for display
+    const officers = state.officers.length > 0 ? state.officers : [];
+    const establishmentData = state.establishmentData.length > 0 ? state.establishmentData : [];
+    const corporatePlanData = state.corporatePlanData;
+    const aggregatedData = state.aggregatedData;
+
+    // Check if data has been imported
+    const hasImportedData = state.officers.length > 0 || state.establishmentData.length > 0;
+
+    // Compute effective data for display
+    const effectiveData = useMemo(() => {
+        if (hasImportedData) {
+            return {
+                agencyName: state.corporatePlanData?.strategic_goals?.vision?.substring(0, 30) || 'Imported Agency',
+                totalStaff: establishmentData.length,
+                activeSurveys: officers.length,
+                completionRate: establishmentData.length > 0 ? Math.round((officers.length / establishmentData.length) * 100) : 0,
+                criticalGaps: aggregatedData?.skillGapsCount || 0,
+                kpis: {
+                    establishmentGap: aggregatedData?.vacancyRate || 0,
+                    baselineScore: aggregatedData?.baselineScore || 0,
+                    criticalSkillGaps: aggregatedData?.skillGapsCount || 0,
+                    trainingCompletion: aggregatedData?.participationRate ? Math.round(aggregatedData.participationRate * 100) : 0
+                }
+            };
+        }
+        // Fallback demo data when no imported data
+        return {
+            agencyName: "Department of Personnel Management",
+            totalStaff: 245,
+            activeSurveys: 189,
+            completionRate: 77,
+            criticalGaps: 23,
+            kpis: {
+                establishmentGap: 18,
+                baselineScore: 6.5,
+                criticalSkillGaps: 12,
+                trainingCompletion: 10
+            }
+        };
+    }, [hasImportedData, state.corporatePlanData, establishmentData.length, officers.length, aggregatedData]);
 
     // Sync local state with context
     useEffect(() => {
@@ -53,175 +97,25 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ onLogout }) => {
         }
     }, [state.error]);
 
-    // Demo data for organisational overview
-    const demoData = useMemo(() => ({
-        agencyName: "Department of Personnel Management",
-        totalStaff: 245,
-        activeSurveys: 189,
-        completionRate: 77,
-        criticalGaps: 23,
-        kpis: {
-            establishmentGap: 18,
-            baselineScore: 6.5,
-            criticalSkillGaps: 12,
-            trainingCompletion: 10
-        }
-    }), []);
-
-    // Demo establishment data
-    const demoEstablishmentData = useMemo(() => [
-        {
-            positionNumber: 'NP-001',
-            division: 'Policy & Planning',
-            grade: 'Grade 12',
-            designation: 'Senior Planning Officer',
-            occupant: 'John Smith',
-            status: 'Confirmed',
-            gen: 'M'
-        },
-        {
-            positionNumber: 'NP-002',
-            division: 'M&E Division',
-            grade: 'Grade 11',
-            designation: 'Monitoring & Evaluation Specialist',
-            occupant: 'Mary Johnson',
-            status: 'Confirmed',
-            gen: 'F'
-        },
-        {
-            positionNumber: 'NP-003',
-            division: 'Program Implementation',
-            grade: 'Grade 10',
-            designation: 'Project Manager',
-            occupant: 'David Wilson',
-            status: 'Confirmed',
-            gen: 'M'
-        }
-    ], []);
-
-    // Demo corporate plan data
-    const demoCorporatePlanData = useMemo(() => ({
-        strategic_goals: {
-            vision: 'To be a leading public service organization in PNG',
-            mission: 'Deliver efficient and effective public services',
-            objectives: ['Improve service delivery', 'Enhance workforce capabilities', 'Strengthen governance'],
-            values: ['Integrity', 'Excellence', 'Innovation']
-        },
-        training_needs: 'Leadership development, technical skills enhancement, digital literacy',
-        financial_context: 'Budget allocation for training programs',
-        risk_assessment: 'Skills gaps in critical areas',
-        personnel_establishment: 'Current staffing levels adequate but skill gaps exist',
-        full_document_context: 'Strategic plan focuses on organizational development and capacity building'
-    }), []);
-
-    // Demo officers data (simplified for demo purposes)
-    const demoOfficers: OfficerRecord[] = useMemo(() => [
-        {
-            employmentStatus: 'Confirmed',
-            lifecycleStage: 'Peak Performer',
-            urgency: 'High' as UrgencyLevel,
-            jobQualification: 'Masters Degree',
-            technicalCapabilityGaps: ['Strategic Planning'],
-            yearsOfExperience: 15,
-            gradingGroup: 'Senior Management' as GradingGroup,
-            gender: 'Male',
-            spaRating: 'Outstanding',
-            age: 45,
-            email: 'john.smith@gov.na',
-            name: 'John Smith',
-            position: 'Senior Planning Officer',
-            positionNumber: 'NP-001',
-            dateOfBirth: '1979-05-15',
-            commencementDate: '2009-01-01',
-            division: 'Policy & Planning',
-            grade: 'Grade 12',
-            performanceRatingLevel: 'Well Above Required' as PerformanceRatingLevel,
-            capabilityRatings: [] as CapabilityRating[],
-            gapTag: '[ALIGNED]' as GapTag,
-            gapTagReason: 'Strong alignment with organizational goals',
-            trainingHistory: [] as TrainingRecord[],
-            trainingPreferences: ['Leadership Development', 'Strategic Planning'],
-            ictSkills: ['Advanced Excel', 'PowerPoint'],
-            leadershipCapabilityGaps: [],
-            // Additional properties for ReportingSuiteModal
-            occupant: 'John Smith',
-            designation: 'Senior Planning Officer',
-            status: 'Confirmed',
-            cnaSubmission: 'Yes',
-            trainingYear: [2024, 2025],
-            branch: 'Policy & Planning'
-        },
-        {
-            employmentStatus: 'Confirmed',
-            lifecycleStage: 'High Potential',
-            urgency: 'Medium' as UrgencyLevel,
-            jobQualification: 'Bachelors Degree',
-            technicalCapabilityGaps: ['Data Analytics'],
-            yearsOfExperience: 8,
-            gradingGroup: 'Professional' as GradingGroup,
-            gender: 'Female',
-            spaRating: 'Good',
-            age: 35,
-            email: 'mary.johnson@gov.na',
-            name: 'Mary Johnson',
-            position: 'Monitoring & Evaluation Specialist',
-            positionNumber: 'NP-002',
-            dateOfBirth: '1989-03-22',
-            commencementDate: '2016-07-01',
-            division: 'M&E Division',
-            grade: 'Grade 11',
-            performanceRatingLevel: 'Above Required' as PerformanceRatingLevel,
-            capabilityRatings: [] as CapabilityRating[],
-            gapTag: '[SKILL_GAP]' as GapTag,
-            gapTagReason: 'Needs development in data analytics',
-            trainingHistory: [] as TrainingRecord[],
-            trainingPreferences: ['Data Analytics', 'Monitoring & Evaluation'],
-            ictSkills: ['Excel', 'SPSS'],
-            leadershipCapabilityGaps: [],
-            // Additional properties for ReportingSuiteModal
-            occupant: 'Mary Johnson',
-            designation: 'Monitoring & Evaluation Specialist',
-            status: 'Confirmed',
-            cnaSubmission: 'Yes',
-            trainingYear: [2024],
-            branch: 'M&E Division'
-        },
-        {
-            employmentStatus: 'Confirmed',
-            lifecycleStage: 'Early Career',
-            urgency: 'High' as UrgencyLevel,
-            jobQualification: 'Bachelors Degree',
-            technicalCapabilityGaps: ['Project Management'],
-            yearsOfExperience: 3,
-            gradingGroup: 'Professional' as GradingGroup,
-            gender: 'Male',
-            spaRating: 'Developing',
-            age: 28,
-            email: 'david.wilson@gov.na',
-            name: 'David Wilson',
-            position: 'Project Manager',
-            positionNumber: 'NP-003',
-            dateOfBirth: '1996-11-08',
-            commencementDate: '2021-09-01',
-            division: 'Program Implementation',
-            grade: 'Grade 10',
-            performanceRatingLevel: 'Below Required Level' as PerformanceRatingLevel,
-            capabilityRatings: [] as CapabilityRating[],
-            gapTag: '[CRITICAL_GAP]' as GapTag,
-            gapTagReason: 'Critical gap in project management skills',
-            trainingHistory: [] as TrainingRecord[],
-            trainingPreferences: ['Project Management', 'Team Leadership'],
-            ictSkills: ['MS Project', 'Word'],
-            leadershipCapabilityGaps: ['Team Management'],
-            // Additional properties for ReportingSuiteModal
-            occupant: 'David Wilson',
-            designation: 'Project Manager',
-            status: 'Confirmed',
-            cnaSubmission: 'Yes',
-            trainingYear: [2024, 2025, 2026],
-            branch: 'Program Implementation'
-        }
-    ], []);
+    // Handle import completion
+    const handleImport = useCallback((
+        data: OfficerRecord[],
+        _agencyType: string,
+        agencyName: string,
+        establishmentRecords?: EstablishmentRecord[],
+        corporatePlan?: StructuredCorporatePlan
+    ) => {
+        console.log('Import completed:', { 
+            officersCount: data.length, 
+            agencyName, 
+            establishmentCount: establishmentRecords?.length,
+            hasCorporatePlan: !!corporatePlan 
+        });
+        
+        // Data is already dispatched to context in ImportModal.handleCompleteImport
+        // Just close the modal
+        setShowImportModal(false);
+    }, []);
 
 
 
@@ -237,7 +131,7 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ onLogout }) => {
                                     <BuildingOfficeIcon className="w-8 h-8 text-blue-600" />
                                     <div>
                                         <p className="text-sm font-bold text-slate-500 uppercase">Total Workforce</p>
-                                        <p className="text-2xl font-black text-slate-900">{demoData.totalStaff}</p>
+                                        <p className="text-2xl font-black text-slate-900">{effectiveData.totalStaff}</p>
                                     </div>
                                 </div>
                                 <p className="text-xs text-slate-400">Active positions in establishment</p>
@@ -248,10 +142,10 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ onLogout }) => {
                                     <UsersIcon className="w-8 h-8 text-emerald-600" />
                                     <div>
                                         <p className="text-sm font-bold text-slate-500 uppercase">Survey Responses</p>
-                                        <p className="text-2xl font-black text-slate-900">{demoData.activeSurveys}</p>
+                                        <p className="text-2xl font-black text-slate-900">{effectiveData.activeSurveys}</p>
                                     </div>
                                 </div>
-                                <p className="text-xs text-slate-400">{demoData.completionRate}% completion rate</p>
+                                <p className="text-xs text-slate-400">{effectiveData.completionRate}% completion rate</p>
                             </div>
 
                             <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
@@ -259,7 +153,7 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ onLogout }) => {
                                     <SparklesIcon className="w-8 h-8 text-amber-600" />
                                     <div>
                                         <p className="text-sm font-bold text-slate-500 uppercase">Critical Gaps</p>
-                                        <p className="text-2xl font-black text-slate-900">{demoData.criticalGaps}</p>
+                                        <p className="text-2xl font-black text-slate-900">{effectiveData.criticalGaps}</p>
                                     </div>
                                 </div>
                                 <p className="text-xs text-slate-400">High-priority capability needs</p>
@@ -270,7 +164,7 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ onLogout }) => {
                                     <AcademicCapIcon className="w-8 h-8 text-purple-600" />
                                     <div>
                                         <p className="text-sm font-bold text-slate-500 uppercase">Training Pipeline</p>
-                                        <p className="text-2xl font-black text-slate-900">{demoData.kpis.trainingCompletion}%</p>
+                                        <p className="text-2xl font-black text-slate-900">{effectiveData.kpis.trainingCompletion}%</p>
                                     </div>
                                 </div>
                                 <p className="text-xs text-slate-400">Current training completion</p>
@@ -315,20 +209,20 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ onLogout }) => {
                                     <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
                                     <div className="flex-1">
                                         <p className="text-sm font-bold text-slate-900">CNA Survey Analysis Completed</p>
-                                        <p className="text-xs text-slate-500">189 responses processed • 2 hours ago</p>
+                                        <p className="text-xs text-slate-500">{effectiveData.activeSurveys} responses processed • 2 hours ago</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
                                     <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                                     <div className="flex-1">
                                         <p className="text-sm font-bold text-slate-900">Establishment Data Imported</p>
-                                        <p className="text-xs text-slate-500">245 positions synchronized • 1 day ago</p>
+                                        <p className="text-xs text-slate-500">{effectiveData.totalStaff} positions synchronized • 1 day ago</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
                                     <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
                                     <div className="flex-1">
-                                        <p className="text-sm font-bold text-slate-900">23 Critical Gaps Identified</p>
+                                        <p className="text-sm font-bold text-slate-900">{effectiveData.criticalGaps} Critical Gaps Identified</p>
                                         <p className="text-xs text-slate-500">Action plans generated • 3 days ago</p>
                                     </div>
                                 </div>
@@ -340,9 +234,10 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ onLogout }) => {
             case 'organizational':
                 return (
                     <StrategicAnalysisDashboard
-                        agencyName={demoData.agencyName}
-                        cnaData={demoOfficers}
-                        establishmentData={[]}
+                        agencyName={effectiveData.agencyName}
+                        cnaData={officers}
+                        establishmentData={establishmentData}
+                        corporatePlanData={corporatePlanData || undefined}
                         onClose={() => setCurrentView('cna')}
                     />
                 );
@@ -360,11 +255,18 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ onLogout }) => {
                                     >
                                         ← Back to Individual Operations
                                     </button>
-                                    <IndividualTalentCardReport
-                                        officer={demoOfficers[0]}
-                                        establishmentData={demoEstablishmentData}
-                                        onClose={() => setSelectedItem(null)}
-                                    />
+                                    {officers.length > 0 ? (
+                                        <IndividualTalentCardReport
+                                            officer={officers[0]}
+                                            establishmentData={establishmentData}
+                                            onClose={() => setSelectedItem(null)}
+                                        />
+                                    ) : (
+                                        <div className="text-center py-20">
+                                            <h3 className="text-xl font-bold text-slate-900 mb-2">No Data Available</h3>
+                                            <p className="text-slate-600">Import data to view individual talent card reports.</p>
+                                        </div>
+                                    )}
                                 </div>
                             );
                         default:
@@ -551,7 +453,7 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ onLogout }) => {
                                             <h4 className="font-bold text-slate-900 text-sm">Competency Domain Report</h4>
                                             <p className="text-xs text-slate-600">Domain-specific competency analysis</p>
                                         </button>
-                                        <button className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+                                        <button onClick={() => setShowCapabilityGapReport(true)} className="w-full text-left p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
                                             <h4 className="font-bold text-slate-900 text-sm">Capability Gap Analysis Report</h4>
                                             <p className="text-xs text-slate-600">Identify and analyze capability gaps</p>
                                         </button>
@@ -569,23 +471,23 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ onLogout }) => {
             case 'survey-insights':
                 return (
                     <SurveyInsights
-                        officers={demoOfficers}
+                        officers={officers}
+                        establishmentData={establishmentData}
+                        corporatePlanData={corporatePlanData || undefined}
                         baselineData={{
-                            agencyName: demoData.agencyName,
-                            kpis: demoData.kpis
+                            agencyName: effectiveData.agencyName,
+                            kpis: effectiveData.kpis
                         }}
-                        corporatePlanData={demoCorporatePlanData}
-                        establishmentData={demoEstablishmentData}
                     />
                 );
 
             case 'expenditure-review':
                 return (
                     <ExpenditureReview
-                        officers={demoOfficers}
+                        officers={officers}
                         baselineData={{
-                            agencyName: demoData.agencyName,
-                            kpis: demoData.kpis
+                            agencyName: effectiveData.agencyName,
+                            kpis: effectiveData.kpis
                         }}
                     />
                 );
@@ -979,7 +881,7 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ onLogout }) => {
                 <header className="bg-white border-b border-slate-200 px-8 py-4 flex justify-between items-center fixed top-0 left-0 md:left-64 right-0 z-20">
                     <div>
                         <h1 className="text-xl font-black text-slate-900 uppercase">
-                            {demoData.agencyName}
+                            {effectiveData.agencyName}
                         </h1>
                         <p className="text-xs text-slate-500 uppercase tracking-widest">
                             Capability Needs Analysis System
@@ -1011,8 +913,10 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ onLogout }) => {
             {/* Modals */}
             {showReportingSuite && (
                 <ReportingSuiteModal
-                    division={demoData.agencyName}
-                    officers={(demoOfficers as unknown) as EligibleOfficer[]}
+                    division={effectiveData.agencyName}
+                    officers={(officers as unknown) as EligibleOfficer[]}
+                    establishmentData={establishmentData}
+                    corporatePlanData={corporatePlanData || undefined}
                     yearHeaders={[2024, 2025, 2026, 2027, 2028]}
                     onClose={() => setShowReportingSuite(false)}
                 />
@@ -1027,11 +931,16 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ onLogout }) => {
 
             {showImportModal && (
                 <ImportModal
-                    onImport={(data, agencyType, agencyName, establishmentData, corporatePlanContext) => {
-                        console.log('Import completed:', { data, agencyType, agencyName, establishmentData, corporatePlanContext });
-                        setShowImportModal(false);
-                    }}
+                    onImport={handleImport}
                     onClose={() => setShowImportModal(false)}
+                />
+            )}
+
+            {showCapabilityGapReport && (
+                <CapabilityGapAnalysisReport
+                    data={officers}
+                    agencyName={effectiveData.agencyName}
+                    onClose={() => setShowCapabilityGapReport(false)}
                 />
             )}
         </div>

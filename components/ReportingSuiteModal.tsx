@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { EligibleOfficer } from '../types';
+import { EligibleOfficer, EstablishmentRecord, StructuredCorporatePlan } from '../types';
 import { XIcon, DocumentChartBarIcon, UsersIcon, ClipboardDocumentListIcon, PresentationChartLineIcon } from './icons';
 import { ExportMenu } from './ExportMenu';
 
@@ -11,6 +11,8 @@ type ReportType = 'full' | 'eligible' | 'cna' | 'yearly' | 'none';
 interface ReportProps {
     division: string;
     officers: EligibleOfficer[];
+    establishmentData?: EstablishmentRecord[];
+    corporatePlanData?: StructuredCorporatePlan;
     yearHeaders: number[];
     onClose: () => void;
 }

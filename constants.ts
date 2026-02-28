@@ -1,4 +1,22 @@
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 export const INITIAL_CNA_DATASET: never[] = [];
 export const STRATEGIC_CONTEXT_DEFAULT = "To be updated with organization specific context.";
 
@@ -65,7 +83,55 @@ You are a career development specialist. Generate a personalized growth plan for
 `;
 
 export const AI_FIVE_YEAR_PLAN_PROMPT_INSTRUCTIONS = `
-Act as a workforce planning strategist. Generate a 5-year strategic roadmap for capability development, identifying long-term targets and necessary interventions.
+Act as a workforce planning strategist for the PNG Public Service. Generate a comprehensive 5-year Learning & Development Plan (2026-2030) in the exact format specified below.
+
+**REPORT FORMAT:**
+
+SUMMARY OF [DEPARTMENT / AGENCY / ORGANISATION NAME]
+2026 – 2030 LEARNING & DEVELOPMENT PLAN
+As at [Insert Current Date]
+
+The output must be structured as a JSON object with this exact schema:
+
+{
+  "executiveSummary": "Brief overview of the 5-year training strategy",
+  "trainingPlan": [
+    {
+      "division": "Division Name",
+      "positions": [
+        {
+          "positionNumber": "Position Code",
+          "grade": "Grade Level",
+          "designation": "Job Title",
+          "occupant": "Officer Full Name",
+          "proposedCourse": "Training Course Name",
+          "institution": "Training Institution",
+          "year2026": "Yes/No/ - ",
+          "year2027": "Yes/No/ - ",
+          "year2028": "Yes/No/ - ",
+          "year2029": "Yes/No/ - ",
+          "year2030": "Yes/No/ - "
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "totalGapsDetected": number,
+    "criticalGapsCount": number,
+    "staffCategoryDistribution": [{"category": string, "count": number}],
+    "topImprovementAreas": [{"area": string, "reason": string}],
+    "concludingIntervention": string
+  }
+}
+
+**IMPORTANT:**
+- Group all positions by DIVISION
+- For each position, indicate with "Yes" which year(s) the training is proposed
+- Use "-" if no training is proposed for a particular year
+- The report should cover all officers in the establishment register
+- Align training recommendations with corporate goals and identified capability gaps
+
+**TONE:** Official, professional, and data-driven.
 `;
 
 export const AI_COMPETENCY_REPORT_PROMPT_INSTRUCTIONS = `
