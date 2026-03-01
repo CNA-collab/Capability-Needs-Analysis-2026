@@ -1,6 +1,6 @@
 import React from 'react';
 
-interface IconProps {
+interface IconProps extends React.SVGProps<SVGSVGElement> {
     className?: string;
 }
 

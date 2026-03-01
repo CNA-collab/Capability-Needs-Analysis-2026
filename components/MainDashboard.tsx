@@ -97,7 +97,7 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ onLogout }) => {
         }
     }, [state.error]);
 
-    // Handle import completion
+// Handle import completion
     const handleImport = useCallback((
         data: OfficerRecord[],
         _agencyType: string,
@@ -115,6 +115,27 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ onLogout }) => {
         // Data is already dispatched to context in ImportModal.handleCompleteImport
         // Just close the modal
         setShowImportModal(false);
+    }, []);
+
+    // Convert OfficerRecord to EligibleOfficer for ReportingSuiteModal
+    const convertToEligibleOfficer = useCallback((officers: OfficerRecord[]): EligibleOfficer[] => {
+        return officers.map((officer, index) => ({
+            id: officer.positionNumber || `officer-${index}`,
+            branch: officer.division || '',
+            positionNumber: officer.positionNumber || '',
+            grade: officer.grade || '',
+            designation: officer.position || '',
+            occupant: officer.name || '',
+            status: (officer.employmentStatus as EligibleOfficer['status']) || 'Other',
+            cnaSubmission: officer.tnaProcessExists ? 'Yes' : 'No',
+            beenSentForStudies: 'No',
+            studiedWhere: '',
+            courseDetails: officer.tnaDesiredCourses || '',
+            notes: '',
+            trainingQuarters: '',
+            trainingYear: [],
+            attendedFurtherTraining: 'No'
+        }));
     }, []);
 
 
@@ -274,14 +295,14 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ onLogout }) => {
                     </div>
                 );
 
-            case 'organizational':
+case 'organizational':
                 return (
                     <StrategicAnalysisDashboard
                         agencyName={effectiveData.agencyName}
                         cnaData={officers}
                         establishmentData={establishmentData}
                         corporatePlanData={corporatePlanData || undefined}
-                        onClose={() => setCurrentView('cna')}
+                        onClose={() => setCurrentView('dashboard')}
                     />
                 );
 
@@ -953,11 +974,12 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ onLogout }) => {
                 {renderView()}
             </main>
 
-            {/* Modals */}
+{/* Modals */}
             {showReportingSuite && (
                 <ReportingSuiteModal
                     division={effectiveData.agencyName}
-                    officers={(officers as unknown) as EligibleOfficer[]}
+                    agencyType={state.agencyType || 'National Department'}
+                    officers={convertToEligibleOfficer(officers)}
                     establishmentData={establishmentData}
                     corporatePlanData={corporatePlanData || undefined}
                     yearHeaders={[2024, 2025, 2026, 2027, 2028]}
