@@ -19,18 +19,30 @@ interface DashboardProps {
     onClose: () => void;
 }
 
-const StatCard: React.FC<{ title: string; value: string | number; description?: string; icon?: React.ReactNode }> = ({ title, value, description, icon }) => (
-    <div className="bg-white dark:bg-slate-800/50 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
-        <div className="flex justify-between items-start">
-            <div>
-                <p className="text-2xl font-black text-slate-800 dark:text-slate-100">{value}</p>
-                <h3 className="text-[7pt] uppercase tracking-widest font-bold text-slate-500 dark:text-slate-400 mt-1">{title}</h3>
+const StatCard: React.FC<{ title: string; value: string | number; description?: string; icon?: React.ReactNode; color?: string }> = ({ title, value, description, icon, color = 'blue' }) => {
+    const colorClasses: Record<string, string> = {
+        blue: 'from-blue-500 to-blue-600 bg-blue-50',
+        emerald: 'from-emerald-500 to-emerald-600 bg-emerald-50',
+        amber: 'from-amber-500 to-amber-600 bg-amber-50',
+        purple: 'from-purple-500 to-purple-600 bg-purple-50',
+    };
+    
+    return (
+        <div className="bg-white dark:bg-slate-800/50 rounded-xl shadow-card border border-slate-100 overflow-hidden hover:shadow-card-hover transition-shadow duration-300">
+            <div className={`h-1.5 bg-gradient-to-r ${colorClasses[color] || colorClasses.blue}`}></div>
+            <div className="p-5">
+                <div className="flex justify-between items-start mb-3">
+                    <div className={`p-2.5 rounded-lg ${colorClasses[color]?.split(' ')[2] || 'bg-blue-50'}`}>
+                        <div className={`opacity-80 ${colorClasses[color]?.split(' ')[2]?.replace('bg-', 'text-') || 'text-blue-500'}`}>{icon}</div>
+                    </div>
+                </div>
+                <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">{value}</p>
+                <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 mt-1">{title}</h3>
+                {description && <p className="text-xs font-medium text-slate-400 dark:text-slate-500 mt-2">{description}</p>}
             </div>
-            <div className="text-blue-500 opacity-20">{icon}</div>
         </div>
-        {description && <p className="text-[6pt] font-medium text-slate-400 dark:text-slate-500 mt-2 uppercase">{description}</p>}
-    </div>
-);
+    );
+};
 
 export const StrategicAnalysisDashboard: React.FC<DashboardProps> = ({ cnaData, agencyName, baselineData, onClose }) => {
 

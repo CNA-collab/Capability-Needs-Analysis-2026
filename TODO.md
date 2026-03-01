@@ -1,27 +1,26 @@
-# CNA Policy Integration - TODO List
+# Dashboard Redesign TODO
 
-## Task: Add Sections 2.1 and 2.2 to CNA Components
+## Phase 1: Tailwind Configuration
+- [x] Update tailwind.config.js with professional color palette and custom theme
 
-### Steps:
-- [x] 1. Update CnaOverview.tsx - Add Section 2.1 "Determining Core Terms in CNA"
-- [x] 2. Update CnaProcessGuide.tsx - Add Section 2.2 "Scope of the CNA Policy"
-- [x] 3. Update CnaLndPlanning.tsx - Reinforce 70:20:10 model connection
+## Phase 2: MainDashboard Component
+- [x] Redesign KPI cards with better typography and visual hierarchy
+- [x] Improve Quick Actions section styling
+- [x] Enhance Recent Activity section
+- [ ] Improve header styling
 
-### Section 2.1 Core Terms to add:
-- [x] i. Capacity Building
-- [x] ii. Capability  
-- [x] iii. Competency
+## Phase 3: StrategicAnalysisDashboard Component
+- [x] Fix tiny text sizes (text-[7pt], text-[6pt])
+- [x] Improve StatCard component
+- [ ] Enhance chart sections
+- [ ] Better modal styling
 
-### Section 2.2 Scope Focus Areas:
-- [x] i. Capability Needs Analysis (CNA)
-- [x] ii. Learning & Development Approach (Model) 70:20:10
-- [x] iii. Learning & Development Plan
-- [x] iv. Administration of the L&D Approach
+## Phase 4: Sidebar Component
+- [x] Refine navigation item styling
+- [x] Improve hover and active states
+- [x] Better spacing and typography
 
-### Step 3 Enhancements Made:
-- Added CNA Diagnostic Proficiency Levels section (Section 4.1.5)
-- Added three proficiency cards: Knowledge (70%), Competency (20%), Capacity (10%)
-- Added CNA Assessment Integration section with mandatory tool reference
-- Added policy alignment references for Section 4.1.5 and 4.1.6
-- Added Workforce Planning link with 70:20:10 model integration
-- Reinforced connection between CNA diagnostic and L&D planning
+## Phase 5: Testing & Polish
+- [ ] Verify all components render correctly
+- [ ] Check responsive behavior
+- [ ] Ensure accessibility
