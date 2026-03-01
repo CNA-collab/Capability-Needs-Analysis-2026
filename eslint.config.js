@@ -1,36 +1,34 @@
 import js from '@eslint/js';
-import react from 'eslint-plugin-react';
+import reactHooks from 'eslint-plugin-react-hooks';
+import reactRefresh from 'eslint-plugin-react-refresh';
 import globals from 'globals';
-import tseslint from '@typescript-eslint/eslint-plugin';
-import tsparser from '@typescript-eslint/parser';
+import tseslint from 'typescript-eslint';
 
-export default [
-  js.configs.recommended,
+export default tseslint.config(
+  { ignores: ['dist', 'node_modules', 'coverage'] },
   {
-    ignores: ['dist/**'],
-  },
-  {
+    extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ['**/*.{js,jsx,ts,tsx}'],
     languageOptions: {
-      parser: tsparser,
+      ecmaVersion: 2022,
       globals: {
         ...globals.browser,
         ...globals.node,
       },
     },
     plugins: {
-      react,
-      '@typescript-eslint': tseslint,
-    },
-    settings: {
-      react: {
-        version: 'detect', // Fix React version warning
-      },
+      'react-hooks': reactHooks,
+      'react-refresh': reactRefresh,
     },
     rules: {
-      ...react.configs.recommended.rules,
-      ...tseslint.configs.recommended.rules,
-      // Add any custom rules here
+      ...reactHooks.configs.recommended.rules,
+      'react-refresh/only-export-components': [
+        'warn',
+        { allowConstantExport: true },
+      ],
+      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-explicit-any': 'warn',
+      'react/react-in-jsx-scope': 'off',
     },
   },
-];
+);

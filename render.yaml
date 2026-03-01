@@ -1,6 +1,11 @@
 services:
   - type: web
     name: cnas-strategic-portal
-    runtime: static
+    runtime: node
     buildCommand: npm run build
-    publishDir: dist
+    startCommand: npm run start
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: NODE_ENV
+        value: production
