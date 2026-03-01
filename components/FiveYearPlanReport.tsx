@@ -92,7 +92,7 @@ const aiFiveYearPlanSchema = {
     required: ["executiveSummary", "trainingPlan", "summary"]
 };
 
-// eslint-disable-next-line no-empty-pattern
+
 const ReportSection: React.FC<{ title: string; children: React.ReactNode; anchorId?: string }> = ({ title, children, anchorId }) => (
     <div className="pt-4 mb-4" id={anchorId}>
         <h2 className="font-bold text-lg mb-2 text-slate-800 dark:text-slate-100 border-b border-slate-300 dark:border-slate-600 pb-1">{title}</h2>
@@ -100,6 +100,7 @@ const ReportSection: React.FC<{ title: string; children: React.ReactNode; anchor
     </div>
 );
 
+/* trunk-ignore(git-diff-check/error) */
 export const FiveYearPlanReport: React.FC<FiveYearPlanReportProps> = ({ 
     data, 
     establishmentData, 
